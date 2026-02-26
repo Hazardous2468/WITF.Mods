@@ -1,0 +1,52 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.PauseSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.save.Save;
+import StringTools;
+import funkin.input.PreciseInputManager;
+import funkin.play.notes.NoteSprite;
+import funkin.play.notes.SustainTrail;
+import funkin.util.Constants;
+import thx.Arrays;
+import flixel.util.FlxTimer;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.play.song.Song;
+import funkin.modding.events.ScriptEvent;
+
+class HalvedSongModule extends Song {
+//class HalvedSongModule extends Module {
+
+    public function new() {
+        super("halved");
+    }
+	
+	function onCreate(event:ScriptEvent):Void {
+		PauseSubState.musicSuffix = "-HALVED";
+	}
+	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+
+	/*
+    override function onUpdate(e) {
+        super.onUpdate(e);
+        if (PlayState.instance != null) {
+			
+            for (holdNote in PlayState.instance.playerStrumline.holdNotes.members){
+                if (holdNote != null && holdNote.missedNote && !holdNote.handledMiss)
+                {
+                    // The player dropped a hold note.
+                    holdNote.handledMiss = true;
+                    if (holdNote.sustainLength >= 130) { // check if ur releasing too early
+                        PlayState.instance.onNoteMiss(null, true, -Constants.HEALTH_MISS_PENALTY);
+                    }
+                }
+            }
+        }
+    }
+	*/
+}

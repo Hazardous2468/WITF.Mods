@@ -1,0 +1,54 @@
+{
+  "version": "2.2.3",
+  "songName": "Operator",
+  "artist": "Hazard24",
+  "charter": "Hazard24",
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal",
+      "hard"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "nobody",
+      "opponent": "operator",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+	"album": "Inhuman",
+    "stage": "emptyStage",
+    "noteStyle": "inhuman",
+	
+	"ratings": {
+      "easy": 5,
+      "hard": 7,
+      "normal": 6
+    },
+    "previewStart": 0,
+    "previewEnd": 0
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.1",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 160,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

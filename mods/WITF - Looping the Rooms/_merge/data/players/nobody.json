@@ -1,0 +1,4 @@
+[
+  { "op": "add", "path": "/ownedChars/-", "value": "liminal_char" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_liminal" }
+ ]

@@ -1,0 +1,16 @@
+{
+  "title": "Hazard's test songs",
+  "description": "A few test songs",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "everything"
+		}
+	],
+  "api_version": "0.8.0",
+  "mod_version": "1.1.2",
+  "dependencies": {
+		"_WITF - Essentials": "*"
+	},
+  "license": "Apache-2.0"
+}

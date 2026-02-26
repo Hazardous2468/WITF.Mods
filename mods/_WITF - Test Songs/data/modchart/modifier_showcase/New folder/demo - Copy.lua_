@@ -1,0 +1,101 @@
+function setUp()
+	centerPlayer("")
+end
+
+function modsTimeline()
+	set(-16,1, "showallmods","bf")
+	set(-16,1, "alpha","dad")	
+	set(-16,-112*10, "debugx","dad")
+	set(-16,0.5, "debugalpha","bf")
+	set(-15,0.75, "debugalpha","bf")
+	
+	set(-16,0.2, "arrowpath","bf")
+	set(-16,25, "arrowpathgrain","bf")
+	set(-16,0.1, "arrowpathwidth","bf")
+	
+	
+	
+	set(-16,  0.5, "flip","bf")
+	set(-16,  -0.5, "hourglass","bf")
+	
+	set(-16,  1, "hourglass--1","bf")
+	set(-16,  400, "hourglass--1__offset","bf")
+	set(-16,  500, "hourglass--1__start","bf")
+	
+	set(-16,  -1, "hourglass--2","bf")
+	set(-16,  400, "hourglass--2__offset","bf")
+	
+	set(-16, 1, "hourglass--3","bf")
+	set(-16,  500, "hourglass--3__offset","bf")
+	set(-16,  2, "hourglass--3__end","bf")
+	set(-16,  488, "hourglass--3__start","bf")
+	
+	set(-16, 1/3, "hourglass--0","bf")
+	set(-16,  500, "hourglass--0__offset","bf")
+	set(-16,  2, "hourglass--0__end","bf")
+	set(-16,  600, "hourglass--0__start","bf")
+	
+	
+	set(-16,  1, "beat","bf")
+	
+	
+	set(-16,  -4, "movez","bf")
+	
+	set(-16,  1, "3d","bf")
+	
+	set(-16,  1, "sudden","bf")
+	set(-16,  700, "sudden__offset","bf")
+	
+	set(-16,  -50, "rotatex","bf")
+	set(-16,  -50, "confusionxoffset","bf")
+	set(-16,  -4*112, "rotatex__offset_x","bf")
+	
+	set(-16,  -1, "moveyd","bf")
+	
+	--set(-16,  1, "reverse","bf")
+
+	add(4, 16, "linear", 1000*2, "drive2","bf")
+	add(4, 16, "linear", -895*2, "drive","bf")
+	
+	for i = 0, 16 do
+		add(i, 1, "bounce", -0.3, "tiny","bf")
+	end
+	
+	--[[
+	for i = 0, 16 do
+		if i % 4==0 then
+			ease(i, 1, "backOut", 1, "hourglass","bf")
+			ease(i, 1, "backOut", 0, "flip","bf")
+		elseif i%4 == 1 then
+			ease(i, 1, "backOut", 0, "hourglass","bf")
+			ease(i, 1, "backOut", 1, "flip","bf")
+		elseif i%4 == 2 then
+			ease(i, 1, "backOut", -1, "hourglass","bf")
+			ease(i, 1, "backOut", 1, "flip","bf")
+		else
+			ease(i, 1, "backOut", 0, "hourglass","bf")
+			ease(i, 1, "backOut", 0, "flip","bf")
+		end
+	end
+	]]--
+	
+
+	--[[
+	for i = 0, 16 do
+		value(i, 1, "sineOut", -1.75, 0, "tiny","bf")
+		if i % 2==0 then
+			value(i, 1, "sineOut", 1, 0, "drunk","bf")
+			
+			ease(i, 1, "bell", 1, "tipsy","bf")
+		else
+			value(i, 1, "sineOut", -1, 0, "drunk","bf")
+			
+			ease(i, 1, "bell", -1, "tipsy","bf")
+		end
+	end
+	]]--
+
+	
+end
+
+

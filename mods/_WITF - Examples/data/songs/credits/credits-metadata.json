@@ -1,0 +1,55 @@
+{
+  "version": "2.2.3",
+  "songName": "Credits",
+  "artist": "Frums",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal",
+      "hard",
+      "easy"
+    ],
+    "characters": {
+      "player": "nobody_credits",
+      "girlfriend": "",
+      "opponent": "nobody_credits",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "sextion",
+    "ratings": {
+      "easy": 4,
+      "hard": 6,
+      "normal": 5
+    },
+	"album": "WITF",
+    "previewStart": 0,
+    "previewEnd": 9400
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.0",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 179,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

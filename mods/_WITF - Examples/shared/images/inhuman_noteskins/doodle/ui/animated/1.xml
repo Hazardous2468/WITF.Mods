@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="1.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="10000" x="1" y="1" width="200" height="200"/>
+	<SubTexture name="10001" x="1" y="1" width="200" height="200"/>
+	<SubTexture name="10002" x="1" y="202" width="200" height="200"/>
+	<SubTexture name="10003" x="1" y="202" width="200" height="200"/>
+</TextureAtlas>

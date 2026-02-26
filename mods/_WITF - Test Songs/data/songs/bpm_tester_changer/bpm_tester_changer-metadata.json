@@ -1,0 +1,37 @@
+{
+	"timeFormat": "ms",
+	"artist": "Hazard24",
+	"charter": "Hazard24",
+	
+	"playData": {
+		"difficulties": [
+		  "normal"
+		],
+		"characters": {
+		  "player": "hazard_loweffort",
+		  "girlfriend": "",
+		  "opponent": "nobody_test"
+		},
+		"stage": "emptyStage_hazVoidSillyAAA",
+		"noteStyle": "groovin",
+		"album": "WITF_test",
+		"ratings": {
+		  "normal": 3
+		}
+	  },
+	
+	
+	
+	
+	"songName": "BPM Testing",
+	"timeChanges": [
+		{"t": 0, "bpm": 130},
+		{"t": 9230.76923076923, "bpm": 135},
+		{"t": 11008.547008547, "bpm": 140},
+		{"t": 12722.8327228327, "bpm": 145},
+		{"t": 14378.0051366258, "bpm": 150},
+		{"t": 15978.0051366258, "bpm": 174}
+	],
+	"generatedBy": "Psych Engine v0.4.5 (DEMO) - Chart Editor V-Slice Exporter",
+	"version": "2.2.3"
+}

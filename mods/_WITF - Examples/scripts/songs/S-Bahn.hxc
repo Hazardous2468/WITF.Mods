@@ -1,0 +1,29 @@
+import funkin.play.song.Song;
+import funkin.graphics.shaders.WiggleEffectRuntime;
+import openfl.filters.ShaderFilter;
+import flixel.FlxG;
+import flixel.FlxCamera;
+import funkin.play.PlayState;
+import funkin.play.modchartSystem.HazardAFT;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+
+class sbahnSong extends Song {
+	public function new() {
+		super('S-Bahn');
+	}
+	
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+	}
+	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+	
+	
+}

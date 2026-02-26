@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "name": "Hazard - Low Effort",
+  "healthIcon": {
+    "id": "hazard_loweffort",
+	"flipX": true
+  },
+  "assetPath": "characters/haz_silly",
+  "singTime": 6.0,
+  "flipX": true,
+  "scale": 0.6,
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "idle",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "sing_left",
+      "offsets": [56, 0]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "sing_down",
+      "offsets": [0, -43]
+    },
+    {
+      "name": "singUP",
+      "prefix": "sing_up",
+      "offsets": [0, 48]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "sing_right",
+      "offsets": [2, 0]
+    },
+    {
+      "name": "singLEFTmiss",
+      "prefix": "miss_left",
+      "offsets": [56, 0]
+    },
+    {
+      "name": "singDOWNmiss",
+      "prefix": "miss_down",
+      "offsets": [0, -58]
+    },
+    {
+      "name": "singUPmiss",
+      "prefix": "miss_up",
+      "offsets": [0, 48]
+    },
+    {
+      "name": "singRIGHTmiss",
+      "prefix": "miss_right",
+      "offsets": [2, 0]
+    }
+  ]
+}

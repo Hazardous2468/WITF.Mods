@@ -1,0 +1,795 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+import funkin.play.modchartSystem.HazardAFT;
+import funkin.Preferences;
+import funkin.Conductor;
+
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.ShaderFilter;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+import funkin.graphics.shaders.WiggleEffectRuntime;
+
+class FinalHopeSong extends Song {
+
+	var lowDetail:Bool = false;
+
+
+	var blackOutBG:FunkinSprite = null;
+	var blackOverlay:FunkinSprite = null;
+	
+	var cloudShaderSprite:FunkinSprite = null;
+	var cloudShader:FlxRuntimeShader = null;
+	
+	//var cloudShaderSprite_alt:FunkinSprite = null;
+	//var cloudShader_alt:FlxRuntimeShader = null;
+	
+	var noiseField_Spr:FunkinSprite = null;
+	var noiseField_Shader:FlxRuntimeShader = null;
+	
+	
+	var timeClock_1:FunkinSprite = null;
+	var timeShader:FlxRuntimeShader = null;
+	
+
+	var aftSprite:FunkinSprite;
+	var aftCapture:HazardAFT;	
+
+	public function new() {
+		super('final-hope');
+	}
+	
+	
+
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		
+		//PlayState.instance.camAFT.visible = true;
+		//PlayState.instance.camNotes.x -= 9999;
+		aftCapture = new HazardAFT(PlayState.instance.camNotes);
+		aftCapture.updateRate = 0.0;
+		aftCapture.recursive = false;
+		aftCapture.blendMode = "normal";
+		
+
+		aftSprite = new FunkinSprite(0, 0);
+		aftSprite.cameras = [PlayState.instance.camNotes];
+		aftSprite.zIndex = -5555;
+		PlayState.instance.add(aftSprite);
+		aftSprite.x = 0;
+		aftSprite.y = 0;
+		aftSprite.loadGraphic( aftCapture.bitmap );	
+		
+		
+		
+		blackOutBG = new FunkinSprite(-FlxG.width, -FlxG.height).makeSolidColor(FlxG.width*3, FlxG.height*3, 0xFFFFFFFF);
+		blackOutBG.zIndex = 7500;
+		blackOutBG.alpha=1;
+		PlayState.instance.add(blackOutBG);
+		
+		
+		cloudShader = new FlxRuntimeShader(Assets.getText(Paths.frag("FinalHopeBG")), null);
+		cloudShader.setInt("effectType",31);
+		cloudShader.setFloat("uWaveAmplitude",0.0);
+		
+		cloudShaderSprite = new FunkinSprite(0, 0).makeSolidColor(FlxG.width, FlxG.height, 0xFFFFFFFF);
+		cloudShaderSprite.scrollFactor.set();
+		cloudShaderSprite.screenCenter();
+		cloudShaderSprite.zIndex = 7550;
+		cloudShaderSprite.angle = 180;
+		PlayState.instance.add(cloudShaderSprite);
+		cloudShaderSprite.shader = cloudShader;
+		
+		
+		
+		if(!lowDetail){
+			//cloudShader_alt = new WiggleEffectRuntime(2, 4, 0.01, 4);
+			//cloudShader_alt.setInt("effectType",32);
+			
+			//cloudShaderSprite_alt = new FunkinSprite(0, 0).makeSolidColor(FlxG.width, FlxG.height, 0xFFFFFFFF);
+			//cloudShaderSprite_alt.scrollFactor.set();
+			//cloudShaderSprite_alt.screenCenter();
+			//cloudShaderSprite_alt.zIndex = 7550;
+			//cloudShaderSprite_alt.angle = 180;
+			//PlayState.instance.add(cloudShaderSprite_alt);
+			//cloudShaderSprite_alt.shader = cloudShader_alt;
+			//cloudShaderSprite_alt.alpha=0;
+		
+
+			noiseField_Shader = new FlxRuntimeShader(Assets.getText(Paths.frag("FinalHopeNoiseField")), null);
+			noiseField_Shader.setInt("effectType",33);
+			noiseField_Shader.setFloat("uFrequency",0);
+			
+			noiseField_Spr = new FunkinSprite(0, 0).makeSolidColor(FlxG.width, FlxG.height, 0xFFFFFFFF);
+			noiseField_Spr.scrollFactor.set();
+			noiseField_Spr.screenCenter();
+			noiseField_Spr.zIndex = 9999;
+			//noiseField_Spr.angle = 180;
+			//noiseField_Spr.cameras = [PlayState.instance.camHUD]; //Since camHUD can be hidden!
+			noiseField_Spr.cameras = [PlayState.instance.camAFT];
+			PlayState.instance.add(noiseField_Spr);
+			noiseField_Spr.shader = noiseField_Shader;
+			
+			timeShader = new FlxRuntimeShader(Assets.getText(Paths.frag("FinalHopeClock")), null);
+			timeShader.setInt("effectType",34);
+			
+			timeClock_1 = new FunkinSprite(0, 0).makeSolidColor(700, 700, 0xFFFFFFFF);
+			timeClock_1.scrollFactor.set();
+			timeClock_1.screenCenter();
+			timeClock_1.zIndex = -9999;
+			timeClock_1.cameras = [PlayState.instance.camNotes];
+			PlayState.instance.add(timeClock_1);
+			timeClock_1.shader = timeShader;
+			timeClock_1.alpha=0;
+			
+			timeClock_2 = new FunkinSprite(0, 0).makeSolidColor(clockSize, clockSize, 0xFFFFFFFF);
+			timeClock_2.scrollFactor.set();
+			timeClock_2.screenCenter();
+			timeClock_2.zIndex = -9998;
+			timeClock_2.cameras = [PlayState.instance.camNotes];
+			PlayState.instance.add(timeClock_2);
+			timeClock_2.shader = timeShader;
+			timeClock_2.alpha=0;
+			
+		}
+		
+		playstateFunny();
+		
+		blackOverlay = new FunkinSprite(-FlxG.width, -FlxG.height).makeSolidColor(FlxG.width*3, FlxG.height*3, 0xFF000000);
+		blackOverlay.zIndex = 7555;
+		blackOverlay.alpha=1;
+		PlayState.instance.add(blackOverlay);
+	}
+	
+	var clockSize:Float = 700;
+	function setClock1Size(mult:Float):Void{
+		timeClock_1.setGraphicSize(Std.int(clockSize * mult));
+	}
+	function setClock2Size(mult:Float):Void{
+		timeClock_2.setGraphicSize(Std.int(clockSize * mult));
+	}
+	
+	
+	function playstateFunny():Void{
+		if(PlayState.instance.comboPopUps!=null){
+			//PlayState.instance.comboPopUps.offsets[0] = -255;
+			//PlayState.instance.comboPopUps.offsets[1] = 17;	
+			PlayState.instance.comboPopUps.offsets[0] = -255;
+			PlayState.instance.comboPopUps.offsets[1] = (Preferences.get_downscroll() ? -160 : 300);	
+		}
+		
+		
+		
+		if(PlayState.instance.camHUD!=null){
+			PlayState.instance.camHUD.angle = 0;
+		}
+		
+		if(PlayState.instance.iconP1!=null){
+			PlayState.instance.iconP1.visible = false;
+		}
+		if(PlayState.instance.iconP2!=null){
+			PlayState.instance.iconP2.visible = false;
+		}
+	}
+
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+		blackOutBG.destroy();
+		blackOverlay.destroy();
+		
+		if(cloudShaderSprite!=null){
+			cloudShaderSprite.destroy();
+			cloudShader = null;
+		}
+	
+		
+		if(noiseField_Spr!=null){
+			noiseField_Spr.destroy();
+			noiseField_Shader = null;
+		}
+		
+		if(timeShader!=null){
+			timeClock_1.destroy();
+			timeShader = null;
+			timeClock_2.destroy();
+		}
+		
+		
+		
+		if(aftSprite!=null){
+			aftSprite.destroy();
+			aftCapture = null;
+		}
+		
+		
+		
+	}
+	
+	var cloudShaderTimeScale:Float = 1.0;
+	
+	var cloudShader_uTime:Float = 0.0;
+	var timeShader_uTime:Float = 0.0;
+	var noiseField_uTime:Float = 0.0;
+	
+	function onUpdate(callback)
+	{
+		if(timeShader != null){
+			//timeShader.update(callback.elapsed*-1);
+			timeShader_uTime = timeShader_uTime + callback.elapsed*-1;
+			timeShader.setFloat('uTime', timeShader_uTime);
+		}
+		if(cloudShader != null){
+			//cloudShader.update(callback.elapsed*0.01*2 * cloudShaderTimeScale);
+			cloudShader_uTime = cloudShader_uTime + callback.elapsed*0.01*2 * cloudShaderTimeScale;
+			cloudShader.setFloat('uTime', cloudShader_uTime);
+		}
+		//if(cloudShader_alt != null){
+		//	cloudShader_alt.update(callback.elapsed*0.01*2);
+		//}
+		if(noiseField_Spr != null ){
+			noiseField_uTime = noiseField_uTime + callback.elapsed;
+			noiseField_Shader.setFloat('uTime', noiseField_uTime);
+			//noiseField_Shader.update(callback.elapsed);
+			//noiseField_Shader.setFloat('uTime', noiseField_Shader.getFloat("uTime") + callback.elapsed);
+		}
+		
+		if(aftCapture!=null){
+			aftCapture.update(callback.elapsed);
+		}
+	}
+	
+	
+	
+	//USE THIS TO SETUP MOD STUFF BEFORE CUSTOM STRUMS ARE ADDED
+	override function onModchartSetup(event) {
+		super.onModchartSetup(event);
+	}
+	
+	
+	//USE THIS TO RESET EVERYTHING BACK TO DEFAULT WHEN GOING BACKWARDS
+	override function onModchartReset(event) {
+		super.onModchartReset(event);	
+		
+		playstateFunny();
+		
+		if(aftSprite!=null && aftCapture!=null){
+			aftSprite.setGraphicSize(Std.int(aftCapture.w));
+			aftSprite.alpha = 0;
+			aftCapture.blendMode = "normal";
+			aftCapture.recursive = false;
+		}
+		if(blackOverlay!=null){
+			blackOverlay.alpha = 1;
+		}
+		
+		if(cloudShader != null){
+		//if(cloudShader != null && cloudShader_alt != null){
+			cloudShader.setFloat("uTime",0.0);
+			cloudShader.setFloat("uWaveAmplitude",0.0);
+			cloudShaderSprite.alpha = 1;
+		}
+		if(noiseField_Shader!=null){
+			noiseField_Shader.setFloat("uFrequency",0);
+		}
+		
+		if(timeClock_1!=null){
+			timeClock_1.alpha=0;
+			timeClock_2.alpha=0;
+		}	
+		cloudShaderTimeScale = 1.0;
+	}
+	
+	var aftSpriteFadeValue:Float = 0.29;
+	
+	var lazyAlternate:Bool = false;
+	function doCamBounce(beat:Float){
+		var eh = PlayState.instance.modchartEventHandler;
+		var target1 = PlayState.instance.playerStrumline.mods;
+		
+		var fuckin:Float = 1.5/2.0;
+		
+		if(PlayState.instance.camHUD != null){
+			eh.funcTweenModEvent(target1, beat, fuckin, FlxEase.sineOut, 0, 20 * (lazyAlternate ? 1 : -1), function(v) {
+				PlayState.instance.camHUD.angle = v;
+			}, "camHudAngle");
+			eh.funcTweenModEvent(target1, beat+fuckin, fuckin, FlxEase.sineIn, 20 * (lazyAlternate ? 1 : -1), 0, function(v) {
+				PlayState.instance.camHUD.angle = v;
+			}, "camHudAngle");
+			lazyAlternate = !lazyAlternate;
+		}
+	}
+	
+	
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		lazyAlternate = false;
+
+		var eh = PlayState.instance.modchartEventHandler;
+
+		var target1 = PlayState.instance.playerStrumline.mods;
+		
+		
+		eh.funcTweenModEvent(target1, 160, 4, ModConstants.getEaseFromString("inCubic"), 1, 8, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 194, 4, ModConstants.getEaseFromString("inOutSine"), 8, 1, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 210, 2, ModConstants.getEaseFromString("inCubic"), 1, 8, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 288, 4, ModConstants.getEaseFromString("inOutSine"), 8, 1, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 308, 2, ModConstants.getEaseFromString("outCubic"), 1, 5, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 324, 4, ModConstants.getEaseFromString("inOutSine"), 5, 1, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 340, 2, ModConstants.getEaseFromString("outCubic"), 1, 5, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		eh.funcTweenModEvent(target1, 350, 6, ModConstants.getEaseFromString("inOutSine"), 5, 0.95, function(v) {
+			cloudShaderTimeScale = v;
+		}, "cloudShaderTimeScale");
+		
+		//Clocks
+		if(!lowDetail){
+			var clockGoToAlpha:Float = 0.35;
+			var clockXpos:Float = (FlxG.width/2) - (clockSize/2);
+			
+			eh.funcTweenModEvent(target1, 96, 4, ModConstants.getEaseFromString("pop"), 0, clockGoToAlpha*0.8, function(v) {
+				timeClock_1.alpha = v;
+			}, "clock1_a");
+			
+			eh.funcTweenModEvent(target1, 96, 6, ModConstants.getEaseFromString("quartOut"), 0.28, 3, function(v) {
+				setClock1Size(v);
+			}, "clock1_s");
+			
+			eh.funcTweenModEvent(target1, 96, 6, ModConstants.getEaseFromString("quartOut"), 0.0, 100, function(v) {
+				timeClock_1.x = clockXpos;
+			}, "clock1_x");
+			
+			for (i in 36...96){
+				if(i % 8 == 0){
+					trace("penis");
+					
+					eh.funcTweenModEvent(target1, i, 4, ModConstants.getEaseFromString("pop"), 0, clockGoToAlpha, function(v) {
+						timeClock_1.alpha = v;
+					}, "clock1_a");
+					
+					eh.funcTweenModEvent(target1, i, 6, ModConstants.getEaseFromString("quartOut"), 0.3, 2, function(v) {
+						setClock1Size(v);
+					}, "clock1_s");
+					
+					eh.funcTweenModEvent(target1, i, 6, ModConstants.getEaseFromString("quartOut"), 0.0, 100, function(v) {
+						timeClock_1.x = clockXpos+v;
+					}, "clock1_x");
+					
+					
+					
+				}else if(i % 8 == 4){
+				
+					eh.funcTweenModEvent(target1, i, 4, ModConstants.getEaseFromString("pop"), 0, clockGoToAlpha, function(v) {
+						timeClock_2.alpha = v;
+					}, "clock2_a");
+					
+					eh.funcTweenModEvent(target1, i, 6, ModConstants.getEaseFromString("quartOut"), 0.3, 2, function(v) {
+						setClock2Size(v);
+					}, "clock2_s");
+					
+					eh.funcTweenModEvent(target1, i, 6, ModConstants.getEaseFromString("quartOut"), 0.0, 100, function(v) {
+						timeClock_2.x = clockXpos-v;
+					}, "clock2_x");
+					
+				}
+			}
+		
+		}
+		
+		
+		
+		
+		//Camera movement!
+		
+		if(PlayState.instance.camHUD != null){
+			
+		
+			doCamBounce(4);
+			doCamBounce(5.5);
+			doCamBounce(7);
+			doCamBounce(8.5);
+			
+			doCamBounce(12);
+			doCamBounce(13.5);
+			doCamBounce(15);
+			doCamBounce(16.5);
+			
+			doCamBounce(196);
+			doCamBounce(196+1.5);
+			doCamBounce(196+3);
+			doCamBounce(196+3+1.5);
+			
+			doCamBounce(204);
+			doCamBounce(204+1.5);
+			doCamBounce(204+3);
+			doCamBounce(204+3+1.5);
+			
+			lazyAlternate = !lazyAlternate; // make it less weird lol
+			doCamBounce(356);
+			doCamBounce(356+1.5);
+			doCamBounce(356+3);
+			doCamBounce(356+3+1.5);
+			
+			doCamBounce(364);
+			doCamBounce(364+1.5);
+			doCamBounce(364+3);
+			doCamBounce(364+3+1.5);
+			
+			eh.funcTweenModEvent(target1, 10, 2, FlxEase.cubeIn, 0, 360, function(v) {
+				PlayState.instance.camHUD.angle = v;
+			}, "camHudAngle");
+			
+			eh.funcTweenModEvent(target1, 18, 2, FlxEase.cubeInOut, 360,0, function(v) {
+				PlayState.instance.camHUD.angle = v;
+			}, "camHudAngle");
+		}
+		
+		
+		eh.funcTweenModEvent(target1, 160, 8, FlxEase.cubeInOut, 0.0, 0.38, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		
+		eh.funcTweenModEvent(target1, 194, 3, FlxEase.cubeInOut, 0.38, 0.1, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 210, 4, FlxEase.cubeInOut, 0.1, 0.5, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 224, 16, FlxEase.linear, 0.5, 0.67, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 286, 292-286, FlxEase.linear, 0.67, 0.0, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 308, 2, FlxEase.quadInOut, 0.0, 0.6, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 324, 2, FlxEase.quadInOut, 0.6, 0, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 339.3, 2, FlxEase.quadInOut, 0.0, 0.6, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		eh.funcTweenModEvent(target1, 349, 356-349, FlxEase.quadInOut, 0.6, 0.0, function(v) {
+			noiseField_Shader.setFloat("uFrequency",v);
+		}, "noiseThing");
+		
+		
+		eh.funcTweenModEvent(target1, 0, 4, FlxEase.cubeIn, 1, 0, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 9.3, 0.7, FlxEase.sineInOut, 0, 0.7, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 12, 0.6, FlxEase.expoOut, 0.7, 0, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		eh.funcTweenModEvent(target1, 17.8, 1, FlxEase.sineInOut, 0.0, 0.3, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 35, 1, FlxEase.sineInOut, 0.3, 0.42, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 90, 6, FlxEase.sineIn, 0.42, 1, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 100, 2, FlxEase.quadOut, 1, 0.3, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 132, 2, FlxEase.sineInOut, 0.3, 0.5, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 138, 1, FlxEase.quadOut, 0.5, 0.1, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 140, 2, FlxEase.quadOut, 0.1, 0.3, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		
+		eh.funcTweenModEvent(target1, 148, 2, FlxEase.sineInOut, 0.3, 0.5, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 159.9, 0.15, FlxEase.expoIn, 0.5, 0.89, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 160.05, 4, FlxEase.linear, 1, 0.15, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 201.98, 1, FlxEase.sineOut, 0.15, 0.45, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		eh.funcTweenModEvent(target1, 202.98, 1, FlxEase.sineIn, 0.45, 0.15, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");	
+		
+		eh.funcTweenModEvent(target1, 224, 4, FlxEase.linear, 0.15, 0.4, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 228, 4, FlxEase.cubeOut, 0.4, 0.15, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 288, 4, FlxEase.linear, 0.15, 0.4, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 308, 2, FlxEase.linear, 0.4, 0.2, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 324, 2, FlxEase.linear, 0.2, 0.4, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 338, 3, FlxEase.linear, 0.4, 0.2, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		
+			eh.funcTweenModEvent(target1, 361, 1, FlxEase.expoIn, 0.2, 0.5, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		eh.funcTweenModEvent(target1, 364, 1, FlxEase.expoOut, 0.5, 0.2, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		eh.funcTweenModEvent(target1, 370, 4, FlxEase.linear, 0.2, 0.37, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		eh.funcTweenModEvent(target1, 400, 8, FlxEase.sineIn, 0.37, 1, function(v) {
+			blackOverlay.alpha = v;
+		}, "blackOut");
+		
+		
+		if(!lowDetail){
+			eh.funcTweenModEvent(target1, 24, 90, FlxEase.sineInOut, 0.0, 1, function(v) {
+				cloudShader.setFloat("uWaveAmplitude",v);
+				//cloudShaderSprite_alt.alpha = v;
+				//cloudShaderSprite.alpha = 1-v;
+			}, "cloudTransition");
+			
+			eh.funcTweenModEvent(target1, 148, 160-148, FlxEase.sineInOut, 1.0, 0, function(v) {
+				cloudShader.setFloat("uWaveAmplitude",v);
+				//cloudShaderSprite_alt.alpha = v;
+				//cloudShaderSprite.alpha = 1-v;
+			}, "cloudTransition");
+			
+			eh.funcTweenModEvent(target1, 228, 292-228, FlxEase.sineInOut, 0.0, 1, function(v) {
+				cloudShader.setFloat("uWaveAmplitude",v);
+				//cloudShaderSprite_alt.alpha = v;
+				//cloudShaderSprite.alpha = 1-v;
+			}, "cloudTransition");
+			
+			eh.funcTweenModEvent(target1, 350, 6, FlxEase.sineInOut, 1.0, 0, function(v) {
+				cloudShader.setFloat("uWaveAmplitude",v);
+				//cloudShaderSprite_alt.alpha = v;
+				//cloudShaderSprite.alpha = 1-v;
+			}, "cloudTransition");
+		}
+		
+		
+		
+		var target2 = ModConstants.grabStrumModTarget("3");
+		eh.funcTweenModEvent(target1, 160, 356-160, FlxEase.linear, 0, 356-160, function(v) {
+			
+			//PlayState.instance.modDebugNotif(Conductor.instance.songPosition);
+			//to create a small gap for which stealthGlow can be set to white!
+			if(Conductor.instance.songPosition <= 89022 || Conductor.instance.songPosition > 92678){
+				
+
+			
+				var timmy:Float = v*32*1.5;
+				var p:Float = Math.PI;
+				var rad:Float = p/180;
+				
+				var red:Float = (1.5) * FlxMath.fastSin(timmy*rad);
+				var green:Float =  (1.5)*(FlxMath.fastSin(timmy*rad+(0.66*p)));
+				var blue:Float = (1.5)*(FlxMath.fastSin(timmy*rad+(0.66*p*2)));
+				
+				target1.setModVal("stealthglowred", red);
+				target1.setModVal("stealthglowblue", blue);
+				target1.setModVal("stealthglowgreen", green);
+				
+				target2.setModVal("stealthglowred", red);
+				target2.setModVal("stealthglowblue", blue);
+				target2.setModVal("stealthglowgreen", green);	
+				
+				//target1.setModVal("arrowpathred", red);
+				//target1.setModVal("arrowpathblue", blue);
+				//target1.setModVal("arrowpathgreen", green);
+				
+				//target2.setModVal("arrowpathred", red);
+				//target2.setModVal("arrowpathblue", blue);
+				//target2.setModVal("arrowpathgreen", green);	
+			}
+			else
+			{
+			
+				var red:Float = 1.0;
+				var green:Float =  1.0;
+				var blue:Float = 1.0;
+				target1.setModVal("stealthglowred", red);
+				target1.setModVal("stealthglowblue", blue);
+				target1.setModVal("stealthglowgreen", green);
+				
+				target2.setModVal("stealthglowred", red);
+				target2.setModVal("stealthglowblue", blue);
+				target2.setModVal("stealthglowgreen", green);	
+			}			
+		});
+		
+		eh.funcModEvent(target1, -16, function() {
+			aftCapture.updateRate = 99999.0;
+		});
+		
+		eh.funcModEvent(target1, 159, function() {
+			aftCapture.updateAFT();
+		});
+		
+		eh.funcModEvent(target1, 160, function() {
+			aftSprite.setGraphicSize(Std.int(aftCapture.w * 1.02));
+			aftSprite.alpha = 0.0;
+			
+			aftCapture.updateRate = 0.0;
+			aftCapture.blendMode = "normal";
+			aftCapture.recursive = true;
+			aftCapture.updateAFT();
+		});
+		
+		
+		
+		
+		eh.funcTweenModEvent(target1, 160, 4, FlxEase.linear, 0, aftSpriteFadeValue, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+
+		eh.funcTweenModEvent(target1, 194, 4, FlxEase.sineInOut, aftSpriteFadeValue, 0.0, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		eh.funcTweenModEvent(target1, 208, 4, FlxEase.sineInOut, 0.0, aftSpriteFadeValue, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		eh.funcTweenModEvent(target1, 288, 4, FlxEase.sineInOut, aftSpriteFadeValue, 0.0, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		eh.funcTweenModEvent(target1, 306, 2, FlxEase.sineIn, 0.0, aftSpriteFadeValue, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		eh.funcTweenModEvent(target1, 324, 2, FlxEase.quadOut, aftSpriteFadeValue, 0.0, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		
+		eh.funcTweenModEvent(target1, 339, 1, FlxEase.sineIn, 0.0, aftSpriteFadeValue, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		eh.funcTweenModEvent(target1, 349, 7, FlxEase.quadInOut, aftSpriteFadeValue, 0.0, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		
+		
+		
+		eh.funcTweenModEvent(target1, 349, 7, FlxEase.quadInOut, aftSpriteFadeValue, 0.0, function(v) {
+			aftSprite.alpha = v;
+		}, "aftSprite_fade");
+		
+		sillyHoldyModdy = ModConstants.createNewMod("straightholds");
+		sillyHoldyModdy.currentValue = -20;
+		sillyHoldyModdy.baseValue = -20;
+		sillyHoldyModdy.strumOwner = PlayState.instance.playerStrumline;
+		
+		
+		eh.funcTweenModEvent(target1, 108, 1, ModConstants.getEaseFromString("linear"), 0, -20, function(v) {
+			sillyHoldyModdy.currentValue = v;
+		}, "sillyHoldyModdy");
+		
+		eh.funcTweenModEvent(target1, 114, 0.3, ModConstants.getEaseFromString("impulse"), 0, -8, function(v) {
+			sillyHoldyModdy.currentValue = v;
+		}, "sillyHoldyModdy");
+	}
+	
+	
+	
+	
+	var sillyHoldyModdy;
+	
+	function onNoteIncoming(callback)
+	{
+		var note = callback.note;
+		
+		if(note.strumTime >= 31595 && note.strumTime < 31735){
+			var daNoteMod = ModConstants.createNewMod("longholds");
+			daNoteMod.currentValue = 10;
+			daNoteMod.baseValue = 10;
+			daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+			if(note.noteModData.noteMods != null){
+				note.noteModData.noteMods.push(daNoteMod);
+				if(note.holdNoteSprite != null){
+					note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+				}
+			}
+		}
+		
+		if(sillyHoldyModdy == null) return;
+
+		if(note.strumTime >= 31018 && note.strumTime < 31600){
+		
+			var daNoteMod = ModConstants.createNewMod("linearx");
+			
+			//Invert the mod value if on the other side (for shuffle mods)
+			var rightSide:Bool = note.direction >= 2;
+			
+			daNoteMod.currentValue = 0.0125 * (rightSide ? 1 : -1);
+			daNoteMod.baseValue = 0.0125 * (rightSide ? 1 : -1);
+			daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+			
+
+			if(note.noteModData.noteMods != null){
+				note.noteModData.noteMods.push(daNoteMod);
+				note.noteModData.noteMods.push(sillyHoldyModdy);
+				if(note.holdNoteSprite != null){
+					note.holdNoteSprite.noteModData.noteMods.push(sillyHoldyModdy);
+					note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+				}
+			}
+		}
+	}
+	
+	
+	
+}

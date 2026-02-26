@@ -1,0 +1,60 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.FlxTypedEmitter;
+import flixel.effects.particles.FlxEmitterMode;
+
+class operator_SongScript extends Song {
+	public function new() {
+		super('operator');
+	}
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+	
+	var particlesEmitter:FlxTypedEmitter;
+
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+		
+		
+		particlesEmitter = new FlxTypedEmitter(20,20, 48);
+		particlesEmitter.launchMode = FlxEmitterMode.SQUARE;
+		particlesEmitter.width = FlxG.width;
+		particlesEmitter.height = 12;
+		particlesEmitter.x = 0;
+		particlesEmitter.y = FlxG.height + 100;
+		particlesEmitter.lifespan.set(14, 20);
+		particlesEmitter.velocity.set(-145, -180, 145, -130);
+		particlesEmitter.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter.launchAngle.set(-180, 180);
+		particlesEmitter.alpha.set(1, 1, 0, 0);
+		particlesEmitter.angle.set(-90, 90);
+		particlesEmitter.keepScaleRatio = true;
+		var particle:FlxParticle;
+		for (i in 0...64)
+		{
+			particle = new FlxParticle();
+			particle.scrollFactor.set();
+			particle.x -= 5000; //So errrrrrr.... basically... errrrr it... err... stops the trail from loading in the centre of the... err... screen? and because its off screen it... errrrrrrr... doesn't load and cause frame drops? yeah... something like that... i think
+			particle.loadGraphic(Paths.image("operatorParticle"));
+			particlesEmitter.add(particle);
+			
+			particle.scale.x = 1.0;
+			particle.scale.y = 1.0;
+			
+		}
+		particlesEmitter.start(false, 0.23);
+		PlayState.instance.add(particlesEmitter);
+		
+		PlayState.instance.variables.set("particlesEmitter", particlesEmitter);
+		
+	}
+	
+
+}

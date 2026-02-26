@@ -1,0 +1,25 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+
+//Simple script which makes the botplay note hits re-enable BF vocals!
+
+class BotplayVocalsModule extends Module
+{	
+	public function new() {
+        super("BotplayVocalsModule", 1, {
+          state: PlayState
+        });
+    }
+
+	function onNoteHit(event) {
+		super.onNoteHit(event);
+		if(PlayState.instance == null){ 	//To stop any potential errors
+			return; 
+		}	
+		//perfect judgement = botplay
+		if (event.judgement == "perfect" && PlayState.instance.isBotPlayMode && event.note.noteData.getMustHitNote()) {
+			PlayState.instance.vocals.playerVolume = 1;
+		}
+	}
+}

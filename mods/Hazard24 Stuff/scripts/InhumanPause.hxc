@@ -1,0 +1,123 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.PauseSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+import openfl.filters.ShaderFilter;
+
+class InhumanPauseModule extends Module {
+
+	var validSongs:Array<String> = 
+	[
+	"emergency-reset", "emergency reset", "argos", "operator", "too-many-trumpets", "too many trumpets", "her", "her - 2025"
+	];
+
+	var isWITF:Bool = false;
+	public function new() {
+		super("InhumanPauseModule", 1, {
+          state: PlayState
+        });
+		shaderTime = 0.0;
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+
+
+	var shader:FlxRuntimeShader;
+	var shaderFilter:ShaderFilter;
+	var shaderTime:Float = 0.0;
+	override function onUpdate(event:UpdateScriptEvent):Void {
+        super.onUpdate();
+		if(shader != null){
+			shaderTime += event.elapsed;
+			shader.setFloat("uTime", shaderTime);	
+		}
+    }
+	
+	
+	var pauseState = null;
+	public function onSubStateOpenBegin(event):Void {
+	
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		
+		//first check if the song is valid ?
+		if( !validSongs.contains( PlayState.instance.currentChart.songName.toLowerCase() ) ){
+			return;		
+		}	
+		
+		PauseSubState.musicSuffix = "-Inhuman";
+
+		if (Std.isOfType(event.targetState, PauseSubState)) {
+			pauseState = event.targetState;
+			FunkinSound.playOnce(Paths.sound('pause'), 1);	
+			
+			//Create shader if it doesn't already exist:
+			if(shader==null){
+				shader = new FlxRuntimeShader(Assets.getText(Paths.frag("inhuman_pause_shader")), null);
+				shader.setFloat("uTime",0.0);	
+				shaderFilter = new ShaderFilter(shader);
+			}
+			
+			//add shader
+			addShaderToCamera(PlayState.instance.camGame, shaderFilter);
+			addShaderToCamera(PlayState.instance.camHUD, shaderFilter);
+			if(isWITF){
+				addShaderToCamera(PlayState.instance.camNotes, shaderFilter);
+				addShaderToCamera(PlayState.instance.camAFT, shaderFilter);
+			}
+			
+			
+			
+		}
+        super.onSubStateOpenBegin(event);
+	}
+	
+	function addShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+			else{ 
+				if(!daCamera.filters.contains(daShaderFilter))
+					daCamera.filters.push(daShaderFilter);
+			}
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	function removeShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters != null)
+				daCamera.filters.remove(daShaderFilter);
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	
+	public function onSubStateCloseBegin(event:StateChangeScriptEvent):Void {
+	
+		if(pauseState != null){
+			
+			//FunkinSound.playOnce(Paths.sound('pause'), 0.7).pitch = 0.78;
+			
+			removeShaderToCamera(PlayState.instance.camGame, shaderFilter);
+			removeShaderToCamera(PlayState.instance.camHUD, shaderFilter);
+			if(isWITF){
+				removeShaderToCamera(PlayState.instance.camNotes, shaderFilter);
+				removeShaderToCamera(PlayState.instance.camAFT, shaderFilter);
+			}
+			
+			pauseState = null;
+		}
+	
+        super.onSubStateCloseBegin(event);
+	}
+}

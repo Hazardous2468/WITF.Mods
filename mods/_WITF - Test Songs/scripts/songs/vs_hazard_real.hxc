@@ -1,0 +1,86 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.song.Song;
+import funkin.play.notes.NoteSprite;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.StrumlineNote;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.Preferences;
+import flixel.FlxG;
+import funkin.util.Constants;
+
+
+class VS_hazard_realScript extends Song
+{	
+	public function new() {
+		super('vs_hazard_real');
+		doneFunny = false;
+	}
+	
+	function getStrumToTrack():Strumline{
+		return PlayState.instance.playerStrumline;
+		//return PlayState.instance.allStrumLines[1];
+	}
+	
+	var posTracker_strum:FunkinSprite = null;
+	var posTracker_strumNote:FunkinSprite = null;
+	
+	function onCreate(event:ScriptEvent):Void
+	{
+		doneFunny = false;
+		super.onCreate(event);
+		
+		
+		posTracker_strum = new FunkinSprite(0, 0);
+		posTracker_strum.loadGraphic(Paths.image('hazard_debugPoint'));
+		posTracker_strum.scrollFactor.set();
+		posTracker_strum.screenCenter();
+		posTracker_strum.camera = PlayState.instance.camHUD;
+		PlayState.instance.add(posTracker_strum);		
+		posTracker_strum.color = 0xFFFF0000;
+
+		
+		posTracker_strumNote = new FunkinSprite(0, 0);
+		posTracker_strumNote.loadGraphic(Paths.image('hazard_debugPoint'));
+		posTracker_strumNote.scrollFactor.set();
+		posTracker_strumNote.screenCenter();
+		posTracker_strumNote.camera = PlayState.instance.camHUD;
+		PlayState.instance.add(posTracker_strumNote);		
+		posTracker_strumNote.color = 0xFF0000FF;
+		
+		PlayState.instance.modDebugNotif("hello");
+	}
+	
+	var doneFunny:Bool = false;
+	
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+		if(posTracker_strum!=null){
+			posTracker_strum.destroy();
+		}
+		if(posTracker_strumNote!=null){
+			posTracker_strumNote.destroy();
+		}
+		doneFunny = false;
+	}
+	
+	function onUpdate(callback)
+	{
+		if(!doneFunny){
+			doneFunny = true;
+		}
+	
+		if(posTracker_strumNote!=null && posTracker_strum!=null){
+			var strumToTrack:Strumline = getStrumToTrack();
+			if(strumToTrack != null){
+				posTracker_strum.x = strumToTrack.x;
+				posTracker_strum.y = strumToTrack.y;
+				
+				var strumNoteToTrack:StrumlineNote = strumToTrack.getByIndex(0);
+				posTracker_strumNote.x = strumNoteToTrack.x;
+				posTracker_strumNote.y = strumNoteToTrack.y;		
+			}			
+		}
+	}
+}

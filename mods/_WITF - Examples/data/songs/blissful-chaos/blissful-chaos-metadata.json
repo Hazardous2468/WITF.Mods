@@ -1,0 +1,46 @@
+{
+  "version": "2.2.3",
+  "songName": "Blissful Chaos",
+  "artist": "Hazard24",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "",
+      "opponent": "nobody",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+	"album": "WITF",
+    "stage": "emptyStage",
+    "noteStyle": "groovin",
+    "ratings": {
+      "normal": 6
+    },
+    "previewStart": 5241,
+    "previewEnd": 12741
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.0",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 160.0,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

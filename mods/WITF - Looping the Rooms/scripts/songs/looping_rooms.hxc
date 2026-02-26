@@ -1,0 +1,52 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.character.CharacterType;
+class Looping_Rooms_SONG extends Song {
+	public function new() {
+		super('looping_rooms');
+	}
+	
+	override function onGameOver(event) {
+		super.onGameOver(event);
+		var bf = PlayState.instance.currentStage.getBoyfriend();
+		bf.scrollFactor.set(1,1);
+		bf.alpha=1;
+		bf.visible = false;
+		bf.scale.set(1,1);
+	}
+	
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		
+		var swapBoyFriendControlToOpponent = function(){
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			bf.characterType = CharacterType.DAD;
+		}
+		var swapBoyFriendControlToPlayer = function(){
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			bf.characterType = CharacterType.BF;
+		}
+
+		var eh = PlayState.instance.modchartEventHandler;
+		
+		eh.modResetFuncs.push(swapBoyFriendControlToOpponent);
+		
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 35.95,swapBoyFriendControlToPlayer);
+
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 67.5,swapBoyFriendControlToOpponent);
+
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 99.5,swapBoyFriendControlToPlayer);
+		
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 131.75,swapBoyFriendControlToOpponent);
+
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 164,swapBoyFriendControlToPlayer);
+		
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 195,swapBoyFriendControlToOpponent);
+		
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 226,swapBoyFriendControlToPlayer);
+		
+		eh.funcModEvent(PlayState.instance.playerStrumline.mods, 292.4,swapBoyFriendControlToOpponent);
+		
+	}
+}

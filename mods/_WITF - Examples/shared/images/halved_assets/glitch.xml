@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="glitch.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="Idle0000" x="1" y="1" width="1280" height="720"/>
+	<SubTexture name="Idle0001" x="1" y="722" width="1280" height="720"/>
+	<SubTexture name="Idle0002" x="1" y="1443" width="1280" height="720"/>
+	<SubTexture name="Idle0003" x="1" y="2164" width="1280" height="720"/>
+	<SubTexture name="Idle0004" x="1" y="2885" width="1280" height="720"/>
+</TextureAtlas>

@@ -1,0 +1,13 @@
+import funkin.play.song.Song;
+import flixel.FlxG;
+import funkin.play.PlayState;
+
+class BlissfulChaosSong extends Song {
+	public function new() {
+		super('blissful-chaos');
+	}
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}	
+}

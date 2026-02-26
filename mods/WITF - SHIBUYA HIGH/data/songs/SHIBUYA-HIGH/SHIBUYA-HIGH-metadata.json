@@ -1,0 +1,58 @@
+{
+  "version": "2.2.4",
+  "songName": "SHIBUYA-HIGH",
+  "artist": "ROONIN",
+  "charter": "Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": -68,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal"
+    ],
+    "characters": {
+      "player": "SHIBUYA_HIGH",
+      "girlfriend": "nobody",
+      "opponent": "nobody",
+      "instrumental": "",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "nobody"
+      ],
+      "playerVocals": [
+        "nobody"
+      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "groovin",
+    "ratings": {
+      "normal": 8
+    },
+    "album": "WITF",
+    "previewStart": 30320,
+    "previewEnd": 48296
+  },
+  "generatedBy": "What in the Funkin' - v0.7.5",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 127,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

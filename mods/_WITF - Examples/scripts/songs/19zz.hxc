@@ -1,0 +1,103 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+//import funkin.play.modchartSystem.modifiers.BaseModifier;
+import funkin.Conductor;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import funkin.data.event.SongEventRegistry;
+
+class nineteenzzSong extends Song {
+
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+
+	public var repeatingSong:Bool = false;
+
+	public function new() {
+		super('19zz');
+	}
+
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+	}
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+	}
+	
+	
+	//USE THIS TO SETUP MOD STUFF BEFORE CUSTOM STRUMS ARE ADDED
+	override function onModchartSetup(event) {
+		super.onModchartSetup(event);
+	}
+	
+	
+	//USE THIS TO RESET EVERYTHING BACK TO DEFAULT WHEN GOING BACKWARDS
+	override function onModchartReset(event) {
+		super.onModchartReset(event);	
+	}
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);		
+	}
+	
+	var repeatOffset:Float = 450;
+	public function setSongTime(time:Float)
+	{
+		if(time < 0) time = 0;
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.get_isGamePaused()){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			//vocals.time = time;
+			if (Conductor.get_instance().songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.get_isGamePaused()){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.get_instance().songPosition = time;		
+		PlayState.instance.handleSkippedNotes();
+		Conductor.get_instance().update();
+	}
+	
+	
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null || !repeatingSong) return;
+		if(PlayState.instance.isGamePaused) return;
+		
+		if(Conductor.instance.songPosition < 0){
+			return;
+		}
+		
+		if(Conductor.instance.songPosition >= PlayState.instance.currentSongLengthMs-repeatOffset){
+			//PlayState.instance.modDebugNotif(PlayState.instance.currentSongLengthMs, 0xFFFFFF00);
+			//PlayState.instance.modDebugNotif(Conductor.instance.songPosition, 0xFFFF00FF);
+			PlayState.instance.modDebugNotif("Looped song!", 0xFFFFFF00);
+			setSongTime(0);
+			SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);			
+		}
+	}
+	
+}

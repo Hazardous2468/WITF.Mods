@@ -1,0 +1,97 @@
+{
+  "version": "2.2.4",
+  "songName": "It Go",
+  "artist": "answearingmachine",
+  "charter": "Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    },
+    "altVocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal"
+    ],
+    "characters": {
+      "player": "nobody_cog",
+      "girlfriend": "",
+      "opponent": "nobody_cog",
+      "instrumental": "",
+      "altInstrumentals": [      ],
+      "opponentVocals": [
+        "nobody"
+      ],
+      "playerVocals": [
+        "nobody"
+      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "groovin",
+    "ratings": {
+      "normal": 12
+    },
+    "album": "WITF",
+    "previewStart": 5241,
+    "previewEnd": 12741
+  },
+  "generatedBy": "Friday Night Funkin' - v0.6.2",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 160.237,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+	{
+      "t": 22466.721169268,
+      "b": 60,
+      "bpm": 160.25,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+	{
+      "t": 26210.8709352587,
+      "b": 70,
+      "bpm": 213.66666666666666666666666666667,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    },
+	{
+      "t": 26866.097144307,
+      "b": 72,
+      "bpm": 160.25,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

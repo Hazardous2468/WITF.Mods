@@ -1,0 +1,13 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+
+class ItGoSong extends Song {
+	public function new() {
+		super('xi-x');
+	}
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}	
+}

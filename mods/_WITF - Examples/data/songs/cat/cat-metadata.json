@@ -1,0 +1,55 @@
+{
+  "version": "2.2.3",
+  "songName": "Gypsy In My Mind [Sped up]",
+  "artist": "Never Dull",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 7,
+    "altInstrumentals": {    },
+    "vocals": {
+      "bf": 0
+    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal",
+      "easy"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "",
+      "opponent": "nobody",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+    "stage": "emptyStage_CAT",
+    "noteStyle": "doodle",
+    "ratings": {
+      "easy": 2,
+      "normal": 3
+    },
+	"album": "WITF",
+    "previewStart": 10800,
+    "previewEnd": 27200
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.0",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 146.5,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

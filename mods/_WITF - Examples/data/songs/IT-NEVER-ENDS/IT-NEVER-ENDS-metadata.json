@@ -1,0 +1,53 @@
+{
+  "version": "2.2.3",
+  "songName": "IT-NEVER-ENDS",
+  "artist": "Hazard24",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {
+      "bf": 0
+    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "",
+      "opponent": "nobody",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "groovin",
+    "ratings": {
+      "normal": 5
+    },
+	"album": "IT_NEVER_ENDS",
+    "previewStart": 10800,
+    "previewEnd": 27200
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.0",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 160,      
+	  "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

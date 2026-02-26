@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="AnimationPointTestAnim.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="bounce0000" x="677" y="671" width="337" height="323" frameX="-27" frameY="-230" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0001" x="998" y="997" width="391" height="221" frameX="0" frameY="-323" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0002" x="998" y="997" width="391" height="221" frameX="0" frameY="-323" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0003" x="611" y="1331" width="195" height="317" frameX="-98" frameY="-141" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0004" x="1392" y="961" width="249" height="319" frameX="-71" frameY="-70" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0005" x="1602" y="3" width="259" height="319" frameX="-66" frameY="-48" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0006" x="3" y="1333" width="279" height="319" frameX="-56" frameY="-33" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0007" x="1020" y="3" width="313" height="321" frameX="-39" frameY="-20" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0008" x="3" y="3" width="345" height="331" frameX="-23" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0009" x="3" y="3" width="345" height="331" frameX="-23" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0010" x="344" y="337" width="331" height="331" frameX="-30" frameY="-7" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0011" x="344" y="337" width="331" height="331" frameX="-30" frameY="-21" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0012" x="344" y="337" width="331" height="331" frameX="-30" frameY="-47" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0013" x="344" y="337" width="331" height="331" frameX="-30" frameY="-85" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0014" x="344" y="337" width="331" height="331" frameX="-30" frameY="-118" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0015" x="344" y="337" width="331" height="331" frameX="-30" frameY="-175" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounce0016" x="344" y="337" width="331" height="331" frameX="-30" frameY="-208" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0000" x="685" y="3" width="332" height="323" frameX="-551" frameY="-310" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0001" x="998" y="997" width="391" height="221" frameX="-521" frameY="-403" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0002" x="998" y="997" width="391" height="221" frameX="-521" frameY="-403" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0003" x="998" y="1221" width="198" height="317" frameX="-601" frameY="-214" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0004" x="1333" y="643" width="257" height="315" frameX="-474" frameY="-98" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0005" x="1336" y="3" width="263" height="317" frameX="-367" frameY="-46" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0006" x="3" y="1333" width="279" height="319" frameX="-309" frameY="-34" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0007" x="1020" y="3" width="313" height="321" frameX="-254" frameY="-24" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0008" x="3" y="3" width="345" height="331" frameX="-206" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0009" x="3" y="3" width="345" height="331" frameX="-206" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceLeft0010" x="3" y="665" width="331" height="331" frameX="-187" frameY="-35" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0011" x="685" y="329" width="321" height="331" frameX="-149" frameY="-113" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0012" x="3" y="999" width="317" height="331" frameX="-83" frameY="-190" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceLeft0013" x="337" y="671" width="337" height="325" frameX="0" frameY="-291" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceRight0000" x="685" y="3" width="332" height="323" frameX="-23" frameY="-310" frameWidth="913" frameHeight="633"/>
+	<SubTexture name="bounceRight0001" x="998" y="997" width="391" height="221" frameX="0" frameY="-400" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceRight0002" x="998" y="997" width="391" height="221" frameX="0" frameY="-400" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceRight0003" x="1593" y="643" width="207" height="312" frameX="-149" frameY="-190" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0004" x="1017" y="663" width="257" height="313" frameX="-170" frameY="-101" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0005" x="1333" y="327" width="269" height="313" frameX="-208" frameY="-72" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0006" x="323" y="1323" width="285" height="317" frameX="-265" frameY="-51" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0007" x="323" y="999" width="313" height="321" frameX="-296" frameY="-18" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0008" x="3" y="3" width="345" height="331" frameX="-316" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceRight0009" x="3" y="3" width="345" height="331" frameX="-316" frameY="0" frameWidth="391" frameHeight="553"/>
+	<SubTexture name="bounceRight0010" x="351" y="3" width="331" height="331" frameX="-369" frameY="-41" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0011" x="1009" y="329" width="321" height="331" frameX="-449" frameY="-106" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0012" x="677" y="997" width="318" height="331" frameX="-527" frameY="-199" frameWidth="907" frameHeight="633"/>
+	<SubTexture name="bounceRight0013" x="3" y="337" width="338" height="325" frameX="-569" frameY="-293" frameWidth="907" frameHeight="633"/>
+</TextureAtlas>

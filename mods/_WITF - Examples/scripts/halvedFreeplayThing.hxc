@@ -1,0 +1,198 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.ui.AtlasMenuItem;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.FlxSprite;
+
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+
+import funkin.audio.FunkinSound;
+
+import funkin.ui.debug.charting.ChartEditorState;
+
+import funkin.play.modchartSystem.ModHandler;
+import funkin.play.modchartSystem.ModConstants;
+
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+
+import funkin.modding.module.ModuleHandler;
+
+
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.ShaderFilter;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+
+class FreeplayFunnyForHalved extends Module
+{
+	override function onStateChangeStart(event) {
+		super.onStateChangeStart(event);
+	}
+	
+	
+	var shader:FlxRuntimeShader = null; 
+	var shaderFilter:ShaderFilter = null; 
+		
+	var halfSelected:Bool = false;
+	function onUpdate(callback)
+	{
+		if(PlayState.instance != null) return; //WE INGAME, SKIP ALL THIS!
+		var inFreeplay = Std.isOfType(FlxG.state.subState, FreeplayState);
+		if(!inFreeplay) return;
+		
+		//Will only work if on 'Modchart Hell' character, 
+		//otherwise this script will break due to how it accesses the custom backing card variables
+		var correctCharacter:Bool = FreeplayState.rememberedCharacterId == "nobody";
+		if(!correctCharacter) return;
+		
+		if(shader == null){
+			shader = new FlxRuntimeShader(Assets.getText(Paths.frag("halved/binaryglitch")), null);
+			shader.setBool('_active', true);
+			shader.setFloat('glitchStrength', 0.3);
+			shaderFilter = new ShaderFilter(shader);
+			
+			theColorWas = FlxG.state.subState.angleMaskShader.extraColor;
+		}
+		if(theColorWas == null) theColorWas = 0xFFFFFFFF;
+		
+		var curCapsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
+		
+		/*
+		if(FlxG.keys.justPressed.SHIFT){
+			var sndToPlay:String = "missnote3";
+			if(curCapsule == null){
+				sndToPlay = "missnote3";
+			}else{
+				if(FlxG.state.subState.curSelected == 0){ //RANDOM SELECTED
+					sndToPlay = "missnote1";
+				}else{
+					if(curCapsule.freeplayData.data.songName.toLowerCase() == "halved halved halved"){
+						sndToPlay = "notitg_mine";
+					}else{
+						sndToPlay = "missnote2";
+					}
+				}
+			}
+			FunkinSound.playOnce(Paths.sound(sndToPlay));
+		}
+		*/
+		
+		var freeplayCamera = FlxG.state.subState.funnyCam;
+		freeplayCamera.filtersEnabled=true;
+		
+		if(FlxG.state.subState.curSelected == 0){ //RANDOM SELECTED
+			if(halfSelected){
+				halfSelected = false;
+				
+				removeShaderToCamera(freeplayCamera, shaderFilter);
+
+				FlxG.state.subState.backingCard.pinkBack.visible = true;
+				FlxG.state.subState.backingCard.orangeBackShit.visible = true;
+				FlxG.state.subState.backingCard.alsoOrangeLOL.visible = true;
+				FlxG.state.subState.backingImage.visible = true;
+				FlxG.state.subState.angleMaskShader.extraColor = theColorWas;
+				
+				FlxG.state.subState.backingCard.active = true;
+				
+				//FlxG.state.subState.dj.active = true;
+				//FlxG.state.subState.dj.color = 0xFFFFFFFF;
+				FlxG.state.subState.dj.resetAFKTimer();
+				
+				if(FlxG.state.subState.backingCard.particleScaleTween != null){
+					FlxG.state.subState.backingCard.particleScaleTween.active = true;
+				}
+				FlxG.state.subState.backingCard.pulseParticlesOnBeat = true;
+				FlxG.state.subState.backingCard.particlesEmitter.active = true;
+			}
+			return;
+		}
+		if(curCapsule != null && curCapsule.freeplayData.data != null){
+			if(curCapsule.freeplayData.data.songName.toLowerCase() == "halved halved halved"){
+				halfSelected = true;
+				
+				addShaderToCamera(freeplayCamera, shaderFilter);
+				
+				FlxG.state.subState.dj.resetAFKTimer();
+				//FlxG.state.subState.dj.color = 0xFF000000;
+				FlxG.state.subState.backingCard.active = false;
+				
+				FlxG.state.subState.backingCard.pinkBack.visible = false;
+				FlxG.state.subState.backingCard.orangeBackShit.visible = false;
+				FlxG.state.subState.backingCard.alsoOrangeLOL.visible = false;
+								
+				FlxG.state.subState.backingImage.visible = true;
+				FlxG.state.subState.angleMaskShader.extraColor = 0xFF000000;
+
+				
+				if(FlxG.state.subState.backingCard.particleScaleTween != null){
+					FlxG.state.subState.backingCard.particleScaleTween.active = false;
+				}
+				FlxG.state.subState.backingCard.pulseParticlesOnBeat = false;
+				FlxG.state.subState.backingCard.particlesEmitter.active = false;				
+				
+				
+			}else{
+				if(halfSelected){
+					halfSelected = false;
+					
+					removeShaderToCamera(freeplayCamera, shaderFilter);
+					
+					FlxG.state.subState.backingCard.pinkBack.visible = true;
+					FlxG.state.subState.backingCard.orangeBackShit.visible = true;
+					FlxG.state.subState.backingCard.alsoOrangeLOL.visible = true;
+					FlxG.state.subState.backingImage.visible = true;
+					FlxG.state.subState.angleMaskShader.extraColor = theColorWas;
+					
+			
+			
+					FlxG.state.subState.backingCard.active = true;
+					
+					//FlxG.state.subState.dj.active = true;
+					//FlxG.state.subState.dj.color = 0xFFFFFFFF;
+					FlxG.state.subState.dj.resetAFKTimer();
+					
+					if(FlxG.state.subState.backingCard.particleScaleTween != null){
+						FlxG.state.subState.backingCard.particleScaleTween.active = true;
+					}
+					FlxG.state.subState.backingCard.pulseParticlesOnBeat = true;
+					FlxG.state.subState.backingCard.particlesEmitter.active = true;
+				}
+			}
+			//lol.songData.songId;
+		}
+	}
+	var theColorWas = null;
+	
+	function addShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+			else{ 
+				if(!daCamera.filters.contains(daShaderFilter))
+					daCamera.filters.push(daShaderFilter);
+			}
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	function removeShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters != null)
+				daCamera.filters.remove(daShaderFilter);
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+}

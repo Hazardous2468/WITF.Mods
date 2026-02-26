@@ -1,0 +1,180 @@
+{
+  "version": "1.1.0",
+  "name": "Memory",
+  "author": "Anby",
+  "fallback": "simple",
+  "assets": {
+    "note": {
+      "assetPath": "shared:notes/memory/notes",
+      "scale": 0.7,
+      "data": {
+        "left": { "prefix": "purple0" },
+        "down": { "prefix": "blue0" },
+        "up": { "prefix": "green0" },
+        "right": { "prefix": "red0" }
+      }
+    },
+    "noteStrumline": {
+      "assetPath": "shared:notes/memory/notes",
+      "scale": 0.7,
+      "offsets": [22, 28],
+      "data": {
+        "leftStatic": { "prefix": "arrowLEFT" },
+        "leftPress": { "prefix": "left press" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm" },
+        "downStatic": { "prefix": "arrowDOWN" },
+        "downPress": { "prefix": "down press" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm" },
+        "upStatic": { "prefix": "arrowUP" },
+        "upPress": { "prefix": "up press" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm" },
+        "rightStatic": { "prefix": "arrowRIGHT" },
+        "rightPress": { "prefix": "right press" },
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm" }
+      }
+    },
+    "holdNote": {
+		"scale": 0.7,
+		 "offsets": [2, 0],
+      "assetPath": "notes/memory/holds/holds",
+	  "data": {
+        "behindStrums": true
+      }
+    },
+    "holdNoteCover": {
+      "assetPath": "",
+      "data": {
+        "enabled": false
+      }
+    },
+	"noteSplash": {
+      "assetPath": "notes/memory/splashes/splashes",
+      "alpha": 0.8,
+      "data": {
+        "enabled": true,
+        "leftSplashes": [
+          { "prefix": "note impact 1 purple0" },
+          { "prefix": "note impact 2 purple0" }
+        ],
+        "rightSplashes": [
+          { "prefix": "note impact 1 red0" },
+          { "prefix": "note impact 2 red0" }
+        ],
+        "upSplashes": [
+          { "prefix": "note impact 1 green0" },
+          { "prefix": "note impact 2 green0" }
+        ],
+        "downSplashes": [
+          { "prefix": "note impact 1  blue0" },
+          { "prefix": "note impact 2 blue0" }
+        ]
+      }
+    },
+    "countdownThree": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/memory/intro3"
+      },
+      "assetPath": "shared:ui/intro3",
+	  "scale": 0.75,
+      "isPixel": false
+    },
+    "countdownTwo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/memory/intro2"
+      },
+      "assetPath": "shared:ui/intro2",
+      "scale": 0.75,
+      "isPixel": false
+    },
+    "countdownOne": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/memory/intro1"
+      },
+      "assetPath": "shared:ui/intro1",
+      "scale": 0.75,
+      "isPixel": false
+    },
+    "countdownGo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/memory/introGo"
+      },
+      "assetPath": "shared:ui/introGo",
+      "scale": 0.75,
+      "isPixel": false
+    },
+    "judgementSick": {
+      "assetPath": "shared:ui/rating_great",
+      "scale": 0.5,
+      "isPixel": false
+    },
+    "judgementGood": {
+      "assetPath": "shared:ui/rating_good",
+      "scale": 0.5,
+      "isPixel": false
+    },
+    "judgementBad": {
+      "assetPath": "shared:ui/rating_ok",
+      "scale": 0.5,
+      "isPixel": false
+    },
+    "judgementShit": {
+      "assetPath": "shared:ui/rating_bad",
+      "scale": 0.5,
+      "isPixel": false
+    },
+    "comboNumber0": {
+      "assetPath": "shared:ui/nums/num0",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber1": {
+      "assetPath": "shared:ui/nums/num1",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber2": {
+      "assetPath": "shared:ui/nums/num2",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber3": {
+      "assetPath": "shared:ui/nums/num3",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber4": {
+      "assetPath": "shared:ui/nums/num4",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber5": {
+      "assetPath": "shared:ui/nums/num5",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber6": {
+      "assetPath": "shared:ui/nums/num6",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber7": {
+      "assetPath": "shared:ui/nums/num7",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber8": {
+      "assetPath": "shared:ui/nums/num8",
+      "isPixel": false,
+      "scale": 0.4
+    },
+    "comboNumber9": {
+      "assetPath": "shared:ui/nums/num9",
+      "isPixel": false,
+      "scale": 0.4
+    }
+  }
+}

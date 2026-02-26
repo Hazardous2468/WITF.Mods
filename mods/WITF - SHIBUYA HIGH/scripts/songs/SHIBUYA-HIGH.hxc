@@ -1,0 +1,35 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.character.CharacterType;
+class SHIBUYA_HIGH_SONG extends Song {
+	public function new() {
+		super('SHIBUYA-HIGH');
+	}
+	
+	override function onGameOver(event) {
+		super.onGameOver(event);
+		var bf = PlayState.instance.currentStage.getBoyfriend();
+		bf.scrollFactor.set(1,1);
+		bf.alpha=1;
+		bf.visible = true;
+		bf.scale.set(1,1);
+	}
+	
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		
+		var func = function(){
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			bf.characterType = CharacterType.BF;
+		}
+		PlayState.instance.modchartEventHandler.modResetFuncs.push(func);
+		
+		
+		PlayState.instance.modchartEventHandler.funcModEvent(PlayState.instance.playerStrumline.mods, 257.97, function() {
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			bf.characterType = CharacterType.DAD;
+		});
+
+	}
+}

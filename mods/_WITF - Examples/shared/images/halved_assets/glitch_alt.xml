@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="glitch_alt.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="alt0000" x="1" y="1" width="1920" height="1017"/>
+	<SubTexture name="alt0001" x="1922" y="1" width="1920" height="1017"/>
+	<SubTexture name="alt0002" x="1" y="1019" width="1920" height="1017"/>
+	<SubTexture name="alt0003" x="1922" y="1019" width="1920" height="1017"/>
+	<SubTexture name="alt0004" x="1" y="2037" width="1920" height="1017"/>
+	<SubTexture name="alt0005" x="1922" y="2037" width="1920" height="1017"/>
+	<SubTexture name="alt0006" x="1" y="3055" width="1920" height="1017"/>
+	<SubTexture name="alt0007" x="1922" y="3055" width="1920" height="1017"/>
+	<SubTexture name="alt0008" x="1" y="4073" width="1920" height="1017"/>
+</TextureAtlas>

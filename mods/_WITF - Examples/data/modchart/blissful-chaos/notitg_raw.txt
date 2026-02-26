@@ -1,0 +1,373 @@
+--Just a short quick modchart.
+--Nothing too crazy going on, just thought it would be cute to chart Blissful Chaos here (since it was originally made for Osu! Mania)
+
+
+--CARDS
+card = require("card")
+card{0,14,"Intro", 0, "#444444"}
+card{18,82,"Part 1", 6, "#EEEEFF"}
+card{82,146,"Part 2", 8, "#BBBBFF"}
+
+
+if not P1 or not P2 then
+	backToSongWheel('Two Player Mode Required')
+	return
+end
+
+-- judgment / combo proxies
+for pn = 1, 2 do
+	setupJudgeProxy(PJ[pn], P[pn]:GetChild('Judgment'), pn)
+	setupJudgeProxy(PC[pn], P[pn]:GetChild('Combo'), pn)
+end
+-- player proxies
+for pn = 1, #PP do
+	PP[pn]:SetTarget(P[pn])
+	P[pn]:hidden(1)
+end
+
+
+
+
+aux('centerx')
+node {'x','centerx', function (x,centerx, pn) 
+return x + scx * ((pn-1)%2 -0.5)*(1-centerx*0.01)
+end, 'x'}
+func {0, function()
+    for pn=1,2 do
+    local plr = P[pn]
+    --local pos = 0.25
+     --if pn == 2 then pos = 0.75 end
+           if plr then plr:x(SCREEN_CENTER_X) end
+end
+end}
+
+local r = ((math.pi/180)*100) --multiply a degree by 'r' to convert degrees it to radians
+definemod {'fakeout', function(a, pn)
+	local offset1 = -90*r * (a/100)
+	local offset2 = 90*r * (a/100)
+	local offset3 = 90*r * (a/100)
+	local offset4 = -90*r * (a/100)
+    return a, a/2, offset1, offset2, offset3, offset4
+end, 'invert', 'stealth', 'confusionzoffset0', 'confusionzoffset1', 'confusionzoffset2', 'confusionzoffset3'}
+
+
+
+
+definemod{'fisheye', function(p)
+	fisheye_Spr:GetShader():uniform1f('amount',p) 
+end}
+fisheye_Spr:SetTexture(shaderAFT4:GetTexture())
+fisheye_Spr:GetShader():uniform1f('amount',0.00) 
+oldtimes_Spr:SetTexture(shaderAFT3:GetTexture()) 
+
+
+
+
+
+setdefault {100, 'centerx'}
+--setdefault {-100, 'drawsizeback'}
+setdefault {2.5, 'xmod'}
+setdefault {100, 'dizzyholds'}
+setdefault {100, 'modtimer'}
+setdefault {0, 'modtimeroffset'}
+setdefault{100, 'reversetype'}
+setdefault{100, 'stealthpastreceptors'}
+setdefault{250, 'arrowpathdrawsizeback', 200, 'arrowpathdrawsize'}
+
+
+math.randomseed(69) --I'm lazy lol
+
+setdefault {3, 'DrawSize'}
+setdefault{0, 'zoom'} --So that the notes start at 0 zoom. I can get away with this cuz I don't need to reset() for such a short modfile
+set{0,0,'zoom'}
+
+set{0,-333,'gayholds',-13, 'longholds'}
+
+
+set{0,50,'movex1',-50,'movex2',-150,'movex3',150,'movex0',100,'centered',-360,'rotationy'}
+
+ease {10, 8, inOutQuad, 0, 'centered'}
+
+ease {14, 0.8, outElastic, 0, 'movex3'}
+ease {15, 0.8, outElastic, 0, 'movex2'}
+ease {16, 0.8, outElastic, 0, 'movex1'}
+ease {17, 0.8, outElastic, 0, 'movex0'}
+
+
+ease{4,1, pop, 100, 'tipsy', 100, 'drunk'}
+ease{4+4,1, pop, 100, 'tipsy', 100, 'drunk'}
+for i = 10, 13, 0.5 do --tbh, I don't fucking know what I'm doing here XD
+	ease{i,0.25, pop, -50, 'tipsy', -50, 'drunk'}
+	ease{i+0.25,0.25, pop, 50, 'tipsy', 50, 'drunk'}
+	
+	ease{i,0.25, pop, -60, 'tiny', -60, 'tiny'}
+	--ease{i+0.25,0.25, pop, -40, 'tiny', -40, 'tiny'}
+end
+
+ease {5,1, outCubic, -180, 'rotationy'}
+ease {5+4,1, outCubic, 0, 'rotationy'}
+ease {10,4, linear, 360*2, 'rotationx', plr=1}
+ease {10,4, linear, 360*-2, 'rotationx', plr=2}
+
+set{17.5,0,'rotationx',0,'rotationy',150,'DrawSize'}
+
+
+ease {0, 12, inOutSine, 100, 'zoom'}
+
+ease {0, 14, inSine, 0.5, 'fisheye'}
+ease {14, 2, inOutQuad, 0, 'fisheye'}
+
+local blackcoverfadeouttofordrop = 0.75
+func_ease {12,4, inOutQuad, 1.0,blackcoverfadeouttofordrop, function(a)
+	black_cover:diffusealpha(a)
+end}
+
+
+
+
+
+func_ease {12,4, linear, 0.0,0.1, function(a)
+	oldtimes_Spr:GetShader():uniform1f('noiseMix',a)
+end}
+local fxMix_Min = 0.1
+local fxMix_Max = 0.5
+oldtimes_Spr:GetShader():uniform1f('fxMix',fxMix_Min)
+
+func_ease {18,4, inOutSine, fxMix_Min,fxMix_Max, function(a)
+	oldtimes_Spr:GetShader():uniform1f('fxMix',a)
+end}
+
+for i = 18, 143.5, 0.5 do
+	func_ease {i,0.5, pop, 1.0,1.025, function(zzzz)
+		background:xywh(scx,scy,sw*zzzz,sh*zzzz)
+	end}
+	
+	ease {i, 0.5, pop, 20, 'arrowpath',plr=1}
+	
+	func {i, function(l)
+		for numb = 1, 2 do
+			for col = 0, 3 do
+				local red  = math.random(0,1)*1.5
+				local green  = math.random(0,1)*1.55
+				local blue  = math.random(0,1)*1.5
+				P[numb]:SetNumPathGradientPoints(col, 2)
+				P[numb]:SetPathGradientColor(0, col, red, green, blue, 1)
+				P[numb]:SetPathGradientColor(1, col, red, green, blue, 1)
+			end
+		end
+	end}
+	
+end
+
+set{18,64,'beat'}
+ease {16, 2, linear, 21, 'tipsy', -21, 'drunk'}
+
+for i = 30, 146, 32 do
+	ease {i, 3.9, linear, -0.6, 'fisheye'}
+	ease {i+3.9, 0.1, linear, 0.0, 'fisheye'}
+	
+	ease {i+15.5, 0.5, inSine, -0.6, 'fisheye'}
+	ease {i+16, 4, linear, 0.0, 'fisheye'}
+	
+	
+	ease {i, 3.9, linear, -50, 'reverse'}
+	ease {i+3.9, 0.1, linear, 0.0, 'reverse'}
+	
+	ease {i+15.5, 0.5, inSine, -45, 'reverse'}
+	ease {i+16, 4, linear, 0.0, 'reverse'}
+end
+
+
+
+for i = 18, 77.5, 0.5 do
+	set{i,0,'tiny'}
+	ease {i, 0.5, inCirc, 200, 'tiny'}
+end
+ease {79,3, linear, 0, 'tiny'}
+
+for i = 82, 143.5, 0.5 do
+	set{i,0,'tiny'}
+	ease {i, 0.5, inCirc, 200, 'tiny'}
+end
+ease {144,1, linear, -50, 'tiny'}
+ease {145,1, linear, 200, 'tiny'}
+
+
+
+
+for i = 18, 77.5, 0.5 do
+	ease {i, 0.2, outCubic, math.random(-26,26), 'rotationx', math.random(-26,26), 'rotationy', math.random(-11,11), 'rotationz'}
+end
+for i = 82, 143.5, 0.5 do
+	ease {i, 0.2, outCubic, math.random(-34,34), 'rotationx', math.random(-34,34), 'rotationy', math.random(-19,19), 'rotationz'}
+end
+
+
+local function fuckingRepeat(i)
+	ease {i, 1.0, pop,87, 'zoom'}
+	func_ease {i,1, pop, fxMix_Max,fxMix_Min, function(a)
+		oldtimes_Spr:GetShader():uniform1f('fxMix',a)
+	end}
+end
+
+local function fuckingSnare(i)
+	fuckingRepeat(i+1)
+	fuckingRepeat(i+3)
+	
+	ease {i+0.75, 0.25, inSine, 100, 'fakeout'}
+	ease {i+1, 0.75, outSine, 0, 'fakeout'}
+	
+	ease {i+2.75, 0.25, inSine, 100, 'fakeout'}
+	ease {i+3, 0.75, outSine, 0, 'fakeout'}
+	
+	ease {i, 1, inCirc, -200, 'skewx'}
+	ease {i+1, 1, outCirc, 0, 'skewx'}
+	
+	ease {i+2, 1, inCirc, 200, 'skewx'}
+	ease {i+3, 1, outCirc, 0, 'skewx'}
+end
+
+for i = 18, 47-4, 4 do
+	fuckingSnare(i)
+end
+
+
+	
+
+local function fuckingSnareFREAKOUT(i)
+	func_ease {i+1,1, bounce, fxMix_Max,fxMix_Min, function(a)
+		oldtimes_Spr:GetShader():uniform1f('fxMix',a)
+	end}
+	ease {i+0.75, 0.25, inSine, 100, 'fakeout'}
+	ease {i+0.75+0.5, 0.25, linear, 0, 'fakeout'}
+	ease {i+1, 0.15, outQuad, -80, 'skewy', 111, 'skewx'}
+	ease {i+1.25, 0.15, outQuad, 80, 'skewy', -111, 'skewx'}
+	ease {i+1.5, 0.15, outQuad, 0, 'skewy', 0, 'skewx'}
+
+	ease {i+2.5-0.25, 0.25, inCirc, -100, 'skewy'}
+	ease {i+3-0.25, 0.25, inCirc, 100, 'skewy'}
+	ease {i+3, 1, inOutQuad, 0, 'skewy'}
+--[[
+	ease {46.75, 0.25, inSine, 100, 'fakeout'}
+	ease {46.75+0.5, 0.25, linear, 0, 'fakeout'}
+	ease {47, 0.15, outQuad, -80, 'skewy', 111, 'skewx'}
+	ease {47.25, 0.15, outQuad, 80, 'skewy', -111, 'skewx'}
+	ease {47.5, 0.15, outQuad, 0, 'skewy', 0, 'skewx'}
+
+	ease {48.5-0.25, 0.25, inCirc, -100, 'skewy'}
+	ease {49-0.25, 0.25, inCirc, 100, 'skewy'}
+	ease {49, 1, inOutQuad, 0, 'skewy'}
+	]]--
+end
+fuckingSnareFREAKOUT(46)
+fuckingSnareFREAKOUT(110)
+for i = 50, 74, 4 do
+	fuckingSnare(i)
+end
+
+for i = 82, 110-4, 4 do
+	fuckingSnare(i)
+end
+for i = 114, 142-4, 4 do
+	fuckingSnare(i)
+end
+
+
+local function l0l(i)
+	ease{i,2, pop, 20, 'hidden', plr=2}
+	ease{i,2, pop, -200, 'movex0', -200, 'movex1', 200, 'movex2', 200, 'movex3', plr=2}
+end
+
+set {78, 400, 'hiddenoffset'}
+ease{78,4, outBack, 100, 'hidden', 80, 'dark', plr=2}
+
+
+l0l(85)
+l0l(85+4)
+l0l(85+8)
+l0l(85+16)
+l0l(85+20)
+l0l(85+24)
+l0l(125)
+l0l(117)
+l0l(117+4)
+l0l(133)
+l0l(133+4)
+l0l(141)
+
+ease{111.5,2, bounce, 87, 'hidden', plr=2}
+ease{111.5,2, bounce, -200, 'movex0', -200, 'movex1', 200, 'movex2', 200, 'movex3', plr=2}
+
+ease{143,2.5, bounce, 90, 'hidden', plr=2}
+ease{143,2.5, bounce, -200, 'movex0', -200, 'movex1', 200, 'movex2', 200, 'movex3', plr=2}
+
+
+ease {85, 0.3, outQuad, 50, 'reverse1'}
+ease {85+0.5, 0.3, outQuad, 0, 'reverse1'}
+ease {85+4, 0.3, outQuad, 50, 'reverse1'}
+ease {85+0.5+4, 0.3, outQuad, 0, 'reverse1'}
+ease {85+8, 0.3, outQuad, 50, 'reverse1'}
+ease {85+0.5+8, 0.3, outQuad, 0, 'reverse1'}
+
+ease {85+16, 0.3, outQuad, 50, 'reverse2'}
+ease {85+0.5+16, 0.3, outQuad, 0, 'reverse2'}
+ease {85+20, 0.3, outQuad, 50, 'reverse1'}
+ease {85+0.5+20, 0.3, outQuad, 0, 'reverse1'}
+ease {85+24, 0.3, outQuad, 50, 'reverse2'}
+ease {85+0.5+24, 0.3, outQuad, 0, 'reverse2'}
+
+ease {117, 0.3, outQuad, 50, 'reverse2'}
+ease {117+0.5, 0.3, outQuad, 0, 'reverse2'}
+ease {117+4, 0.3, outQuad, 50, 'reverse1'}
+ease {117+0.5+4, 0.3, outQuad, 0, 'reverse1'}
+ease {117+8, 0.3, outQuad, 50, 'reverse0'}
+ease {117+0.5+8, 0.3, outQuad, 0, 'reverse0'}
+
+ease {133, 0.3, outQuad, 50, 'reverse0'}
+ease {133+0.5, 0.3, outQuad, 0, 'reverse0'}
+ease {133+4, 0.3, outQuad, 50, 'reverse0'}
+ease {133+0.5+4, 0.3, outQuad, 0, 'reverse0'}
+ease {141, 0.3, outQuad, 50, 'reverse2'}
+ease {141+0.5, 0.3, outQuad, 0, 'reverse2'}
+
+
+ease {110, 1, bounce, -10, 'reverse3'}
+ease {111, 2, bounce, 35, 'reverse3'}
+ease {111 + 0.5, 2, bounce, 35, 'reverse2'}
+ease {111 + 1.0, 2, bounce, 35, 'reverse1'}
+ease {111 + 1.5, 2, bounce, 35, 'reverse0'}
+
+
+ease {143, 0.25, flip(outQuad), 200, 'skewy', 666, 'skewx'}
+ease {143.25, 0.25, flip(outQuad), -200, 'skewy', -666, 'skewx'}
+ease {143.5, 0.25, flip(outQuad), 200, 'skewy', -200, 'skewx'}
+
+--func_ease {146,8, linear, blackcoverfadeouttofordrop,1.0, function(a)
+--	black_cover:diffusealpha(a)
+--end}
+func_ease {160-4,8+8, linear, 0.0,1.0, function(a)
+	fadetoblack:diffusealpha(a)
+end}
+
+func_ease {144,1, inOutSine, fxMix_Max,fxMix_Min, function(a)
+	oldtimes_Spr:GetShader():uniform1f('fxMix',a)
+end}
+
+func_ease {146,4, inOutSine, 0.0,2.0, function(a)
+	oldtimes_Spr:GetShader():uniform1f('sepiaMix',a)
+end}
+
+set{146,0,'beat', 200, 'tornadozperiod', 0, 'arrowpath', 200, 'tornadoperiod'}
+set{146,0,'hidden',plr=2}
+ease{144, 3, inOutCubic, 50, 'flip', 0, 'gayholds', 500, 'DrawSize', 0, 'longholds'}
+ease{148, 16, inCirc, 0, 'tiny'}
+
+ease{146, 0.1, linear, 3.0, 'xmod', 98, 'brake', 0.0, 'rotationx', 0.0, 'rotationz', 0.0, 'rotationy', 100, 'dark0', 100, 'dark1', 100, 'dark2'}
+ease{146, 0.1, linear, 200, 'tornadoz', 100, 'tornado', plr=1}
+ease{146, 0.1, linear, 200, 'tornadoz', -100, 'tornado', plr=2}
+ease{146, 32, outSine, 0, 'tornadoperiod', 100, 'tornadozperiod'}
+ease{146, 0.1, linear, -50, 'centered'}
+
+
+
+ease{164,8, inOutQuad, -90*r, 'confusionzoffset'}

@@ -1,0 +1,59 @@
+{
+  "version": "1.0.0",
+  "name": "Looping Rooms Character",
+  "healthIcon": {
+    "id": "nobody",
+	"flipX": true
+  },
+  "assetPath": "characters/hazard_sitting",
+  "singTime": 5.5,
+  "flipX": true,
+  "scale": 1.0,
+  "animations": [
+    {
+      "name": "idle",
+      "prefix": "idle",
+      "offsets": [0, 0]
+    },
+    {
+      "name": "singLEFT",
+      "prefix": "singLEFT",
+      "offsets": [4, -1]
+    },
+    {
+      "name": "singDOWN",
+      "prefix": "singDOWN",
+      "offsets": [0, -13]
+    },
+    {
+      "name": "singUP",
+      "prefix": "singUP",
+      "offsets": [-5, 12]
+    },
+    {
+      "name": "singRIGHT",
+      "prefix": "singRIGHT",
+      "offsets": [-3, 0]
+    },
+    {
+      "name": "singLEFTmiss",
+      "prefix": "missLEFT",
+      "offsets": [4, -1]
+    },
+    {
+      "name": "singDOWNmiss",
+      "prefix": "missDOWN",
+      "offsets": [0, -13]
+    },
+    {
+      "name": "singUPmiss",
+      "prefix": "missUP",
+      "offsets": [-5, 12]
+    },
+    {
+      "name": "singRIGHTmiss",
+      "prefix": "missRIGHT",
+      "offsets": [-4, 0]
+    }
+  ]
+}

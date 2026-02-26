@@ -1,0 +1,61 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+
+
+class MatoiSong extends Song {
+	public function new() {
+		super('matoi');
+	}
+	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		var eh = PlayState.instance.modchartEventHandler;
+		var target1 = PlayState.instance.playerStrumline.mods;
+		
+		var target3 = ModConstants.grabStrumModTarget("3");
+		
+		
+		//RAINBOW!
+		eh.funcTweenModEvent(target1, 547, 999, ModConstants.getEaseFromString("linear"), 0, 999, function(v) {
+			var timmy:Float = v*32*1.25;
+			var p:Float = Math.PI;
+			var rad:Float = p/180;
+			
+			var red:Float = (1.1) * FlxMath.fastSin(timmy*rad);
+			var green:Float =  (1.1)*(FlxMath.fastSin(timmy*rad+(0.66*p)));
+			var blue:Float = (1.1)*(FlxMath.fastSin(timmy*rad+(0.66*p*2)));
+			
+			target1.setModVal("stealthglowred", red);
+			target1.setModVal("stealthglowblue", blue);
+			target1.setModVal("stealthglowgreen", green);
+			
+			target3.setModVal("stealthglowred", red);
+			target3.setModVal("stealthglowblue", blue);
+			target3.setModVal("stealthglowgreen", green);
+			
+			
+			
+			target1.setModVal("arrowpathred", red);
+			target1.setModVal("arrowpathblue", blue);
+			target1.setModVal("arrowpathgreen", green);
+			
+			target3.setModVal("arrowpathred", red);
+			target3.setModVal("arrowpathblue", blue);
+			target3.setModVal("arrowpathgreen", green);
+			
+			
+		}, "RAINBOW STEALTH");
+	}
+}

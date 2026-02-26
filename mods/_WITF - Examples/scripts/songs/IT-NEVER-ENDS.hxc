@@ -1,0 +1,193 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+import funkin.Conductor;
+import funkin.util.Constants;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import funkin.data.event.SongEventRegistry;
+
+class ITNEVERENDS_Song extends Song {
+	public var repeatingSong:Bool = true;
+	public function new() {
+		super('IT-NEVER-ENDS');
+	}
+	
+	
+	function onNoteHit(event) {
+		super.onNoteHit(event);
+		event.healthChange *= 0.075; //Awww, sorryy... you barely recover ANY health! This is meant to be an endurance test after all!
+		//PlayState.instance.modDebugNotif("t", 0xFFFFFF00);
+	}
+	
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+	}
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+	}
+	
+	//If true, when shuffling the chart data, will make sure it's pad compatible (no spin / double-step nonsense, like smart blender or whatever)
+	public var padCompatibleShuffle:Bool = false;
+	
+	
+	public var cycles:Int = 0;
+	public function repeatTheSong(){
+		cycles += 1;
+		PlayState.instance.variables.set("cycles", cycles);
+		//PlayState.instance.modDebugNotif("Looped song!", 0xFFFFFF00);
+		setSongTime(0);
+		SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);
+
+		//Regen the chart data but shuffle it around
+		chartShuffle();
+	}
+	
+	
+	public function chartShuffle(){
+		if(PlayState.instance == null) return;
+		
+		var shuffleType:String = "none";
+		var r:Int = FlxG.random.int(0, 7);
+		switch(r){
+			case 0:
+				shuffleType = "flip u/d";
+			case 1:
+				shuffleType = "flip l/r";
+			case 2:
+				shuffleType = "flip all";
+			case 3:
+				shuffleType = "invert";
+			case 4:
+				shuffleType = "shift 1 right";
+			case 5:
+				shuffleType = "shift 1 left";
+		}
+		
+		
+		PlayState.instance.modDebugNotif("Shuffle: '"+shuffleType+"'", 0xFFFFFF00);
+	
+		//get original chart data
+		var notes = PlayState.instance.currentChart.notes.copy();
+		var playerNoteData:Array<SongNoteData> = [];
+		for (songNote in notes){
+		
+			var cloneNote = songNote.clone();
+		
+			var strumTime:Float = cloneNote.time;
+			var noteData:Int = cloneNote.getDirection() % 4;
+
+			if(cloneNote.getStrumlineIndex() == 0){
+				
+				switch(r){
+					case 0:
+						if(noteData == 1){
+							noteData = 2;
+						}else if(noteData == 2){
+							noteData = 1;
+						}
+					case 1:
+						if(noteData == 0){
+							noteData = 3;
+						}else if(noteData == 3){
+							noteData = 0;
+						}
+					case 2:
+						noteData = 3-noteData;
+					case 3:
+						if(noteData == 0){
+							noteData = 1;
+						}else if(noteData == 1){
+							noteData = 0;
+						}
+						else if(noteData == 2){
+							noteData = 3;
+						}else if(noteData == 3){
+							noteData = 2;
+						}
+					case 4:
+						noteData = (noteData + 1) % 4;
+					case 5:
+						noteData = (noteData + 3) % 4;
+
+				}
+				cloneNote.data = noteData;
+
+				playerNoteData.push(cloneNote);
+
+			}
+		}
+		PlayState.instance.playerStrumline.applyNoteData(playerNoteData);
+	}
+	
+	//If we are triggering the countdown, we are restarting!
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);		
+		totalTimeElapsed = 0.0;
+		cycles = 0;
+		PlayState.instance.variables.set("totalTimeElapsed", totalTimeElapsed);
+		PlayState.instance.variables.set("cycles", cycles);
+		
+		PlayState.instance.health = Constants.HEALTH_MAX;
+		//start player at max health
+		PlayState.instance.updateHealthBar();
+	}
+	
+	
+	
+	var repeatOffset:Float = 1500;
+	public function setSongTime(time:Float)
+	{
+		if(time < 0) time = 0;
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.get_isGamePaused()){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			//vocals.time = time;
+			if (Conductor.get_instance().songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.get_isGamePaused()){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.get_instance().songPosition = time;		
+		PlayState.instance.handleSkippedNotes();
+		Conductor.get_instance().update();
+	}
+	
+	
+	var totalTimeElapsed:Float = 0.0;
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null || !repeatingSong) return;
+		if(PlayState.instance.isGamePaused) return;
+		if(Conductor.instance.songPosition < 0){
+			return;
+		}
+		
+		totalTimeElapsed += callback.elapsed;
+		PlayState.instance.variables.set("totalTimeElapsed", totalTimeElapsed);
+
+		if(Conductor.instance.songPosition >= PlayState.instance.currentSongLengthMs-repeatOffset){
+			repeatTheSong();	
+		}
+	}
+	
+}

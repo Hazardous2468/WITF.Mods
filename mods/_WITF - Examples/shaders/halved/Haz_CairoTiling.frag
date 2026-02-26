@@ -1,0 +1,108 @@
+#pragma header
+
+//https://www.youtube.com/watch?v=51LwM2R_e_o
+
+uniform float alpha_1;
+uniform float alpha_2;
+
+#define NUM_LAYERS 4.
+#define ZOOM 12.5
+#define pi 3.14159265358979323846264338327950288419716939937510
+uniform float zoom_add;
+uniform float amount; //0-1
+uniform float iTime;
+
+
+const vec3 iResolution = vec3(1280.0, 720.0, 1.0);
+
+
+//Some GPU's don't have fWidth? :(
+float myFwidth(float p) {
+    return 1.5 / min(iResolution.x, iResolution.y);
+}
+
+float funny(in vec2 uv, in float k){
+
+    uv = fract(uv)-.5;
+    vec2 p = abs(uv);
+    float a = (k*0.5+0.5)*3.1415;
+    vec2 n= vec2(sin(a), cos(a));
+    float d = dot(p-.5,n);
+    d = min(d,p.x);
+    d = max(d,-p.y);
+    d = abs(d);
+
+    return smoothstep(myFwidth(d),0.0,d-0.01);
+}
+
+mat2 Rot(float a){
+	float s = sin(a), c=cos(a);
+	return mat2(c,-s,s,c);
+}
+
+void main() {
+
+	vec2 c = openfl_TextureCoordv.xy * iResolution.xy;
+	
+	vec2 uv_ = (c-.5*iResolution.xy) / iResolution.y;
+	
+	vec4 col = vec4(0.0);
+	
+	if(alpha_2 > 0.0){
+		vec2 uv = uv_;
+		
+		float fisheye = -0.3;
+		uv *= 1.0 - fisheye / 2.0;
+		float r = sqrt(dot(uv,uv));
+		uv *= 1.0 + r * fisheye;
+	
+		 for(float i=0.;i<1.;i+=1./NUM_LAYERS){
+			vec2 p = uv;
+			float t = iTime*0.333;
+			t += i*10.;            
+			p*=Rot(pi*((t*0.2)-i));
+			p.y += (t*0.5)+i;
+			p.x -= (t*0.5)+i;
+			p = fract(p*(ZOOM+zoom_add))-0.5;
+			p = abs(p);
+
+			float a = (0.5)*pi;
+			vec2 n= vec2(sin(a), cos(a));
+			float d = abs(dot(p-.5,n)); 
+			col.rgb += smoothstep(myFwidth(d),0.0,d-0.01)*alpha_2;
+
+			//if(max(p.x, p.y)>.48) col.r += .8;
+		}
+	}
+	gl_FragColor = vec4(col);
+	
+	
+	if(alpha_1 > 0.0){
+	
+		uv_.y = 1.-uv_.y;
+
+		//float amount = (sin(iTime*2.0)*0.5)+0.5;
+		
+		vec3 col = vec3(0.);
+		
+		
+		vec2 uv1 = uv_;
+		uv1.y += iTime*0.1;
+		uv1.x -= iTime*0.1;
+		uv1 *= 7.25;
+		
+		col.rgb += funny(uv1, amount);
+		
+		
+		
+		uv1 = uv_;
+		uv1.y += iTime*0.15;
+		uv1.x += iTime*0.2;
+		uv1 *= 5.125;
+		col.rgb += funny(uv1, amount);
+		gl_FragColor += vec4(col,1.0) * vec4(alpha_1);
+	}
+
+	
+}
+

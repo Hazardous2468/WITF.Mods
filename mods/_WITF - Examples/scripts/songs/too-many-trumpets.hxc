@@ -1,0 +1,159 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.PauseSubState;
+import funkin.modding.module.ModuleHandler;
+import StringTools;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.play.song.Song;
+import funkin.modding.events.ScriptEvent;
+
+import funkin.play.modchartSystem.ModConstants;
+import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.FlxTypedEmitter;
+import flixel.effects.particles.FlxEmitterMode;
+
+class TrumpetsModule extends Song {
+
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+    public function new() {
+        super("too-many-trumpets");
+    }
+	
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+		if(particlesEmitter!=null){
+			particlesEmitter.destroy();
+			particlesEmitter = null;
+		}
+	}
+	
+	var particlesEmitter:FlxTypedEmitter;
+	var particleAlphaTarget:Float = 0;
+	
+	function onCreate(event:ScriptEvent):Void {
+		PauseSubState.musicSuffix = "-pico";
+		
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+		
+		
+		
+		particlesEmitter = new FlxTypedEmitter(20,20, 48);
+		particlesEmitter.launchMode = FlxEmitterMode.SQUARE;
+		particlesEmitter.width = FlxG.width;
+		particlesEmitter.height = 12;
+		particlesEmitter.x = 0;
+		particlesEmitter.y = FlxG.height + 100;
+		particlesEmitter.lifespan.set(14, 20);
+		particlesEmitter.velocity.set(-145, -180, 145, -130);
+		particlesEmitter.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter.launchAngle.set(-180, 180);
+		particlesEmitter.alpha.set(1, 1, 0, 0);
+		particlesEmitter.angle.set(-90, 90);
+		particlesEmitter.keepScaleRatio = true;
+		var particle:FlxParticle;
+		for (i in 0...64)
+		{
+			particle = new FlxParticle();
+			particle.scrollFactor.set();
+			particle.x -= 5000; //So errrrrrr.... basically... errrrr it... err... stops the trail from loading in the centre of the... err... screen? and because its off screen it... errrrrrrr... doesn't load and cause frame drops? yeah... something like that... i think
+			particle.loadGraphic(Paths.image("trumpetBackgroundParticle"));
+			particlesEmitter.add(particle);
+			particle.alpha=0;			
+			particle.visible=false;			
+		}
+		PlayState.instance.add(particlesEmitter);
+		PlayState.instance.variables.set("particlesEmitter", particlesEmitter);
+		particlesEmitter.start(false, 0.18); //start
+		particleAlphaTarget=0.0;
+		
+		
+		particlesEmitter.visible = false;
+	}
+	
+	
+	//USE THIS TO RESET EVERYTHING BACK TO DEFAULT WHEN GOING BACKWARDS
+	override function onModchartReset(event) {
+		super.onModchartReset(event);	
+		particleAlphaTarget = 0;
+		
+		if(particlesEmitter!=null){
+			particlesEmitter.visible = false;
+			for (p in particlesEmitter){
+				p.alpha = particleAlphaTarget;
+				p.visible = false;
+			}
+		}
+
+	}
+	
+	
+	
+	
+	function onUpdate(callback)
+	{
+		if(particlesEmitter!=null){
+			for (p in particlesEmitter){
+				p.alpha = particleAlphaTarget;
+			}
+		}
+	}
+	
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		var eh = PlayState.instance.modchartEventHandler;
+		var target1 = PlayState.instance.playerStrumline.mods;
+		
+		
+		eh.funcTweenModEvent(target1, 254, 2, ModConstants.getEaseFromString("linear"), 0, 0.7, function(v) {
+			particleAlphaTarget = v;
+		}, "particlesAlpha");
+		
+		eh.funcTweenModEvent(target1, 316, 4, ModConstants.getEaseFromString("linear"), 0.7, 0, function(v) {
+			particleAlphaTarget = v;
+		}, "particlesAlpha");
+		
+		eh.funcModEvent(target1, 324, function() {
+			
+			if(particlesEmitter!=null){
+				particlesEmitter.visible = false;
+				for (p in particlesEmitter){
+					p.visible = false;
+				}
+			}
+		}, "particleEmitter");
+		
+		eh.funcModEvent(target1, 252, function() {
+			if(particlesEmitter!=null){
+				particlesEmitter.visible = true;
+				for (p in particlesEmitter){
+					p.visible = true;
+				}
+			}
+		}, "particleEmitter");
+		
+		
+		//eh.funcModEvent(target1, 255, function() {
+		//	particlesEmitter.start(false, 0.23); //start
+		//}, "particleEmitter");
+		
+		//eh.funcModEvent(target1, 316, function() {
+		//	particlesEmitter.start(false, 0.23); //stop
+		//}, "particleEmitter");
+	}
+	
+	
+	
+	
+	
+	
+	
+
+}

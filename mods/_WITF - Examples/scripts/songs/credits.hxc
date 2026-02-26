@@ -1,0 +1,80 @@
+import funkin.play.song.Song;
+import funkin.graphics.shaders.WiggleEffectRuntime;
+import openfl.filters.ShaderFilter;
+import flixel.FlxG;
+import flixel.FlxCamera;
+import funkin.play.PlayState;
+import funkin.play.modchartSystem.HazardAFT;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import openfl.utils.Assets;
+
+class CreditsSong extends Song {
+
+	var customArrowPathPath:String = "credits/arrowPath";
+
+	public function new() {
+		super('credits');
+	}
+	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+	
+	var shader:WiggleEffectRuntime;
+	var shaderFilter:ShaderFilter;
+	
+	var autoApplyShader:Bool = true;
+	
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);		
+		
+		
+		 for (strumLine in PlayState.instance.allStrumLines)
+		  {
+			strumLine.arrowPathFileName = customArrowPathPath;
+		  }
+		
+		//shader = new WiggleEffectRuntime(2, 4, 0.01, 4);
+		shader = new FlxRuntimeShader(Assets.getText(Paths.frag("CreditsShader")), null);
+		shader.setInt("effectType",35);
+					
+		shaderFilter = new ShaderFilter(shader);
+		
+		PlayState.instance.variables.set("credits_shader", shaderFilter);
+		
+		
+		if(autoApplyShader){
+			FlxG.camera.filters = ([shaderFilter]);
+			
+			PlayState.instance.camHUD.filters = ([shaderFilter]);
+			
+			
+			if(PlayState.instance.camNotes != null)
+				PlayState.instance.camNotes.filters = ([shaderFilter]);
+			if(PlayState.instance.camAFT != null)
+				PlayState.instance.camAFT.filters = ([shaderFilter]);
+		}
+		
+	}
+	
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+	}
+	
+	var uTime:Float = 0.0;
+	function onUpdate(callback)
+	{
+		if(shader != null){
+			uTime = uTime + callback.elapsed;
+			shader.setFloat('uTime', uTime);
+			//shader.update(callback.elapsed);
+		}
+	}
+	
+	
+}

@@ -1,0 +1,68 @@
+{
+    "title": "Hazard's Modchart System Examples",
+    "description": "Some useful scripts and demos of how to use the modchart system!",
+	"contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Made all the charts and modcharts and stuff"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Blissful Chaos"
+		},
+		{
+			"name": "Hazard24",
+			"role": "ITNEVERENDSITNEVERENDSITNEVERENDS"
+		},
+		{
+			"name": "Aden Mayo",
+			"role": "Too Many Trumpets"
+		},
+		{
+			"name": "Frums",
+			"role": "Credits + 19ZZ"
+		},
+		{
+			"name": "answearingmachine",
+			"role": "It Go"
+		},
+		{
+			"name": "Riya",
+			"role": "Final-Hope"
+		},
+		{
+			"name": "bermei.inazawa",
+			"role": "Matoi"
+		},
+		{
+			"name": "NotITG - UKSRT8",
+			"role": "Matoi Modfile Inspiration"
+		},
+		{
+			"name": "Hundotte vs. Frums",
+			"role": "HALVED"
+		},
+		{
+			"name": "kaypooma",
+			"role": "Inspiration from their HALVED NotITG modfile."
+		},
+		{
+			"name": "BEMANI Sound Team 'DARK TRAIN'",
+			"role": "S-Bahn"
+		},
+		{
+			"name": "Never Dull",
+			"role": "Gypsy In My Mind (Sad Cat Dance meme song)"
+		}
+	],
+	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+    "api_version": "0.8.0",
+    "mod_version": "3.0.2",
+	"dependencies": {
+		"_WITF - Essentials": "*"
+	},
+	"optionalDependencies": {
+		"FallenMemories-Simple Notestyle": "*"
+	},
+    "license": "CC BY-NC-ND 4.0"
+}

@@ -1,0 +1,21 @@
+{
+    "title": "WITF - Looping the Rooms",
+    "description": "Kuru Kuru Kurikaesu",
+	"contributors": [
+		{
+			"name": "rusino",
+			"role": "Composer"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Everything else"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "1.0.0",
+	"dependencies": {
+		"_WITF - Essentials": "*",
+		"_WITF - Examples": "*"
+	},
+    "license": "CC BY-NC-ND 4.0"
+}

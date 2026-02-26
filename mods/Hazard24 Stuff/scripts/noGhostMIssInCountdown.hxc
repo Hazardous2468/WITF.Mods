@@ -1,0 +1,25 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+
+
+//A script which makes it impossible to miss during the countdown! (or at least, until the "GO!"
+class NoGhostMissInCountDown extends Module
+{
+	public function new() {
+        super("NoGhostMissInCountDown", 1, {
+          state: PlayState
+        });
+    }
+
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		if(Conductor.instance.songPosition < -150)
+			event.cancelEvent();
+	}
+
+}

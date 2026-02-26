@@ -1,0 +1,82 @@
+
+function setupSpinAroundModifier()
+	runHaxeCode(
+	[[
+	//SPIN AROUND MODIFIER
+	for (strumLine in PlayState.instance.allStrumLines)
+	{
+		var spinAroundMod:CustomModifier = createCustomMod("spinaround", 0.0);
+		spinAroundMod.modPriority = 100;
+		spinAroundMod.strumsMod = true;
+		spinAroundMod.notesMod = true;
+		spinAroundMod.holdsMod = true;
+		spinAroundMod.pathMod = false;
+		spinAroundMod.specialMod = false;
+		spinAroundMod.speedMod = false;
+		strumLine.mods.addCustomMod(spinAroundMod);	
+		
+		spinAroundMod.createSubMod("offset", 0.0);
+		spinAroundMod.createSubMod("timeoffset", 0.25);
+		spinAroundMod.createSubMod("speed", 1);
+		spinAroundMod.createSubMod("angle", 0);
+		
+		spinAroundMod.strumMathFunc = function(data){
+		
+			var timmy:Float = Conductor.instance.currentBeatTime / 4 * spinAroundMod.getSubVal("speed");
+			var timeoffset:Float = spinAroundMod.getSubVal("timeoffset");
+
+			timmy += timeoffset * (data.direction + spinAroundMod.getSubVal("offset"));
+
+			var _movex:Float = FlxMath.fastCos(timmy * Math.PI);
+			var _movez:Float = FlxMath.fastSin(timmy * Math.PI);
+			
+			data.x += _movex * spinAroundMod.currentValue;
+			data.z += _movez * spinAroundMod.currentValue;
+			
+			
+			data.angleY += 90 + (timmy*90*2);
+		}
+		
+		spinAroundMod.noteMathFunc = function(data){
+			var timmy:Float = Conductor.instance.currentBeatTime / 4 * spinAroundMod.getSubVal("speed");
+			var timeoffset:Float = spinAroundMod.getSubVal("timeoffset");
+			timmy += timeoffset * (data.direction + spinAroundMod.getSubVal("offset"));
+			data.angleY += ( 90 + (timmy*90*2) ) * spinAroundMod.getSubVal("angle");
+		}
+
+	}
+	]])
+	set(0, 112*4, "spinaround")
+	set(0, 0.5, "spinaround__timeoffset")
+	set(0, 0.5, "flip")
+	set(0, 1, "3d")
+end
+
+function setupHourGlassModifier()
+	set(0, 1, "3d")
+	set(0.0, 10, "arrowpathgrain")
+	set(0, 1, "hourglassx")
+	set(0, 180, "hourglassx__offset")
+	set(0, 1, "hourglassangley")
+	set(0, 180, "hourglassangley__offset")
+		
+	set(0, 3, "wave")
+	set(0, 0.6, "speedmod")
+	set(0, 0.45, "boost")
+	
+	set(0, 1, "hidden")
+	
+end
+
+function modsTimeline()
+	--setupSpinAroundModifier()
+	
+	setupHourGlassModifier()
+		
+	
+	
+	
+	
+end
+
+

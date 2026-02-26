@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="hazard_sitting.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="base0000" x="1434" y="1609" width="460" height="524"/>
+	<SubTexture name="idle0000" x="6" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0001" x="6" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0002" x="482" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0003" x="482" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0004" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0005" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0006" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0007" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0008" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="idle0009" x="958" y="1609" width="470" height="525"/>
+	<SubTexture name="missDOWN0000" x="1434" y="2139" width="470" height="510"/>
+	<SubTexture name="missDOWN0001" x="6" y="2140" width="470" height="510"/>
+	<SubTexture name="missDOWN0002" x="6" y="2140" width="470" height="510"/>
+	<SubTexture name="missDOWN0003" x="6" y="2140" width="470" height="510"/>
+	<SubTexture name="missLEFT0000" x="6" y="550" width="472" height="523"/>
+	<SubTexture name="missLEFT0001" x="484" y="550" width="472" height="523"/>
+	<SubTexture name="missLEFT0002" x="484" y="550" width="472" height="523"/>
+	<SubTexture name="missLEFT0003" x="484" y="550" width="472" height="523"/>
+	<SubTexture name="missRIGHT0000" x="6" y="1079" width="471" height="524"/>
+	<SubTexture name="missRIGHT0001" x="483" y="1079" width="471" height="524"/>
+	<SubTexture name="missRIGHT0002" x="483" y="1079" width="471" height="524"/>
+	<SubTexture name="missRIGHT0003" x="483" y="1079" width="471" height="524"/>
+	<SubTexture name="missUP0000" x="6" y="6" width="460" height="538"/>
+	<SubTexture name="missUP0001" x="472" y="6" width="460" height="538"/>
+	<SubTexture name="missUP0002" x="472" y="6" width="460" height="538"/>
+	<SubTexture name="missUP0003" x="472" y="6" width="460" height="538"/>
+	<SubTexture name="singDOWN0000" x="482" y="2140" width="470" height="510"/>
+	<SubTexture name="singDOWN0001" x="958" y="2140" width="470" height="510"/>
+	<SubTexture name="singDOWN0002" x="958" y="2140" width="470" height="510"/>
+	<SubTexture name="singDOWN0003" x="1434" y="2655" width="470" height="510"/>
+	<SubTexture name="singDOWN0004" x="1434" y="2655" width="470" height="510"/>
+	<SubTexture name="singDOWN0005" x="1434" y="2655" width="470" height="510"/>
+	<SubTexture name="singLEFT0000" x="6" y="550" width="472" height="523"/>
+	<SubTexture name="singLEFT0001" x="962" y="550" width="472" height="523"/>
+	<SubTexture name="singLEFT0002" x="962" y="550" width="472" height="523"/>
+	<SubTexture name="singLEFT0003" x="1440" y="550" width="472" height="523"/>
+	<SubTexture name="singLEFT0004" x="1440" y="550" width="472" height="523"/>
+	<SubTexture name="singLEFT0005" x="1440" y="550" width="472" height="523"/>
+	<SubTexture name="singRIGHT0000" x="6" y="1079" width="471" height="524"/>
+	<SubTexture name="singRIGHT0001" x="960" y="1079" width="471" height="524"/>
+	<SubTexture name="singRIGHT0002" x="960" y="1079" width="471" height="524"/>
+	<SubTexture name="singRIGHT0003" x="1437" y="1079" width="471" height="524"/>
+	<SubTexture name="singRIGHT0004" x="1437" y="1079" width="471" height="524"/>
+	<SubTexture name="singRIGHT0005" x="1437" y="1079" width="471" height="524"/>
+	<SubTexture name="singUP0000" x="6" y="6" width="460" height="538"/>
+	<SubTexture name="singUP0001" x="938" y="6" width="460" height="538"/>
+	<SubTexture name="singUP0002" x="938" y="6" width="460" height="538"/>
+	<SubTexture name="singUP0003" x="1404" y="6" width="460" height="538"/>
+	<SubTexture name="singUP0004" x="1404" y="6" width="460" height="538"/>
+	<SubTexture name="singUP0005" x="1404" y="6" width="460" height="538"/>
+</TextureAtlas>

@@ -1,0 +1,46 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.util.Constants;
+import Std;
+import flixel.FlxG;
+
+class DadSplash extends Module {
+
+    function new() {
+        // Load the mod
+		super("DadSplash", 1, {
+          state: PlayState
+        });
+    }
+
+    override function onNoteHit(event) {
+        super.onNoteHit(event);
+
+		
+        // Dad notes are always perfect and give 0 score
+        var dadNote = event.score == 0 && event.judgement == 'perfect';
+        if (!dadNote) return;
+		
+
+		var note = event.note;
+		var isPlayerNote = event.note.noteData.getMustHitNote();
+		
+
+		// Play the note splash for the opponent
+		var playState = PlayState.instance;
+		if(playState == null) return;
+		var strumline = playState.opponentStrumline;
+		
+		if(isPlayerNote){
+			strumline = playState.playerStrumline;
+		}
+		if(playState != null && strumline != null && note.noteData.kind != "hurt" && note.noteData.kind != "fake" ){
+			if(note.weBelongTo != null)
+				note.weBelongTo.playNoteSplash(note.direction, note);
+			else
+				strumline.playNoteSplash(note.direction, note);
+			
+		}
+		
+    }
+}

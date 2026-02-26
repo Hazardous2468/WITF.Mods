@@ -1,0 +1,38 @@
+function setUp()
+	centerPlayer("")
+	centerOpponent("")
+	createNewPlayer(true)
+end
+
+function modsTimeline()
+	set(-16,1, "alpha","2")
+	
+	set(-15,0.5, "debugalpha","all")
+	set(-14,1, "debugalpha","dad")
+	set(-15,2.6*-112, "debugx","3")
+	set(-15,2.6*112, "debugx","1")
+	
+	set(-15,2.6, "movex","bf")
+	set(-15,-2.6, "movex","3")
+	
+	set(-15,0.74, "speedmod")
+	set(-15,0.3, "drawdistance")
+	
+	
+	set(-15,1, "showallmods")
+	
+	
+	set(-15,0.0, "blacksphere__speedaffect","3")
+
+	
+	--ease(0,16, "linear", 360*6, "blacksphere")
+	ease(0,1, "linear", 45+(45/2), "blacksphere")
+	--ease(0,1, "linear", 0, "blacksphere")
+
+
+
+
+	
+end
+
+

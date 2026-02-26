@@ -1,0 +1,28 @@
+function setUp()
+	centerPlayer("")
+end
+
+function modsTimeline()
+	set(-16,1, "showallmods","bf")
+	set(-16,1, "alpha","dad")	
+	set(-16,-112*10, "debugx","dad")
+	set(-16,0.5, "debugalpha","bf")
+	set(-15,0.75, "debugalpha","bf")
+	
+	set(-16,0.2, "arrowpath","bf")
+	set(-16,25, "arrowpathgrain","bf")
+	set(-15,20, "arrowpathgrain","bf")
+	set(-16,0.1, "arrowpathwidth","bf")
+	
+	
+	set(-8, 1, "drunk")
+	
+	ease(0, 3, "inOutSine", 4, "drunk__speed", "bf")
+	ease(5, 4, "inOutSine", 4, "drunk__mult", "bf")
+	
+	ease(5+5, 4, "inOutSine", 1, "drunk__desync", "bf")
+
+
+end
+
+

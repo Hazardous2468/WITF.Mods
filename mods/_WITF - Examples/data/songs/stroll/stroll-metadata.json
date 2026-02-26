@@ -1,0 +1,46 @@
+{
+  "version": "2.2.3",
+  "songName": "Stroll",
+  "artist": "Hazard",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "easy",
+      "normal"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "",
+      "opponent": "nobody",
+      "instrumental": ""
+    },
+    "stage": "emptyStage",
+    "noteStyle": "simple",
+    "ratings": {
+      "easy": 2,
+      "normal": 3
+    },
+	"album": "WITF",
+    "previewStart": 16149,
+    "previewEnd": 32275
+  },
+  "generatedBy": "Manually created by Hazard24",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 100,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.play.modchartSystem.ModConstants;
+import lime.system.Clipboard;
+import funkin.util.Constants;
+import funkin.data.song.SongTimeChange;
+
+/*
+	A handy script made by me (Hazard24) to help with the creation of time changes for the metadata file in FNF!
+	Works in two modes: singular and linear.
+	
+	Singular:
+	Simply change the beat variable to the beat you want to be converted to milliseconds. Simple!
+	
+	Linear / Curve:
+	Define a startBeat and endBeat, then define the starting and ending BPMs.
+	From there, running this script will the generate a big list of time changes for you to use!
+	This is to basically save you having to constantly go back and forth adding new time changes manually.
+*/
+
+class BPMChangeHelper extends Module
+{
+	public function new() {
+        super("bpmChangeHelper");	
+    }
+	
+	//Set this to true to make this script function. 
+	var enabled:Bool = false;
+	
+	
+	//If true, will copy the results of the script to your computer's clipboard (to paste elsewhere)
+	var copyResultToClipboard:Bool = true;
+	
+	//If set to true, when copying to the clipboard, it will automatically format itself to be easily copied into an FNF metadata file
+	var autoFormat:Bool = true;
+	
+	
+	//The beat that will be printed out in milliseconds
+	var beat:Float = 32;
+	
+	//If true, will print out a set of points between the start and end point
+	//Only works for linear curves lol
+	var curveMode:Bool = false;
+	
+	//Curve mode variables
+	//How many samples between beats. 1 = sample every beat, 2 = sample every half beat, 4 = quarter, etc
+	var samples:Int = 		8;
+	var startBeat:Float  = 	32;
+	var endBeat:Float  = 	64;
+	var startBPM:Float  = 	120;
+	var endBPM:Float  = 	200;
+	
+	
+	
+	var numerator:Int = 4;
+	var denominator:Int = 4;
+	
+	
+	function daScriptLogic(){
+		if(!enabled) return; //do nothing
+	
+		if(!curveMode){
+			var result:Float = Conductor.instance.getBeatTimeInMs(beat);			
+			PlayState.instance.modDebugNotif("Beat '" + beat + "': " + result, true);
+			
+			if(copyResultToClipboard){
+				if(!autoFormat){
+					Clipboard.text = result;
+				}else{
+					Clipboard.text = formatToFNFdata(result, beat, null, numerator, denominator);
+				}
+			}
+		}else{
+			var results_BPM:Array<Float> = []; //bpm:
+			var results_Beats:Array<Float> = []; //b:
+
+			var sampleBeatPoint = 0;
+			var incrementer = 1 / samples;
+			var dif = endBeat - startBeat;
+			dif *= samples;
+			for (i in 0...dif){
+			
+				var curvePercentage:Float = i / dif;
+			
+				sampleBeatPoint = startBeat + (i*incrementer);
+				results_Beats.push(sampleBeatPoint);
+				if (i == 0){ //first one, set to starting BPM
+					results_BPM.push(startBPM);
+				}else{
+					var bpmRange:Float = endBPM - startBPM;
+					//sample da fuckin curve
+					var daBPM:Float = startBPM + (bpmRange * curvePercentage);
+					
+					results_BPM.push(daBPM);
+				}
+			}
+			//and the last one will be the final BPM target
+			sampleBeatPoint = endBeat;
+			results_Beats.push(sampleBeatPoint);
+			results_BPM.push(endBPM);
+			
+			//Okay now for the hard part, converting the beats back into Milliseconds using our new BPM knowledge
+			var results_MS:Array<Float> = []; //t:
+			var bpmMemory:Float = startBPM;
+			var timeChangesMemory = Conductor.instance.timeChanges;
+			var songTimeChanges:Array<SongTimeChange> = PlayState.instance.currentChart.timeChanges;
+			for (i in 0...results_Beats.length){
+			
+				var beat = results_Beats[i];
+				var resultingMS:Float = Conductor.instance.getBeatTimeInMs(beat);	
+				results_MS.push(resultingMS);
+			
+				var newSongTimeChange:SongTimeChange = new SongTimeChange(resultingMS, results_BPM[i], numerator,denominator,beat);
+				songTimeChanges.push(newSongTimeChange);
+				Conductor.instance.mapTimeChanges(songTimeChanges);
+								
+				bpmMemory = results_BPM[i];
+			}
+			
+			//Reset time changes
+			Conductor.instance.timeChanges = timeChangesMemory;
+			Conductor.instance.update(Conductor.instance.songPosition, false);
+			
+			
+			//now format it!
+			
+			var outputString:String = "";
+			for (i in 0...results_Beats.length){
+				if(autoFormat){
+					outputString += formatToFNFdata(results_MS[i], results_Beats[i], results_BPM[i], numerator, denominator);
+					outputString += ",";
+				}else{
+					outputString += "[";
+					outputString += results_MS[i];
+					outputString += ", ";
+					outputString += results_BPM[i];
+					outputString += "], ";
+				}
+			}
+			
+			if(copyResultToClipboard)
+				Clipboard.text = outputString;
+		}
+		
+	}	
+	
+	
+	
+	function formatToFNFdata(_ms:Float, _beat:Float, _bpm:Float, _numerator, _denominator):String{
+	
+		var outputString = '{';
+		outputString += '\n "t": ' + _ms + ',';
+		outputString += '\n "b": ' + _beat + ',';
+		outputString += '\n "bpm": ' + (_bpm == null ? "?" : _bpm) + ',';
+		outputString += '\n "n": ' + _numerator + ',';
+		outputString += '\n "d": ' + _denominator;
+		outputString += '\n}';
+		 
+		//{
+		//  "t": 28515.5430711611,
+		//  "b": 56,
+		//  "bpm": 120,
+		//  "n": 5,
+		//  "d": 4
+		//}
+	
+		return outputString;
+	}
+	
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);			
+		daScriptLogic();
+	}
+	function onUpdate(callback)
+	{
+		if(!enabled || PlayState.instance == null) return;
+		if(PlayState.instance.isGamePaused) return;
+		if(FlxG.keys.justPressed.SPACE){
+			daScriptLogic();
+		}
+	}
+	
+}

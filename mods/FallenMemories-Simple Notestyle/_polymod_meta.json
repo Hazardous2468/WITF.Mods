@@ -1,0 +1,13 @@
+{
+  "title": "Fallen Memories - Memory Noteskin",
+  "description": "A simplified version of Memory noteskin from Fallen Memories.",
+  "contributors": [
+		{
+			"name": "AnbyFox",
+			"role": "Made and ported the original noteskin."
+		}
+	],
+  "api_version": "0.8.0",
+  "mod_version": "1.0.3",
+  "license": "CC BY-NC-ND 4.0"
+}

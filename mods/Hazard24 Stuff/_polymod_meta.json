@@ -1,0 +1,21 @@
+{
+  "title": "Hazard Stuff",
+  "description": "Contains some Quality of Life stuff.",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything"
+		},
+		{
+			"name": "caaaaaaarter - https://www.shadertoy.com/view/4lB3Dc",
+			"role": "'VHS pause effect' shader used for the Inhuman pause shader"
+		},
+		{
+			"name": "Spooky Mix",
+			"role": "ZoomCam and CamBop event art"
+		}
+	],
+  "api_version": "0.8.0",
+  "mod_version": "2.1.0",
+  "license": "Apache-2.0"
+}

@@ -1,0 +1,53 @@
+{
+  "version": "2.2.3",
+  "songName": "VS HAZARD (REAL)!!!",
+  "artist": "Hazard24",
+  "charter": " Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {
+      "bf": 0
+    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "normal"
+    ],
+    "characters": {
+      "player": "hazard_loweffort",
+      "girlfriend": "",
+      "opponent": "nobody_test",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+    "stage": "emptyStage_hazVoidSillyAAA",
+    "noteStyle": "groovin",
+	"album": "WITF_test",
+    "ratings": {
+      "normal": 4
+    },
+    "previewStart": 10800,
+    "previewEnd": 27200
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.0",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 170,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

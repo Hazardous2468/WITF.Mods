@@ -1,0 +1,41 @@
+function setUp()
+	centerPlayer("")
+	centerOpponent("")
+	createNewPlayer(true)
+end
+
+function modsTimeline()
+	set(-16,1, "alpha","2")
+	
+	set(-15,0.5, "debugalpha","all")
+	set(-14,1, "debugalpha","dad")
+	set(-15,2.6*-112, "debugx","3")
+	set(-15,2.6*112, "debugx","1")
+	
+	
+	
+	set(-15,1, "showallmods")
+		
+	set(-16,0.2, "arrowpath","all")
+	set(-15,0.0, "arrowpath","dad")
+	set(-16,25, "arrowpathgrain","all")
+	set(-16,0.1, "arrowpathwidth","all")
+	
+	
+	--set(-15, 180, "hourglassanglez")
+	set(-15, 0.5+(1/6), "hourglassx--0")
+	set(-15, 0.5+(1/6), "hourglassx--3")
+	set(-15, 1, "hourglassx--2")
+	set(-15, 1, "hourglassx--1")
+	set(-15, 200, "hourglassx--3__offset")
+	set(-15, 200, "hourglassx--0__offset")
+
+	
+	
+
+
+
+	
+end
+
+

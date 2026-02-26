@@ -1,0 +1,596 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.ui.AtlasMenuItem;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.FlxSprite;
+import funkin.graphics.adobeanimate.FlxAtlasSprite;
+
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+
+import funkin.audio.FunkinSound;
+
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.ui.debug.DebugMenuSubState;
+import flixel.addons.transition.FlxTransitionableState;
+import lime.system.Clipboard;
+
+import lime.math.Vector2;
+
+import StringTools;
+
+
+
+/*
+
+//CONTROLS:
+
+
+Space - Pause / Unpause animation
+Enter - Play Animation
+
+> Next animation frame
+< Previous animation frame
+
+T - Next Animation
+Y - Previous Animation
+
+
+WASD - Move attachment point around
+ARROW KEYS - Move sprite around
+Hold shift to move faster
+
+] - Zoom camera out
+[ - Zoom camera in
+R - Reset sprite to center as well as reset camera zoom
+
+P - Copy previous frame offsets to current frame
+
+C - Copy data to clipboard
+V - Paste data from clipboard
+
+H - Toggle text visiblity
+
+*/
+
+
+//
+
+
+
+class AnimationAttachmentEditorModule extends Module
+{
+	//CONFIG HERE	
+	var isAtlas:Bool = false;
+	var animationGraphicPath = "AnimationPointTestAnim";
+	var animationPrefixes:Array<String> = ["bounce0", "bounceLeft", "bounceRight"];
+	var animationShouldLoop:Array<Bool> = [true,false,false];
+	var animationFramerate = 24;
+	
+	
+	
+	//Just press C to copy the data and then paste the data into this string lol
+	//var initialOffsets:String = "" ;
+	var initialOffsets:String = "Attachment Points: 
+[Insert18 => (633.900000000003, 500.225000000006), Insert19 => (633.900000000003, 500.225000000006), OldPump0 => (633.900000000003, 509.600000000006), OldPump1 => (633.900000000003, 516.825000000005), OldPump2 => (633.900000000003, 516.100000000005), OldPump3 => (633.900000000003, 513.550000000006), OldPump4 => (633.900000000003, 508.000000000006), OldPump5 => (633.900000000003, 506.825000000006), OldPump6 => (633.900000000003, 501.075000000007), OldPump7 => (633.900000000003, 501.075000000007), lite_cum10 => (633.900000000003, 518.225000000005), OldPump8 => (633.900000000003, 495.700000000007), lite_cum11 => (633.900000000003, 518.225000000005), OldPump9 => (633.900000000003, 495.700000000007), lite_cum12 => (633.900000000003, 514.825000000005), lite_cum13 => (633.900000000003, 514.825000000005), lite_cum14 => (633.900000000003, 510.975000000006), lite_cum15 => (633.900000000003, 510.975000000006), lite_cum16 => (633.900000000003, 507.400000000006), lite_cum17 => (633.900000000003, 507.400000000006), lite_cum18 => (633.900000000003, 507.400000000006), lite_cum19 => (633.900000000003, 503.800000000006), OldPump-113 => (0, 0), OldPump-114 => (0, 0), OldPump-115 => (0, 0), OldPump-116 => (0, 0), OldPump-117 => (0, 0), OldPump-118 => (0, 0), OldPump-119 => (0, 0), IntensePump0 => (633.900000000003, 521.125000000004), IntensePump1 => (633.900000000003, 524.275000000004), IntensePump2 => (633.900000000003, 523.325000000004), IntensePump3 => (633.900000000003, 517.725000000005), Idle_Inserted20 => (633.900000000003, 489.775000000006), IntensePump4 => (633.900000000003, 508.000000000006), Idle_Inserted21 => (633.900000000003, 489.775000000006), IntensePump5 => (633.900000000003, 505.500000000006), Idle_Inserted22 => (633.900000000003, 489.775000000006), IntensePump6 => (633.900000000003, 496.125000000006), Idle_Inserted23 => (633.900000000003, 489.775000000006), IntensePump7 => (633.900000000003, 496.125000000006), Idle_Inserted24 => (633.900000000003, 489.775000000006), IntensePump8 => (633.900000000003, 496.125000000006), RestEnd10 => (633.900000000003, 494.325000000007), Idle_Inserted25 => (633.900000000003, 489.775000000006), IntensePump9 => (633.900000000003, 496.125000000006), Idle_Inserted26 => (633.900000000003, 489.775000000006), Pump10 => (633.900000000003, 490.900000000006), Idle_Inserted27 => (633.900000000003, 489.775000000006), Idle_Inserted28 => (633.900000000003, 489.775000000006), Idle_Inserted29 => (633.900000000003, 489.775000000006), OldPump-140 => (0, 0), OldPump-141 => (0, 0), OldPump-142 => (0, 0), IntensePump10 => (633.900000000003, 496.125000000006), OldPump-143 => (0, 0), OldPump-144 => (0, 0), OldPump-145 => (0, 0), OldPump-146 => (0, 0), Insert0 => (633.900000000003, 488.350000000007), Insert1 => (633.900000000003, 483.475000000007), Insert2 => (633.900000000003, 483.475000000007), Insert3 => (633.900000000003, 475.925000000007), Insert4 => (633.900000000003, 475.925000000007), Insert5 => (633.900000000003, 486.475000000007), Insert6 => (633.900000000003, 513.050000000006), Insert7 => (633.900000000003, 516.925000000005), Insert8 => (633.900000000003, 516.925000000005), Insert9 => (633.900000000003, 515.475000000005), Idle_Inserted10 => (633.900000000003, 513.350000000005), Idle_Inserted11 => (633.900000000003, 513.500000000005), Idle_Inserted12 => (633.900000000003, 513.500000000005), Idle_Inserted13 => (633.900000000003, 513.500000000005), lite_cum0 => (633.900000000003, 512.775000000006), Idle_Inserted14 => (633.900000000003, 512.650000000006), Idle_Inserted15 => (633.900000000003, 512.650000000006), lite_cum1 => (633.900000000003, 513.775000000006), Idle_Inserted16 => (633.900000000003, 512.650000000006), lite_cum2 => (633.900000000003, 521.675000000004), RestEnd0 => (633.900000000003, 517.600000000005), Idle_Inserted17 => (633.900000000003, 512.650000000006), lite_cum3 => (633.900000000003, 525.200000000004), Idle_Inserted18 => (633.900000000003, 512.650000000006), RestEnd1 => (633.900000000003, 519.650000000005), lite_cum4 => (633.900000000003, 523.900000000004), Idle_Inserted19 => (633.900000000003, 512.650000000006), RestEnd2 => (633.900000000003, 516.050000000005), lite_cum5 => (633.900000000003, 522.900000000004), RestEnd3 => (633.900000000003, 516.050000000005), lite_cum6 => (633.900000000003, 522.900000000004), lite_cum7 => (633.900000000003, 521.600000000004), RestEnd4 => (633.900000000003, 505.675000000006), lite_cum8 => (633.900000000003, 521.600000000004), RestEnd5 => (633.900000000003, 504.350000000006), lite_cum9 => (633.900000000003, 518.225000000005), Idle_Came0 => (633.900000000003, 511.400000000006), RestEnd6 => (633.900000000003, 496.250000000007), OldPump-130 => (0, 0), Idle_Came1 => (633.900000000003, 511.400000000006), RestEnd7 => (633.900000000003, 495.000000000007), OldPump-131 => (0, 0), Idle_Came2 => (633.900000000003, 510.700000000006), RestEnd8 => (633.900000000003, 494.325000000007), OldPump-132 => (0, 0), Idle_Came3 => (633.900000000003, 510.700000000006), RestEnd9 => (633.900000000003, 494.325000000007), OldPump-133 => (0, 0), Idle_Came4 => (633.900000000003, 510.700000000006), OldPump-134 => (0, 0), Idle_Came5 => (633.900000000003, 510.700000000006), OldPump-135 => (0, 0), Idle_Came6 => (633.900000000003, 510.700000000006), OldPump-136 => (0, 0), Idle_Came7 => (633.900000000003, 510.700000000006), OldPump-137 => (0, 0), Idle_Came8 => (633.900000000003, 510.700000000006), OldPump-138 => (0, 0), Idle_Came9 => (633.900000000003, 510.700000000006), OldPump-139 => (0, 0), RestStart0 => (633.900000000003, 510.750000000006), RestStart1 => (633.900000000003, 520.275000000004), RestStart2 => (633.900000000003, 524.175000000003), RestStart3 => (633.900000000003, 521.350000000004), Idle_Before0 => (633.900000000003, 488.375000000007), RestStart4 => (633.900000000003, 518.675000000005), Idle_Before1 => (633.900000000003, 488.375000000007), RestStart5 => (633.900000000003, 518.675000000005), lite_cum20 => (633.900000000003, 503.800000000006), Idle_Before2 => (633.900000000003, 488.375000000007), Pump0 => (633.900000000003, 505.675000000006), RestStart6 => (633.900000000003, 516.900000000005), lite_cum21 => (633.900000000003, 503.800000000006), Idle_Before3 => (633.900000000003, 488.375000000007), Pump1 => (633.900000000003, 524.225000000004), RestStart7 => (633.900000000003, 516.900000000005), lite_cum22 => (633.900000000003, 501.750000000006), Idle_Before4 => (633.900000000003, 488.375000000007), Pump2 => (633.900000000003, 527.800000000003), RestStart8 => (633.900000000003, 516.275000000005), lite_cum23 => (633.900000000003, 501.750000000006), Idle_Before5 => (633.900000000003, 488.375000000007), Pump3 => (633.900000000003, 528.375000000003), RestStart9 => (633.900000000003, 516.275000000005), lite_cum24 => (633.900000000003, 501.750000000006), Idle_Before6 => (633.900000000003, 488.375000000007), Pump4 => (633.900000000003, 515.925000000005), lite_cum25 => (633.900000000003, 501.750000000006), Idle_Before7 => (633.900000000003, 488.375000000007), Pump5 => (633.900000000003, 499.575000000006), RestStart10 => (633.900000000003, 516.275000000005), Idle_Before8 => (633.900000000003, 488.375000000007), Pump6 => (633.900000000003, 499.050000000006), OldPump10 => (633.900000000003, 495.700000000007), Pump7 => (633.900000000003, 486.450000000007), Idle_Before9 => (633.900000000003, 488.375000000007), Pump8 => (633.900000000003, 482.950000000007), OldPump-120 => (0, 0), Pump9 => (633.900000000003, 483.000000000007), OldPump-121 => (0, 0), OldPump-122 => (0, 0), OldPump-123 => (0, 0), OldPump-124 => (0, 0), Cum0 => (633.900000000003, 521.175000000004), OldPump-125 => (0, 0), Cum1 => (633.900000000003, 523.050000000004), OldPump-126 => (0, 0), Cum2 => (633.900000000003, 524.350000000004), OldPump-127 => (0, 0), Cum3 => (633.900000000003, 523.825000000004), Insert10 => (633.900000000003, 505.875000000006), OldPump-128 => (0, 0), Cum4 => (633.900000000003, 522.675000000004), Insert11 => (633.900000000003, 506.175000000006), OldPump-129 => (0, 0), Cum10 => (633.900000000003, 515.275000000005), Cum5 => (633.900000000003, 522.675000000004), Insert12 => (633.900000000003, 503.100000000006), Cum11 => (633.900000000003, 515.275000000005), Cum6 => (633.900000000003, 520.125000000005), Insert13 => (633.900000000003, 503.100000000006), Cum12 => (633.900000000003, 513.750000000006), Cum7 => (633.900000000003, 520.125000000005), Insert14 => (633.900000000003, 501.050000000006), Cum13 => (633.900000000003, 513.750000000006), Cum8 => (633.900000000003, 517.275000000005), Insert15 => (633.900000000003, 501.050000000006), Cum14 => (633.900000000003, 513.750000000006), Cum9 => (633.900000000003, 517.275000000005), Insert16 => (633.900000000003, 499.875000000006), Cum15 => (633.900000000003, 513.750000000006), Insert17 => (633.900000000003, 499.875000000006), ]";
+	
+	
+	
+
+	var animationOffsets_X:Array<Float> = [];
+	var animationOffsets_Y:Array<Float> = [];
+	var animationOffsets:Map<String, Vector2>;
+	
+	
+	var old:Bool = false;
+	function copyToClipboard(){
+		var text:String = "Attachment Points: \n";  
+		
+		if(old){
+			for (i in 0...animationOffsets_X.length) {
+				text += "[";
+				text += (Std.string(animationOffsets_X[i]));
+				text += ", ";
+				text += (Std.string(animationOffsets_Y[i]));
+				text += "]";
+			}
+			text += "\n";
+			text += "Raw X: \n";
+			for (i in 0...animationOffsets_X.length) {
+				text += (Std.string(animationOffsets_X[i]));
+				if (i < animationOffsets_X.length-1)
+					text += ", ";
+			}
+			text += "\n";
+			text += "Raw Y: \n";
+			for (i in 0...animationOffsets_Y.length) {
+				text += (Std.string(animationOffsets_Y[i]));
+				if (i < animationOffsets_Y.length-1)
+					text += ", ";
+			}
+		}else{
+			text += "[";
+			for (key in animationOffsets.keys()) {
+				text += key;
+				text += " => ";
+				var vec2 = animationOffsets.get(key);
+				text += "("+ vec2.x + ", " + vec2.y+")";
+				text += ", ";
+			}
+			//text += animationOffsets;
+			text += "]";
+			
+		}
+		
+
+           
+        Clipboard.text = text;
+		FunkinSound.playOnce(Paths.sound('screenshot'));	
+	}
+	
+	function pasteFromClipboard(in_:Null<String> = null){
+		var newText:String = in_;
+		if(newText == null)
+			newText = Clipboard.text;
+		if(newText == null)
+			return;
+			
+		if(!old){
+			newText = StringTools.replace(newText, "[", "");
+			newText = StringTools.replace(newText, "]", "");
+			var split:Array<String> = newText.split('\n'); //Remove Header!
+			newText = split[1];
+			split = newText.split('), ');
+			split.pop();
+			for (str in split) {
+				trace("str: " + str);
+				var split2:Array<String> = str.split(' => ');
+				var animName:String = split2[0];
+				var numbers:String = split2[1];
+				trace("num: " + numbers);
+				
+				
+				var bruh:Array<String> = numbers.split('(');
+				//bruh[1] = X
+				//bruh[2] = Y
+				
+				bruh = bruh[1].split(', ');
+				
+				trace("X: " + bruh[0]);
+				trace("Y: " + bruh[1]);
+				
+				animationOffsets.set(animName, new Vector2(bruh[0], bruh[1]));
+			}
+		}
+	}
+	
+	
+	var bgSprite;
+	var animationGraphic;
+	var attachmentSprite;
+	var textInfo:FlxText;
+	
+
+	
+	
+	var atlasAnimNames:Array<String> = [];
+	
+	var createdState:Bool = false;
+	var addedToDebugList:Bool = false;
+	var animationPaused:Bool = true;
+	var currentAnimation:Int = 0;
+	
+	function createState()
+	{
+		trace("ENTERED ANIMATION ATTACHMENT EDITOR");
+		createdState = true;
+		//FlxTransitionableState.skipNextTransIn = true;
+		//FlxG.switchState(() -> new ChartEditorState());
+		FlxG.state.subState.items.enabled = false;
+
+		bgSprite = new FlxSprite();
+		bgSprite.loadGraphic(Paths.image("menu_attachmenteditorBG"));
+		bgSprite.scrollFactor.set();
+		bgSprite.screenCenter();
+		FlxG.state.subState.add(bgSprite);
+
+
+		if(isAtlas){
+			animationGraphic = new FlxAtlasSprite(0, 0, Paths.animateAtlas(animationGraphicPath,"shared"));
+			
+			atlasAnimNames = animationGraphic.listAnimations();
+			
+			animationPrefixes = [];
+			for (i in 0...atlasAnimNames.length){
+				animationPrefixes.push(atlasAnimNames[i]);
+				if(i > animationShouldLoop.length){
+					animationShouldLoop.push(true);
+				}
+			}
+
+			//play first anim
+			animationGraphic.playAnimation(atlasAnimNames[0], true, false, animationShouldLoop[0]);
+		}else{
+			animationGraphic = new FlxSprite();
+			animationGraphic.frames = Paths.getSparrowAtlas(animationGraphicPath);	
+			for (i in 0...animationPrefixes.length){
+				animationGraphic.animation.addByPrefix(i, animationPrefixes[i], animationFramerate, animationShouldLoop[i]);	
+			}
+			animationGraphic.animation.play(currentAnimation);
+		}
+		
+
+		animationGraphic.scrollFactor.set();
+		FlxG.state.subState.add(animationGraphic);
+		animationGraphic.screenCenter();
+		
+		if(animationPaused){
+			if(isAtlas)
+				animationGraphic.anim.pause();
+			else
+				animationGraphic.animation.pause();
+		}
+		
+		
+		animationOffsets = ["dumb_setup" => new Vector2(0.0, 0.0)];
+		animationOffsets.remove("dumb_setup");
+
+		
+		if(!isAtlas){
+			var allFrames = animationGraphic.frames;		
+			for (i in 0...allFrames.frames.length){
+				animationOffsets.set(allFrames.frames[i].name, new Vector2(0.0, 0.0));
+				trace(allFrames.frames[i].name);
+			}
+		
+			for (i in 0...animationGraphic.animation.curAnim.numFrames){
+				if(animationOffsets_X == null){
+					animationOffsets_X[i] = 0;
+					animationOffsets_Y[i] = 0;
+				}
+			}
+		}
+		
+		//Scans the AttachmentPointsTest.txt file!
+		
+		if(initialOffsets != "")
+			pasteFromClipboard(initialOffsets);
+		
+		attachmentSprite = new FlxSprite();
+		attachmentSprite.loadGraphic(Paths.image("hazard_debugPoint"));
+		attachmentSprite.scrollFactor.set();
+		attachmentSprite.screenCenter();
+		attachmentSprite.alpha=0.85;
+		FlxG.state.subState.add(attachmentSprite);
+
+		
+		textInfo = new FlxText(0, 0, FlxG.width, "eek");
+		textInfo.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, "left", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		textInfo.borderSize = 2;
+		textInfo.scrollFactor.set();
+		textInfo.text = "TESTING 1 2 3 ! \nWE ARE DOING THIS\nAAAAA!";
+		FlxG.state.subState.add(textInfo);
+	}
+	  
+	function cleanUp(){
+		createdState = false;
+		if(animationGraphic!=null){
+			animationGraphic.destroy();
+			bgSprite.destroy();
+			textInfo.destroy();
+			attachmentSprite.destroy();
+		}
+	}
+	
+	
+	function onUpdate(e) {
+		var inDebug = Std.isOfType(FlxG.state.subState, DebugMenuSubState);
+		
+		if(addedToDebugList && !inDebug){ 
+			addedToDebugList = false;
+			createdState = false;
+			cleanUp();
+		}
+		
+		if(!inDebug) return;
+		
+		if(!addedToDebugList){
+			//FunkinSound.playOnce(Paths.sound('notitg_mine'));	
+			addedToDebugList = true;
+			
+			FlxG.state.subState.createItem("Animation Attachment Editor", createState);
+		}
+		
+		if(createdState){
+			var moveAmount:Float = FlxG.keys.pressed.SHIFT ? 100 : 25;
+			
+			if(FlxG.keys.justPressed.ENTER){
+				if(isAtlas){
+					animationGraphic.playAnimation(atlasAnimNames[currentAnimation], true, false, animationShouldLoop[currentAnimation]);
+					if (animationPaused) 		animationGraphic.anim.pause();
+					else 						animationGraphic.anim.resume();
+				}else{
+					animationGraphic.animation.play(currentAnimation);	
+					if (animationPaused) 		animationGraphic.animation.pause();
+					else 						animationGraphic.animation.resume();
+				}
+			}
+			
+			if(FlxG.keys.justPressed.SPACE){
+				animationPaused = !animationPaused;	
+				if(isAtlas){
+					if (animationPaused) 		animationGraphic.anim.pause();
+					else 						animationGraphic.anim.resume();
+				}else{
+					if (animationPaused) 		animationGraphic.animation.pause();
+					else 						animationGraphic.animation.resume();
+				}
+			}
+			
+			
+			if(FlxG.keys.justPressed.T){
+				currentAnimation -= 1;
+				FunkinSound.playOnce(Paths.sound('scrollMenu'));	
+				if(currentAnimation < 0){
+					currentAnimation = animationPrefixes.length-1;
+				}	
+				if(isAtlas){
+					animationGraphic.playAnimation(atlasAnimNames[currentAnimation], true, false, animationShouldLoop[currentAnimation]);
+					if (animationPaused) 		animationGraphic.anim.pause();
+				}else{
+					animationGraphic.animation.play(currentAnimation);	
+					if (animationPaused) 		animationGraphic.animation.pause();
+				}			
+			}
+			if(FlxG.keys.justPressed.Y){
+				currentAnimation += 1;
+				FunkinSound.playOnce(Paths.sound('scrollMenu'));	
+				if(currentAnimation >= animationPrefixes.length){
+					currentAnimation = 0;
+				}		
+
+				if(isAtlas){
+					animationGraphic.playAnimation(atlasAnimNames[currentAnimation], true, false, animationShouldLoop[currentAnimation]);
+					if (animationPaused) 		animationGraphic.anim.pause();
+				}else{
+					animationGraphic.animation.play(currentAnimation);	
+					if (animationPaused) 		animationGraphic.animation.pause();
+				}
+			
+			}
+			
+			if(FlxG.keys.justPressed.PERIOD){
+				if(isAtlas){
+					var endFrame = (animationGraphic.fr.index + animationGraphic.fr.duration);
+					if(animationGraphic.anim.curFrame < endFrame-1){
+						//animationGraphic.animation.curAnim.curFrame += 1;
+						animationGraphic.anim.curFrame += 1;
+	
+						//animationGraphic.anim.resume();
+						
+						FunkinSound.playOnce(Paths.sound('soundtray/Volup'));	
+					}else{
+						FunkinSound.playOnce(Paths.sound('soundtray/VolMAX'));	
+						//animationGraphic.animation.curAnim.curFrame = 0;
+						animationGraphic.anim.curFrame = animationGraphic.fr.index;
+					}
+				}else{
+					if(animationGraphic.animation.curAnim.curFrame < animationGraphic.animation.curAnim.numFrames-1){
+						animationGraphic.animation.curAnim.curFrame += 1;
+						FunkinSound.playOnce(Paths.sound('soundtray/Volup'));	
+					}else{
+						FunkinSound.playOnce(Paths.sound('soundtray/VolMAX'));	
+						animationGraphic.animation.curAnim.curFrame = 0;
+					}
+				}	
+			}
+			
+			if(FlxG.keys.justPressed.COMMA){
+				if(isAtlas){
+					if(animationGraphic.anim.curFrame > animationGraphic.fr.index){
+						animationGraphic.anim.curFrame -= 1;
+						FunkinSound.playOnce(Paths.sound('soundtray/Voldown'));	
+					}else{
+						FunkinSound.playOnce(Paths.sound('soundtray/VolMAX'));	
+						animationGraphic.anim.curFrame = animationGraphic.fr.index + animationGraphic.fr.duration-1;
+					}	
+				}else{
+					if(animationGraphic.animation.curAnim.curFrame > 0){
+						animationGraphic.animation.curAnim.curFrame -= 1;
+						FunkinSound.playOnce(Paths.sound('soundtray/Voldown'));	
+					}else{
+						FunkinSound.playOnce(Paths.sound('soundtray/VolMAX'));	
+						animationGraphic.animation.curAnim.curFrame = animationGraphic.animation.curAnim.numFrames-1;
+					}
+				}
+			}
+			
+			
+			
+			var offsetX:Float = 0;
+			var offsetY:Float = 0;
+
+			if(animationOffsets.exists(getFrameName())){
+				var vec2 = animationOffsets.get(getFrameName());
+				offsetX = vec2.x;
+				offsetY = vec2.y;
+				
+				if(animationOffsets_X[getCurFrame()] == null){
+					animationOffsets_X[getCurFrame()] = offsetX;
+				}
+				if(animationOffsets_Y[getCurFrame()] == null){
+					animationOffsets_Y[getCurFrame()] = offsetY;
+				}
+			}else{
+				
+				if(animationOffsets_X[getCurFrame()] == null){
+					animationOffsets_X[getCurFrame()] = 0;
+				}
+				if(animationOffsets_Y[getCurFrame()] == null){
+					animationOffsets_Y[getCurFrame()] = 0;
+				}
+			
+				offsetX = animationOffsets_X[getCurFrame()];
+				offsetY = animationOffsets_Y[getCurFrame()];
+				
+				animationOffsets.set(getFrameName(), new Vector2(offsetX, offsetY));
+			}
+			
+			
+			
+			
+			if(FlxG.keys.pressed.W){
+				offsetY -= moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.A){
+				offsetX -= moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.S){
+				offsetY += moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.D){
+				offsetX += moveAmount * e.elapsed;
+			}
+			
+			
+			if(FlxG.keys.justPressed.P){
+				var curFrame = getCurFrame();
+				if (curFrame > 0){
+					offsetX = animationOffsets_X[curFrame-1];
+					offsetY = animationOffsets_Y[curFrame-1];
+					animationOffsets_X[curFrame] = animationOffsets_X[curFrame-1];
+					animationOffsets_Y[curFrame] = animationOffsets_Y[curFrame-1];
+					FunkinSound.playOnce(Paths.sound('scrollMenu'));	
+				}
+			}
+			
+			if(FlxG.keys.justPressed.P || FlxG.keys.pressed.S || FlxG.keys.pressed.A || FlxG.keys.pressed.W || FlxG.keys.pressed.D){
+				var curFrame = getCurFrame();
+	
+				animationOffsets.set(getFrameName(), new Vector2(offsetX, offsetY));
+				animationOffsets_X[curFrame] = offsetX;
+				animationOffsets_Y[curFrame] = offsetY;
+			}
+
+			if(FlxG.keys.pressed.LEFT){
+				animationGraphic.x -= moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.RIGHT){
+				animationGraphic.x += moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.UP){
+				animationGraphic.y -= moveAmount * e.elapsed;
+			}
+			if(FlxG.keys.pressed.DOWN){
+				animationGraphic.y += moveAmount * e.elapsed;
+			}
+			
+			if(FlxG.keys.pressed.LBRACKET){
+				FlxG.camera.zoom += 5 * e.elapsed;
+			}
+			if(FlxG.keys.pressed.RBRACKET){
+				FlxG.camera.zoom -= 5 * e.elapsed;
+			}
+			if(FlxG.keys.justPressed.R){
+				FlxG.camera.zoom = 1;
+				animationGraphic.screenCenter();
+			}
+			if(FlxG.keys.justPressed.H){
+				textInfo.visible = !textInfo.visible;
+			}
+			
+			
+			
+			
+			attachmentSprite.x = animationGraphic.x;
+			attachmentSprite.y = animationGraphic.y;
+			attachmentSprite.x += offsetX;
+			attachmentSprite.y += offsetY;
+			
+			var endFrame = "?";
+			if(isAtlas && animationGraphic.fr != null){
+				//endFrame = (animationGraphic.fr.index + animationGraphic.fr.duration)-1;
+				endFrame = (animationGraphic.fr.duration);
+			}
+
+			var str:String = "\n\n";
+			str += "Current Animation ID: " + currentAnimation;
+			str += "\n";
+			str += "Current Animation Name: " + getFrameName();
+			str += "\n";
+			str += "Current Animation Frame: " + (isAtlas ? getCurFrame()+1 : animationGraphic.animation.curAnim.curFrame+1);
+			str += "/" + (isAtlas ? endFrame : animationGraphic.animation.curAnim.numFrames) + "\n";
+			str += "Animation Paused: " + animationPaused;
+			str += "\n";
+			
+			
+			
+			str += "attachment X: " + offsetX;
+			str += "\n";
+			str += "attachment Y: " + offsetY;
+			str += "\n";
+			
+			
+			str += "Sprite X: " + animationGraphic.x;
+			str += "\n";
+			str += "Sprite Y: " + animationGraphic.y;
+			str += "\n";
+			str += "Camera Zoom: " + FlxG.camera.zoom;
+			str += "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
+
+			/*
+			str += "Animation Attachment Offsets: ";
+			str += "\n";
+			str += "X: " + animationOffsets_X;
+			str += "\n";
+			str += "Y: " + animationOffsets_Y;
+			str += "\n";
+			*/
+			
+			
+		
+			textInfo.text = str;
+			
+			if(FlxG.keys.justPressed.C){
+				copyToClipboard();
+			}
+			if(FlxG.keys.justPressed.V){
+				pasteFromClipboard();
+			}
+		}
+		
+		
+    }
+	
+	function getCurFrame():Int{
+		var curFrame = isAtlas ? animationGraphic.anim.curFrame : animationGraphic.animation.curAnim.curFrame;
+		
+		if(isAtlas && animationGraphic.fr != null){
+			curFrame -= animationGraphic.fr.index;
+		}
+		
+		return curFrame;
+	}
+	
+	function getFrameName():String{
+		var r:String = "?";
+		if(isAtlas){
+			r = atlasAnimNames[currentAnimation] + getCurFrame();
+		}else{
+			r = animationGraphic.animation.frameName;
+		}
+		return r;
+	}
+
+}

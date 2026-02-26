@@ -1,0 +1,51 @@
+{
+  "version": "2.2.3",
+  "songName": "S-Bahn",
+  "artist": "BEMANI Sound Team 'DARK TRAIN'",
+  "charter": "Hazard24",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "hard"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "",
+      "opponent": "hazard_sbahn",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "simple",
+	"album": "WITF",
+    "ratings": {
+      "hard": 11
+    },
+    "previewStart": 25600,
+    "previewEnd": 42100
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.1",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 142,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

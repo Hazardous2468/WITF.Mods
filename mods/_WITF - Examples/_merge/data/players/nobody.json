@@ -1,0 +1,8 @@
+[
+  { "op": "add", "path": "/ownedChars/-", "value": "hazard_sbahn" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_halved" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_credits" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_cog" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_trumpets" },
+  { "op": "add", "path": "/ownedChars/-", "value": "nobody_matoi" }
+ ]

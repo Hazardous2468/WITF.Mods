@@ -1,0 +1,44 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+
+
+//Simple script which makes the Conductor get updated in the freeplay state
+
+class FreeplayConductorFix extends Module
+{
+	override function onStateChangeBegin(event) {
+		super.onStateChangeBegin(event);
+		inFreeplay = false;
+	}
+
+	function ConductorPreviewFix(){
+		if(inFreeplay){	
+			if(Conductor.instance != null && FlxG.sound.music != null && FlxG.sound.music.time != null)
+				Conductor.instance.update(FlxG.sound.music.time);
+		}
+	}
+	
+	override function onBeatHit(event){	
+		//var snd:String = event.beat % 4 == 0 ? 'chartingSounds/metronome1' : 'chartingSounds/metronome2';
+		//FunkinSound.playOnce(Paths.sound(snd));
+	}
+
+	var inFreeplay:Bool = false;
+	function onUpdate(event)
+	{
+		inFreeplay = Std.isOfType(FlxG.state.subState, FreeplayState);
+		if(!inFreeplay){ 
+			return;
+		}	
+		ConductorPreviewFix();		
+	}
+	
+}
