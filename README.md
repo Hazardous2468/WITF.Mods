@@ -11,6 +11,9 @@ https://github.com/Hazardous2468/What-In-The-Funkin
 
 
 ### This repository contains all of the example songs that were previously included in releases of WITF.  
+  
+Everything inside the 'essential mods' folder is what comes with WITF releases.  
+Everything inside the 'mods' folder are anything extra that aren't worth bundling with WITF releases but some people may still wanna check out and play.  
 
 *Note that not everything is mine (mainly the music)!  
 All credits should hopefully be given in each mods '_polymod_meta' file*
