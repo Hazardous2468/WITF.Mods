@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="EXCELLENT.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="HazExcellent0000" x="16" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0001" x="614" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0002" x="1212" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0003" x="1212" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0004" x="1810" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0005" x="1810" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0006" x="2408" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0007" x="2408" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0008" x="3006" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0009" x="3006" y="16" width="582" height="726"/>
+	<SubTexture name="HazExcellent0010" x="16" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0011" x="16" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0012" x="614" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0013" x="1212" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0014" x="1212" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0015" x="1810" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0016" x="2408" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0017" x="2408" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0018" x="3006" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0019" x="3006" y="758" width="582" height="726"/>
+	<SubTexture name="HazExcellent0020" x="16" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0021" x="16" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0022" x="614" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0023" x="614" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0024" x="1212" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0025" x="1212" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0026" x="1810" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0027" x="1810" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0028" x="2408" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0029" x="3006" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0030" x="3006" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0031" x="614" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0032" x="614" y="1500" width="582" height="726"/>
+	<SubTexture name="HazExcellent0033" x="16" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0034" x="16" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0035" x="614" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0036" x="614" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0037" x="1212" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0038" x="1810" y="2242" width="582" height="726"/>
+	<SubTexture name="HazExcellent0039" x="1810" y="2242" width="582" height="726"/>
+</TextureAtlas>

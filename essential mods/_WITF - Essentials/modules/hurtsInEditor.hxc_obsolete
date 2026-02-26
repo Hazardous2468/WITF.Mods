@@ -1,0 +1,88 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.ui.debug.charting.ChartEditorState;
+
+//A scuffed script which makes it easier to tell what is a hurt note in the chart editor.
+class HurtsInEditor extends Module
+{
+	//The color to set hurt notes too
+	var hurtCol = 0xF0A00606;
+	//var targetCol = 0xF00099FF;
+	
+	public var customNoteKindToCol:Map<String,Null<Float>> = ["hurt" => hurtCol];
+	
+	
+	//Set to true to always update the hurt notes being rendered!
+	var alwaysupdate = true;
+	
+	//Don't touch the rest!
+	
+	public function new() {
+        super("HurtsInEditor");	
+		//customNoteKindToCol.set("target", targetCol);
+    }
+	
+	var chartEditor = false;
+	var lastRecordedPosition = 0;
+	function onUpdate(callback)
+	{
+		if (Std.isOfType(FlxG.state, ChartEditorState)) {
+			chartEditor = true;
+		}else{
+			chartEditor = false;
+		}
+		
+		if(chartEditor){
+			//if(FlxG.keys.justPressed.CONTROL)
+			//	FunkinSound.playOnce(Paths.sound('notitg_mine'));	
+			
+			
+			//Only update if conductor has changed position
+			if(Conductor.instance.songPosition == lastRecordedPosition && !alwaysupdate){
+				return;
+			}
+			lastRecordedPosition = Conductor.instance.songPosition;
+			
+			//FunkinSound.playOnce(Paths.sound('notitg_mine'));	
+				
+			for (noteSprite in FlxG.state.renderedNotes.members)
+			{
+				//force all colours to be back to normal (white)
+				noteSprite.color = 0xFFFFFFFF;
+				
+				//Check to see if the type is hurt. If yes, then colour it pure red!!
+				if(noteSprite.noteData != null){
+					if(noteSprite.noteData.kind != null){
+						var col = customNoteKindToCol.get(noteSprite.noteData.kind);
+						if(col != null)
+							noteSprite.color = col;
+					}
+				}
+				
+			}
+			
+			for (noteSprite in FlxG.state.renderedHoldNotes.members)
+			{
+				noteSprite.color = 0xFFFFFFFF;
+				//Check to see if the type is hurt. If yes, then colour it pure red!!
+				if(noteSprite.noteData != null){
+					if(noteSprite.noteData.kind != null){
+						var col = customNoteKindToCol.get(noteSprite.noteData.kind);
+						if(col != null)
+							noteSprite.color = col;
+					}
+				}
+			}
+			
+		}
+		
+	}
+}

@@ -1,0 +1,130 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.Paths;
+import funkin.play.scoring.Scoring;
+import funkin.audio.FunkinSound;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.modding.module.ModuleHandler;
+import StringTools;
+import flixel.math.FlxMath;
+
+
+class PlaybackRateHandler extends Module
+{
+
+	public var playbackRate:Float = 1.0;
+	public function addToPlaybackRate(change:Float = 0.0){
+		playbackRate += change;
+		playbackRate = FlxMath.bound(playbackRate, minValue, maxValue); // clamp
+		playbackRate = FlxMath.roundDecimal(playbackRate, 3);
+	}
+	
+	public var maxValue:Float = 4.0;
+	public var minValue:Float = 0.0;
+	
+	var playbackRateAffectTimingWindows:Bool = false;
+	public function new() {
+        super("PlaybackRateHandler");
+    }
+		
+	override function onStateChangeEnd(event) {
+		super.onStateChangeEnd(event);
+		var isPlayState:Bool = Std.isOfType(event.targetState, PlayState);
+		adjustTimeScale(isPlayState ? playbackRate : 1.0);
+	}
+			
+
+	
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);
+		if(PlayState.instance.isChartingMode){
+			//playbackRate = theChartingModePlaybackRate setting
+		}
+		adjustTimeScale(playbackRate);
+	}
+	
+	
+	
+	var changedShit:Bool = false;
+	function adjustTimeScale(scale:Null<Float>):Void
+	{
+		if(scale == null) scale = playbackRate;
+		FlxG.timeScale = scale;
+		
+		if (PlayState.instance != null){
+			PlayState.instance.playbackRate = scale;	
+			if(FlxG.sound.music != null )
+				FlxG.sound.music.pitch = scale;
+			if(PlayState.instance.vocals != null)
+				PlayState.instance.vocals.pitch = scale;
+		}
+		
+		if(!playbackRateAffectTimingWindows){
+			if(changedShit)
+				scale = 1;
+			else
+				return;
+		}
+		
+		changedShit = true;
+
+		// PBOT1 (0.3.0)
+		Scoring.PBOT1_PERFECT_THRESHOLD = 5.0 * scale;
+		Scoring.PBOT1_MISS_THRESHOLD = 160.0 * scale;
+		Scoring.PBOT1_KILLER_THRESHOLD = 12.5 * scale;
+		Scoring.PBOT1_SICK_THRESHOLD = 45.0 * scale;
+		Scoring.PBOT1_GOOD_THRESHOLD = 90.0 * scale;
+		Scoring.PBOT1_BAD_THRESHOLD = 135.0 * scale;
+		Scoring.PBOT1_SHIT_THRESHOLD = 160.0 * scale;
+
+		// Legacy (Pre-0.2.8)
+		Scoring.LEGACY_HIT_WINDOW = (10/60)*1000 * scale;
+		Scoring.LEGACY_SICK_THRESHOLD = 0.2 * scale;
+		Scoring.LEGACY_GOOD_THRESHOLD = 0.75 * scale;
+		Scoring.LEGACY_BAD_THRESHOLD = 0.9 * scale;
+		Scoring.LEGACY_SHIT_THRESHOLD = 1.0 * scale;
+
+		// Week 7 (0.2.8)
+		Scoring.WEEK7_HIT_WINDOW = Scoring.LEGACY_HIT_WINDOW;
+		Scoring.WEEK7_BAD_THRESHOLD = 0.8 * scale;
+		Scoring.WEEK7_GOOD_THRESHOLD = 0.55 * scale;
+		Scoring.WEEK7_SICK_THRESHOLD = 0.2 * scale;
+		
+	}
+	
+	override function onPause(event):Void
+	{
+		adjustTimeScale(1.0);
+		super.onPause(event);
+	}
+
+	override function onResume(event):Void
+	{
+		super.onResume(event);
+		adjustTimeScale(playbackRate);
+	}
+
+	override function onSongEnd(event):Void
+	{
+		adjustTimeScale(1.0);
+		super.onPause(event);
+	}
+
+	override function onGameOver(event):Void
+	{
+		adjustTimeScale(1.0);
+		super.onGameOver(event);
+	}
+
+	override function onSongRetry(event):Void
+	{
+		adjustTimeScale(playbackRate);
+
+		super.onSongRetry(event);
+	}
+		
+}

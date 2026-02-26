@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="shit_back.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="backgradient anim instance 10000" x="3" y="3" width="1497" height="954" frameX="0" frameY="0" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10001" x="3" y="3" width="1497" height="954" frameX="0" frameY="0" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10002" x="3" y="3" width="1497" height="954" frameX="0" frameY="-1" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10003" x="3" y="3" width="1497" height="954" frameX="0" frameY="-1" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10004" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-3" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10005" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-4" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10006" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-7" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10007" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-12" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10008" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-17" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10009" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-24" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10010" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-33" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10011" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-44" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10012" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-57" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10013" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-72" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10014" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-90" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10015" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-111" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10016" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-134" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10017" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-161" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10018" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-191" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10019" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-224" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10020" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-261" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10021" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-303" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10022" x="3" y="2874" width="1497" height="953" frameX="0" frameY="-348" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10023" x="3" y="2874" width="1497" height="953" frameX="-1" frameY="-397" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10024" x="3" y="2874" width="1497" height="953" frameX="-1" frameY="-451" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10025" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-509" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10026" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-563" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10027" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-613" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10028" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-658" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10029" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-699" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10030" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-736" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10031" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-770" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10032" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-800" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10033" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-826" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10034" x="3" y="960" width="1497" height="954" frameX="-1" frameY="-850" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10035" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-871" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10036" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-888" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10037" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-904" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10038" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-917" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10039" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-927" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10040" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-936" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10041" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-943" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10042" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-949" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10043" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-953" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10044" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-956" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10045" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-958" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10046" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-959" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10047" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-960" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10048" x="3" y="960" width="1497" height="954" frameX="-2" frameY="-960" frameWidth="1499" frameHeight="1914"/>
+	<SubTexture name="backgradient anim instance 10049" x="3" y="1917" width="1497" height="954" frameX="-2" frameY="-960" frameWidth="1499" frameHeight="1914"/>
+</TextureAtlas>

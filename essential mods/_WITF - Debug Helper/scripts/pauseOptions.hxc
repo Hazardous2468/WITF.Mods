@@ -1,0 +1,161 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import funkin.data.event.SongEventRegistry;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import flixel.ui.FlxBar;
+import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.play.PauseSubState;
+import funkin.Highscore;
+import flixel.util.FlxTimer;
+import funkin.modding.module.ModuleHandler;
+
+
+
+class ModchartDebug_PauseOptions extends Module
+{
+	var pauseState = null;	
+
+	public function new() {
+        super("ModchartDebug_PauseOptions",18);	
+    }
+
+
+	public function onSubStateCloseEnd(event:StateChangeScriptEvent):Void {
+	
+		if(pauseState != null){
+			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome1'), 0.5);
+			pauseState = null;
+		}
+	
+        super.onSubStateCloseEnd(event);
+	}
+	
+	public function botplayToggle(){
+		updateBotplayState(!PlayState.instance.isBotPlayMode);
+		FunkinSound.playOnce(Paths.sound(PlayState.instance.isBotPlayMode ? "pauseEnable" : "pauseDisable"), 0.65);
+	}
+	
+	function updatePraticeState(newVal:Bool){
+		PlayState.instance.isPracticeMode = newVal;
+	}
+	
+	function updateBotplayState(newVal:Bool){
+		PlayState.instance.isBotPlayMode = newVal;
+		PlayState.instance.updateScoreText();
+	}
+	
+	public function playbackCallback(){
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		if(playbackRateModule == null){ 
+			FunkinSound.playOnce(Paths.sound("CS_locked"), 0.65);
+			return;
+		}
+	
+		playbackRate = 1.0;
+		playbackRateModule.scriptSet("playbackRate", 1.0);
+		
+		updatePlayBackRate(0);
+	}
+	
+
+	var playBackRateOption;
+	
+	function addToPauseEntries(){
+		if(pauseState == null) return;
+		
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		if(playbackRateModule != null){ 
+			playbackRate = playbackRateModule.scriptGet("playbackRate");
+		}
+
+		if(!PlayState.instance.isPracticeMode) return;
+		
+		//only add if practice mode is enabled
+		var newOption = {text: "Toggle Botplay", callback: botplayToggle}
+		pauseState.currentMenuEntries.insert(pauseState.currentMenuEntries.length-1,newOption);
+		
+		var newOption = {text: "Playback Rate: " + playbackRate, callback: playbackCallback}
+		playBackRateOption = newOption;
+		pauseState.currentMenuEntries.insert(2,newOption);
+		
+		pauseState.clearAndAddMenuEntries();
+		pauseState.updateMetadataText();
+		pauseState.changeSelection();
+	}
+	
+	public function onSubStateOpenEnd(event:StateChangeScriptEvent):Void {
+        super.onSubStateOpenEnd(event);
+		
+		if(pauseState != null) return; //We already in pause though?
+		
+		var subState; 
+		if(PlayState.instance != null){
+			subState = PlayState.instance.subState;
+		}else{
+			subState=FlxG.state.subState;
+		}
+		
+		if (Std.isOfType(subState, PauseSubState)) {
+			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome2'), 0.5);
+			
+			pauseState = subState;
+
+			addToPauseEntries();
+			
+		}
+	}
+	
+	var playbackRate:Float = 1;
+	function updatePlayBackRate(change:Float = 0){
+	
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		if(playbackRateModule == null){ 
+			FunkinSound.playOnce(Paths.sound("CS_locked"), 0.65);
+			return;
+		}
+		
+		playbackRateModule.scriptCall("addToPlaybackRate", [change]);
+		playbackRate = playbackRateModule.scriptGet("playbackRate");
+		var snd = FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.6);
+		snd.pitch = playbackRate;
+		if(pauseState != null){
+			pauseState.chooseMenuEntries();
+			addToPauseEntries();
+		}
+		
+	}
+
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null){ return; }
+
+		if (PlayState.instance.isGamePaused && pauseState != null)
+		{	
+			var curEntry = pauseState.currentMenuEntries[pauseState.currentEntry];
+			if(curEntry == playBackRateOption){
+				
+				if(FlxG.state.subState.controls.UI_LEFT_P)
+					updatePlayBackRate(-0.1);
+					
+				if(FlxG.state.subState.controls.UI_RIGHT_P)
+					updatePlayBackRate(0.1);
+			
+				//curEntry.sprite.color = 0xFFFFFF00;
+			}
+		}
+	}
+
+}

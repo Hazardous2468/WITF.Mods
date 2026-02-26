@@ -1,0 +1,180 @@
+{
+  "version": "1.1.0",
+  "name": "inhuman",
+  "author": "Hazard24",
+  "fallback": "funkin",
+  "assets": {
+    "note": {
+      "assetPath": "shared:inhuman_noteskins/notes-inhuman",
+      "scale": 0.7,
+      "data": {
+        "left": { "prefix": "purple0" },
+        "down": { "prefix": "blue0" },
+        "up": { "prefix": "green0" },
+        "right": { "prefix": "red0" }
+      }
+    },
+    "noteStrumline": {
+      "assetPath": "shared:inhuman_noteskins/notes-inhuman",
+      "scale": 0.7,
+      "offsets": [22, 30],
+      "data": {
+        "leftStatic": { "prefix": "arrowLEFT" },
+        "leftPress": { "prefix": "left press" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm" },
+        "downStatic": { "prefix": "arrowDOWN" },
+        "downPress": { "prefix": "down press" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm" },
+        "upStatic": { "prefix": "arrowUP" },
+        "upPress": { "prefix": "up press" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm" },
+        "rightStatic": { "prefix": "arrowRIGHT" },
+        "rightPress": { "prefix": "right press" },
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm" }
+      }
+    },
+    "holdNote": {
+	  "offsets": [2, 0],
+	  "scale": 0.7,
+      "assetPath": "inhuman_noteskins/holds",
+	  "data": {
+        "behindStrums": true
+      }
+    },
+	"noteSplash": {
+      "assetPath": "shared:inhuman_noteskins/noteSplashes_inhumanVSlice",
+      "alpha": 0.8,
+      "data": {
+        "enabled": true,
+        "leftSplashes": [
+          { "prefix": "note impact 1 purple0" },
+          { "prefix": "note impact 2 purple0" }
+        ],
+        "rightSplashes": [
+          { "prefix": "note impact 1 red0" },
+          { "prefix": "note impact 2 red0" }
+        ],
+        "upSplashes": [
+          { "prefix": "note impact 1 green0" },
+          { "prefix": "note impact 2 green0" }
+        ],
+        "downSplashes": [
+          { "prefix": "note impact 1  blue0" },
+          { "prefix": "note impact 2 blue0" }
+        ]
+      }
+    },
+    "holdNoteCover": {
+      "assetPath": "",
+      "data": {
+        "enabled": false
+      }
+    },
+    "countdownThree": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/inhuman/intro3"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/3",
+	  "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownTwo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/inhuman/intro2"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/2",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownOne": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/inhuman/intro1"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/1",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownGo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/inhuman/introGo"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/go",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "judgementSick": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_perfect",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementGood": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_good",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementBad": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_bad",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementShit": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_shit",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "comboNumber0": {
+      "assetPath": "shared:inhuman_noteskins/UI/num0",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber1": {
+      "assetPath": "shared:inhuman_noteskins/UI/num1",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber2": {
+      "assetPath": "shared:inhuman_noteskins/UI/num2",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber3": {
+      "assetPath": "shared:inhuman_noteskins/UI/num3",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber4": {
+      "assetPath": "shared:inhuman_noteskins/UI/num4",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber5": {
+      "assetPath": "shared:inhuman_noteskins/UI/num5",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber6": {
+      "assetPath": "shared:inhuman_noteskins/UI/num6",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber7": {
+      "assetPath": "shared:inhuman_noteskins/UI/num7",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber8": {
+      "assetPath": "shared:inhuman_noteskins/UI/num8",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber9": {
+      "assetPath": "shared:inhuman_noteskins/UI/num9",
+      "isPixel": false,
+      "scale": 0.45
+    }
+  }
+}

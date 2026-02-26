@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="sustain_cover_red.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="sus_cover_end0000" x="4" y="4" width="124" height="59"/>
+	<SubTexture name="sus_cover_end0001" x="4" y="67" width="124" height="59"/>
+	<SubTexture name="sus_cover_end0002" x="4" y="130" width="124" height="59"/>
+	<SubTexture name="sus_cover_end0003" x="4" y="193" width="124" height="59"/>
+	<SubTexture name="sus_cover_end0004" x="4" y="256" width="124" height="59"/>
+	<SubTexture name="sus_cover_end0005" x="4" y="319" width="124" height="59"/>
+	<SubTexture name="sus_cover_lp0000" x="132" y="319" width="120" height="56"/>
+	<SubTexture name="sus_cover_lp0001" x="4" y="382" width="120" height="56"/>
+	<SubTexture name="sus_cover_lp0002" x="128" y="382" width="120" height="56"/>
+	<SubTexture name="sus_cover_start0000" x="4" y="442" width="120" height="57"/>
+</TextureAtlas>

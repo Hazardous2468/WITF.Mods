@@ -1,0 +1,313 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.modding.module.ModuleHandler;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import flixel.tweens.FlxTween;
+import flixel.math.FlxMath;
+import StringTools;
+
+
+class ChaosMode extends Module
+{
+	
+	public var enabled:Bool = false; // Controlled by MetaMods menu.
+	public var coolDownInSeconds:Float = 5;
+	public var stackingEffects:Bool = false; // WILL BE controlled by MetaMods menu.
+	public var stackingPlaybackRate:Bool = true;
+
+
+	public function new() {
+        super("ChaosMode");	
+    }
+	
+	
+	
+	var activeEffects:Array<String> = [];
+	var allPossibleEffects:Array<String> = [
+		"slow down", "speed up", "dizzy camera",
+	
+		"drunk", "tipsy", "tornado", 
+		"invert", "flip", "videogames", 
+		"bumpy", "bounce", "zigzag","hourglass",
+		"confusion", "big", "pulse", "tiny", "reverse", "blacksphere",
+		"hidden", "vanish"
+	];
+	
+	
+	
+	function skipTweenCheck(i:String):Bool{
+		var skipTween:Bool = false;
+		if(StringTools.contains(i, "confusion") || StringTools.contains(i, "blacksphere") ||  StringTools.contains(i, "dizzy camera"))
+			skipTween = true;
+		return skipTween;
+	}
+	
+	
+	
+	public var tweenMap:Map<Modifier,FlxTween>;
+	function clearAllEffects(forceSkip:Bool = false){
+		activeEffects = [];
+		
+		for (i in allAddedModifiers){
+			var skipTween:Bool = forceSkip;
+			if(skipTweenCheck(i)){
+				skipTween = true;
+			}
+		
+			if(skipTween){
+				i.currentValue = 0.0;
+			}else{
+				var newTween = FlxTween.tween(i, {currentValue: 0}, 0.5);
+				if(tweenMap == null){
+					tweenMap = [i => newTween];
+				}else{
+					//we already tweening?
+					if(tweenMap.exists(i)){
+						tweenMap.get(i).cancel();
+					}
+					tweenMap.set(i,newTween);
+				}
+			}
+		}
+	}
+	
+
+	override function onSongRetry(event):Void
+	{
+		super.onSongRetry(event);
+		clearAllEffects(true);
+		timeTillNextFuck = coolDownInSeconds;
+		
+		var metaModsModule = ModuleHandler.getModule("SelectableModifiers_NEW");		
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		playbackRateModule.scriptSet("playbackRate", metaModsModule.scriptGet("playbackRate"));
+	}
+	
+	override function onStateChangeEnd(event) {
+		super.onStateChangeEnd(event);
+		clearAllEffects(true);
+		timeTillNextFuck = coolDownInSeconds;
+	}
+	
+	function triggerNewEffect(){
+		if(!stackingEffects){
+			clearAllEffects();
+		}
+		
+		if(PlayState.instance == null || !enabled) return;
+		
+		//var newEffect = FlxG.random.getObject(allPossibleEffects);
+		var newEffect:String = "";
+		
+		var attemptsLeft:Int = 6;
+		var validEffect:Bool = false;
+		
+		while(attemptsLeft > 0 && !validEffect){
+			newEffect = allPossibleEffects[FlxG.random.int(0,allPossibleEffects.length-1)];
+			newEffect = newEffect.toLowerCase();
+			validEffect = true;
+			
+			
+			if(newEffect == "hourglass" && activeEffects.contains("flip")){
+				validEffect = false;
+			}
+			if(newEffect == "flip" && activeEffects.contains("hourglass")){
+				validEffect = false;
+			}
+			
+			if(newEffect == "tornado" && activeEffects.contains("flip")){
+				validEffect = false;
+			}
+			if(newEffect == "flip" && activeEffects.contains("tornado")){
+				validEffect = false;
+			}
+			
+			if(newEffect == "tornado" && activeEffects.contains("hourglass")){
+				validEffect = false;
+			}
+			if(newEffect == "hourglass" && activeEffects.contains("tornado")){
+				validEffect = false;
+			}
+			if(newEffect == "vanish" && activeEffects.contains("hidden")){
+				validEffect = false;
+			}
+			
+			if(newEffect == "invert" && activeEffects.contains("flip")){
+				validEffect = false;
+			}
+			if(newEffect == "invert" && activeEffects.contains("videogames")){
+				validEffect = false;
+			}
+			
+			if(newEffect == "videogames" && activeEffects.contains("flip")){
+				validEffect = false;
+			}
+			if(newEffect == "videogames" && activeEffects.contains("invert")){
+				validEffect = false;
+			}
+			
+			if(newEffect == "flip" && activeEffects.contains("videogames")){
+				validEffect = false;
+			}
+			if(newEffect == "flip" && activeEffects.contains("invert")){
+				validEffect = false;
+			}
+		}
+		
+		if(!validEffect){
+			return;
+		}
+		
+
+		
+		
+		var removingEffect:Bool = false;
+		if(stackingEffects){
+			if(activeEffects.contains(newEffect)){
+				activeEffects.remove(newEffect);
+				removingEffect = true;
+			}else{
+				activeEffects.push(newEffect);
+			}
+		}else{
+			activeEffects.push(newEffect);
+		}
+		
+		
+		PlayState.instance.modDebugNotif(newEffect.toUpperCase(), 0xFFFFFF00);
+		
+		
+		var metaModsModule = ModuleHandler.getModule("SelectableModifiers_NEW");
+
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		var basePlaybackRate = playbackRateModule.scriptGet("playbackRate");
+		
+		if(!stackingPlaybackRate)
+			playbackRateModule.scriptCall("adjustTimeScale", [null]);
+		
+		//The actual logic!
+		switch(newEffect){
+			case "speed up":
+				playbackRateModule.scriptCall("adjustTimeScale", [basePlaybackRate + 0.14]);
+				if(stackingPlaybackRate){
+					playbackRateModule.scriptSet("playbackRate", basePlaybackRate + 0.14);
+				}
+				
+			case "slow down":
+				playbackRateModule.scriptCall("adjustTimeScale", [basePlaybackRate - 0.14]);
+				if(stackingPlaybackRate){
+					playbackRateModule.scriptSet("playbackRate", basePlaybackRate - 0.14);
+				}
+				
+			default:
+			
+				var skipTween:Bool = skipTweenCheck(newEffect);
+			
+				for (strumLine in PlayState.instance.allStrumLines){
+					var mod:Modifier = null;
+					
+					if(newEffect == "dizzy camera"){
+						mod = metaModsModule.scriptCall("createMetaMod", ["rotatez", strumLine]);
+						mod.currentValue = dizzyCamIntensity;
+						dizzyCamTag = mod.tag;
+					}else{
+						mod = metaModsModule.scriptCall("createMetaMod", [newEffect, strumLine]);
+					}
+					
+					var mod_ = mod;
+					var targetValue:Float = mod.currentValue;
+					if(removingEffect) targetValue = 0.0;
+					
+					//Do we already have this modifier?
+					if(strumLine.mods.modifiers.exists(mod.tag)){
+						mod_ = strumLine.mods.modifiers.get(mod.tag);
+						if(skipTween)
+							mod_.setVal(targetValue);
+					}else{
+						strumLine.mods.modifiers.set(mod.tag, mod);
+						strumLine.mods.sortMods();
+						allAddedModifiers.push(mod);
+						trace("added: " + mod.tag);
+						mod.baseValue = 0;
+						if(!skipTween){
+							mod.currentValue = 0;
+						}
+						else{
+							mod.currentValue = targetValue;
+						}
+					}
+					
+					if(newEffect == "blacksphere"){
+						blacksphereTag = mod.tag;
+					}			
+					
+					if(!skipTween){
+						var newTween = FlxTween.tween(mod_, {currentValue: targetValue}, 0.5);
+						if(tweenMap == null){
+							tweenMap = [mod_ => newTween];
+						}else{
+							//we alread tweening?
+							if(tweenMap.exists(mod_)){
+								tweenMap.get(mod_).cancel();
+							}
+							tweenMap.set(mod_,newTween);
+						}
+					}
+					
+				}
+		}		
+	}
+	
+	var dizzyCamIntensity:Float = 36;
+	var dizzyCamTag:String = "metarotatez";
+	
+	var blacksphereTag:String = "metablacksphere";
+	var blacksphereValue:Float = 0;
+	
+	var allAddedModifiers:Array<Modifier>=[];
+	
+	
+	var timeTillNextFuck:Float = coolDownInSeconds;
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null || !enabled) return;
+		if(PlayState.instance.isGamePaused) return;
+		
+		//Don't do anything before the song starts, or if the song is too short to do anything
+		if(Conductor.instance.songPosition < 0 || PlayState.instance.currentSongLengthMs < coolDownInSeconds/Constants.MS_PER_SEC){
+			return;
+		}
+		
+		if(activeEffects.contains("dizzy camera")){
+			var dizzyCamValue = FlxMath.fastSin(Conductor.instance.currentBeatTime * Math.PI);
+			for (strumLine in PlayState.instance.allStrumLines){
+				if(strumLine.mods.modifiers.exists(dizzyCamTag)){
+					strumLine.mods.modifiers.get(dizzyCamTag).setVal(dizzyCamIntensity*dizzyCamValue);
+				}
+			}
+		}
+				
+		if(activeEffects.contains("blacksphere")){
+			blacksphereValue = Conductor.instance.currentBeatTime * 180;
+			for (strumLine in PlayState.instance.allStrumLines){
+				if(strumLine.mods.modifiers.exists(blacksphereTag)){
+					strumLine.mods.modifiers.get(blacksphereTag).setVal(blacksphereValue);
+				}
+			}
+		}
+		
+		if(timeTillNextFuck >= 0){
+			timeTillNextFuck -= callback.elapsed;
+		}else{
+			timeTillNextFuck = coolDownInSeconds;
+			triggerNewEffect();
+		}
+	}
+	
+	
+
+}

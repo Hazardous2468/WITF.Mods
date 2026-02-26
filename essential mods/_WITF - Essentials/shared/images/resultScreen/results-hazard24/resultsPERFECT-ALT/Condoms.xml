@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Condoms.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="condoms instance 10000" x="3" y="3" width="0" height="0" frameX="583" frameY="373" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10001" x="3" y="3" width="0" height="0" frameX="583" frameY="373" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10002" x="3" y="3" width="0" height="0" frameX="583" frameY="373" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10003" x="3" y="3" width="0" height="0" frameX="583" frameY="373" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10004" x="299" y="181" width="34" height="31" frameX="-80" frameY="0" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10005" x="248" y="371" width="202" height="116" frameX="-47" frameY="-23" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10006" x="3" y="371" width="242" height="104" frameX="-24" frameY="-47" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10007" x="3" y="275" width="272" height="93" frameX="-13" frameY="-68" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10008" x="3" y="181" width="293" height="91" frameX="-8" frameY="-80" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10009" x="3" y="91" width="313" height="87" frameX="-4" frameY="-88" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10010" x="3" y="91" width="313" height="87" frameX="-4" frameY="-88" frameWidth="323" frameHeight="177"/>
+	<SubTexture name="condoms instance 10011" x="3" y="3" width="323" height="85" frameX="0" frameY="-92" frameWidth="323" frameHeight="177"/>
+</TextureAtlas>

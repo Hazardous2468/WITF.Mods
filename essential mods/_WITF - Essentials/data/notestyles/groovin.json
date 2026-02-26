@@ -1,0 +1,214 @@
+{
+  "version": "1.1.0",
+  "name": "groovin",
+  "author": "Hazard24",
+  "fallback": "simple",
+  "assets": {
+    "note": {
+	  "animated": true,
+      "assetPath": "shared:inhuman_noteskins/groovin/NOTE_assets-inhumanGroovin_ANIMATED_padding_fix",
+      "scale": 0.7,
+	  "offsets": [0, 0],
+      "data": {
+        "left": { "prefix": "purple0", "looped": true },
+        "down": { "prefix": "blue0", "looped": true },
+        "up": { "prefix": "green0", "looped": true },
+        "right": { "prefix": "red0", "looped": true }
+      }
+    },
+    "noteStrumline": {
+		"assetPath": "shared:inhuman_noteskins/groovin/NOTE_assets-inhumanGroovin_ANIMATED_padding_fix",
+      "scale": 0.7,
+	  
+      "offsets": [23, 27],
+      "data": {
+        "leftStatic": { "prefix": "arrowLEFT" },
+        "leftPress": { "prefix": "left press" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm" },
+        "downStatic": { "prefix": "arrowDOWN" },
+        "downPress": { "prefix": "down press" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm" },
+        "upStatic": { "prefix": "arrowUP" },
+        "upPress": { "prefix": "up press" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm" },
+        "rightStatic": { "prefix": "arrowRIGHT" },
+        "rightPress": { "prefix": "right press" },
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm" }
+      }
+    },
+    "holdNote": {
+	  "scale": 0.7,
+	  "offsets": [2, 0],
+      "assetPath": "inhuman_noteskins/groovin/holds",
+	   "data": {
+        "behindStrums": true
+      }
+    },
+    "noteSplash": {
+      "assetPath": "shared:inhuman_noteskins/splashes-glow",
+      "alpha": 0.8,
+	  "offsets": [0, -18],
+      "data": {
+        "enabled": true,
+        "copyHSV": true,
+		"framerateDefault": 20,
+        "framerateVariance": 1,
+		"blendMode": "screen",
+        "leftSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "rightSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "upSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "downSplashes": [
+          { "prefix": "note splash red 1" }
+        ]
+      }
+    },
+   "holdNoteCover": {
+      "assetPath": "",
+      "offsets": [4, 0],
+      "data": {
+		"copyHSV": true,
+        "behindStrums": true,
+        "holdPositioned": true,
+		"zCalcMult": [0.0, 0.0],
+        "enabled": true,
+        "scaleX": 1.275,
+        "left": {
+          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "start": { "prefix": "sus_cover_start" },
+          "hold": { "prefix": "sus_cover_lp" },
+          "end": { "prefix": "sus_cover_end" }
+        },
+        "right": {
+          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "start": { "prefix": "sus_cover_start" },
+          "hold": { "prefix": "sus_cover_lp" },
+          "end": { "prefix": "sus_cover_end" }
+        },
+        "up": {
+          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "start": { "prefix": "sus_cover_start" },
+          "hold": { "prefix": "sus_cover_lp" },
+          "end": { "prefix": "sus_cover_end" }
+        },
+        "down": {
+          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "start": { "prefix": "sus_cover_start" },
+          "hold": { "prefix": "sus_cover_lp" },
+          "end": { "prefix": "sus_cover_end" }
+        }
+      }
+    },
+    "countdownThree": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro3"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/ready",
+	  "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownTwo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro2"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/2",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownOne": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro1"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/1",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownGo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/introGo"
+      },
+      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/go",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "judgementSick": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_perfect",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementGood": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_good",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementBad": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_bad",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "judgementShit": {
+      "assetPath": "shared:inhuman_noteskins/UI/rating_shit",
+      "scale": 0.65,
+      "isPixel": false
+    },
+    "comboNumber0": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num0",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber1": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num1",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber2": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num2",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber3": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num3",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber4": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num4",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber5": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num5",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber6": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num6",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber7": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num7",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber8": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num8",
+      "isPixel": false,
+      "scale": 0.45
+    },
+    "comboNumber9": {
+      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num9",
+      "isPixel": false,
+      "scale": 0.45
+    }
+  }
+}

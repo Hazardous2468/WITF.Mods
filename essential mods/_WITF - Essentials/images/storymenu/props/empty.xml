@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<TextureAtlas imagePath="empty.png" width="1765" height="304">
+  <SubTexture name="idle0001" x="0" y="0" width="2" height="2" frameX="0" frameY="0" frameWidth="2" frameHeight="2" />
+  <SubTexture name="confirm0001" x="0" y="0" width="2" height="2" frameX="0" frameY="0" frameWidth="2" frameHeight="2" />
+  <SubTexture name="danceLeft0001" x="0" y="0" width="2" height="2" frameX="0" frameY="0" frameWidth="2" frameHeight="2" />
+  <SubTexture name="danceRight0001" x="0" y="0" width="2" height="2" frameX="0" frameY="0" frameWidth="2" frameHeight="2" />
+</TextureAtlas>

@@ -1,0 +1,70 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+
+
+class ResetOnMiss extends Module
+{
+	public var sickOnly:Bool = false;
+	public var noComboBreaks:Bool = false;
+	public var noMiss:Bool = false;
+	public var noGhost:Bool = false;
+
+
+	public function new() {
+        super("ResetOnMiss");	
+    }
+	
+	
+	function onNoteHit(event) {
+		super.onNoteHit(event);
+		if(PlayState.instance != null){
+		
+			if(PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) return;
+			
+			if(sickOnly && ! (event.judgement == "sick" || event.judgement == "perfect") ){
+				PlayState.instance.needsReset = true;
+			}
+			
+			if (event.isComboBreak && noComboBreaks) {
+				PlayState.instance.needsReset = true;
+			}
+		}
+	}
+	
+	
+	function onNoteMiss(event) {
+		super.onNoteMiss(event);
+		
+		var missReset:Bool = noComboBreaks || noMiss || sickOnly;
+		
+		
+		if(PlayState.instance != null && missReset){
+			if(PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) return;
+			PlayState.instance.needsReset = true;
+		}
+	}
+	
+	function onNoteGhostMiss(event) {
+		super.onNoteGhostMiss(event);
+		if(PlayState.instance != null && noGhost){
+			
+			if(Conductor.instance.songPosition < -150){
+				return;
+			}
+		
+			if(PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) return;
+			PlayState.instance.needsReset = true;
+		}
+	
+		
+	}
+	
+
+	
+	
+	
+}

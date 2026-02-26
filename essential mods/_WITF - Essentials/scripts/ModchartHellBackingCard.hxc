@@ -1,0 +1,337 @@
+import funkin.ui.freeplay.BGScrollingText;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.freeplay.backcards.BackingCard;
+import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxSpriteUtil;
+import funkin.ui.freeplay.charselect.PlayableCharacter;
+import funkin.data.freeplay.player.PlayerRegistry;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.util.Constants;
+import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.FlxTypedEmitter;
+import flixel.effects.particles.FlxEmitterMode;
+import flixel.addons.effects.FlxTrail;
+
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+
+
+class ModchartHellBackingCard extends BackingCard
+{
+	//cuz they cause real bad memory problems :(
+	var doTrails:Bool = false;
+	
+	public var pulseParticlesOnBeat:Bool = true;
+	
+	
+	var particleScaleAdd:Float = 0;
+	var particleScaleTween:FlxTween;
+	var particlesEmitter:FlxTypedEmitter;
+	function pulseParticles(){
+		if(particlesEmitter!=null){
+			if(particleScaleTween!=null){
+				particleScaleTween.cancel();
+			}
+			var secondsBetweenBeats = Conductor.instance.beatLengthMs / Constants.MS_PER_SEC;
+			particleScaleTween = FlxTween.num(0.7, 0, secondsBetweenBeats, {ease: FlxEase.quadIn}, function(v){
+				particleScaleAdd = v;
+			});
+			
+			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome2'));
+		}
+	}
+	
+	var previousX:Float = 0;
+	function onUpdate(callback)
+	{
+		if(particlesEmitter!=null){
+			var changeFromTargetDestination:Float = orangeBackShit.x - previousX;
+			
+			for (p in particlesEmitter){
+				p.scale.x = 0.75 + particleScaleAdd;
+				p.scale.y = 0.75 + particleScaleAdd;
+			
+				var curX = p.x;
+				p.x = curX + changeFromTargetDestination;
+			}
+			previousX = orangeBackShit.x;	
+		}
+	}
+
+
+
+
+  public var moreWays:BGScrollingText;
+  public var funnyScroll:BGScrollingText;
+  public var txtNuts:BGScrollingText;
+  public var funnyScroll2:BGScrollingText;
+  public var moreWays2:BGScrollingText;
+  public var funnyScroll3:BGScrollingText;
+
+  var glow:FlxSprite;
+  var glowDark:FlxSprite;
+  
+  public override function applyExitMovers(?exitMovers:FreeplayState.ExitMoverData, ?exitMoversCharSel:FreeplayState.ExitMoverData):Void
+  {
+    super.applyExitMovers(exitMovers, exitMoversCharSel);
+    if (exitMovers == null || exitMoversCharSel == null) return;
+    exitMovers.set([moreWays],
+      {
+        x: FlxG.width * 2,
+        speed: 0.4,
+      });
+    exitMovers.set([funnyScroll],
+      {
+        x: -funnyScroll.width * 2,
+        y: funnyScroll.y,
+        speed: 0.4,
+        wait: 0
+      });
+    exitMovers.set([txtNuts],
+      {
+        x: FlxG.width * 2,
+        speed: 0.4,
+      });
+    exitMovers.set([funnyScroll2],
+      {
+        x: -funnyScroll2.width * 2,
+        speed: 0.5,
+      });
+    exitMovers.set([moreWays2],
+      {
+        x: FlxG.width * 2,
+        speed: 0.4
+      });
+    exitMovers.set([funnyScroll3],
+      {
+        x: -funnyScroll3.width * 2,
+        speed: 0.3
+      });
+
+    exitMoversCharSel.set([moreWays, funnyScroll, txtNuts, funnyScroll2, moreWays2, funnyScroll3],
+      {
+        y: -60,
+        speed: 0.8,
+        wait: 0.1
+      });
+  }
+
+  public override function enterCharSel():Void
+  {
+    FlxTween.tween(funnyScroll, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+    FlxTween.tween(funnyScroll2, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+    FlxTween.tween(moreWays, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+    FlxTween.tween(moreWays2, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+    FlxTween.tween(txtNuts, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+    FlxTween.tween(funnyScroll3, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
+	
+  }
+
+  public override function new()
+  {
+    super("nobody");
+
+    var player = PlayerRegistry.instance.fetchEntry(this.currentCharacter);
+    funnyScroll = new BGScrollingText(0, 220, player.getFreeplayDJText(1), FlxG.width / 2, false, 60);
+    funnyScroll2 = new BGScrollingText(0, 335, player.getFreeplayDJText(1), FlxG.width / 2, false, 60);
+    moreWays = new BGScrollingText(0, 160, player.getFreeplayDJText(2), FlxG.width, true, 43);
+    moreWays2 = new BGScrollingText(0, 397, player.getFreeplayDJText(2), FlxG.width, true, 43);
+    txtNuts = new BGScrollingText(0, 285, player.getFreeplayDJText(3), FlxG.width / 2, true, 43);
+    funnyScroll3 = new BGScrollingText(0, orangeBackShit.y + 10, player.getFreeplayDJText(1), FlxG.width / 2, false, 60);
+  }
+
+  public override function onCreate(event:ScriptEvent):Void
+  {
+    FlxTween.tween(pinkBack, {x: 0}, 0.6, {ease: FlxEase.quartOut});
+    add(pinkBack);
+
+    add(orangeBackShit);
+
+    add(alsoOrangeLOL);
+
+    FlxSpriteUtil.alphaMaskFlxSprite(orangeBackShit, pinkBack, orangeBackShit);
+    orangeBackShit.visible = false;
+    alsoOrangeLOL.visible = false;
+
+    confirmTextGlow.blend = 0;
+    confirmTextGlow.visible = false;
+
+    confirmGlow.blend = 0;
+
+    confirmGlow.visible = false;
+    confirmGlow2.visible = false;
+
+    add(confirmGlow2);
+    add(confirmGlow);
+
+    add(confirmTextGlow);
+
+    add(backingTextYeah);
+
+    cardGlow.blend = 0;
+    cardGlow.visible = false;
+
+    moreWays.visible = false;
+    funnyScroll.visible = false;
+    txtNuts.visible = false;
+    funnyScroll2.visible = false;
+    moreWays2.visible = false;
+    funnyScroll3.visible = false;
+
+    moreWays.funnyColor = 0xFFFFF383;
+    moreWays.speed = 6.8;
+    add(moreWays);
+
+    funnyScroll.funnyColor = 0xFFFF9963;
+    funnyScroll.speed = -3.8;
+    add(funnyScroll);
+
+    txtNuts.speed = 3.5;
+    add(txtNuts);
+
+    funnyScroll2.funnyColor = 0xFFFF9963;
+    funnyScroll2.speed = -3.8;
+    add(funnyScroll2);
+
+    moreWays2.funnyColor = 0xFFFFF383;
+    moreWays2.speed = 6.8;
+    add(moreWays2);
+
+    funnyScroll3.funnyColor = 0xFFFEA400;
+    funnyScroll3.speed = -3.8;
+    add(funnyScroll3);
+
+    glowDark = new FlxSprite((FreeplayState.CUTOUT_WIDTH * FreeplayState.DJ_POS_MULTI) + -300, 330).loadGraphic(Paths.image('freeplay/beatglow'));
+    glowDark.blend = 9;
+    add(glowDark);
+
+    glow = new FlxSprite((FreeplayState.CUTOUT_WIDTH * FreeplayState.DJ_POS_MULTI) + -300, 330).loadGraphic(Paths.image('freeplay/beatglow'));
+    glow.blend = 0;
+    add(glow);
+
+    glowDark.visible = false;
+    glow.visible = false;
+
+    add(cardGlow);
+	
+	
+	
+	
+	
+	
+		particlesEmitter = new FlxTypedEmitter(20,20, 48);
+		particlesEmitter.launchMode = FlxEmitterMode.SQUARE;
+		particlesEmitter.width = 500;
+		particlesEmitter.height = 12;
+		particlesEmitter.x = 0;
+		particlesEmitter.y = -32;
+		particlesEmitter.lifespan.set(3, 4);
+		particlesEmitter.velocity.set(-80, 280, 80, 380);
+		particlesEmitter.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter.launchAngle.set(-180, 180);
+		particlesEmitter.angle.set(-90, 90);
+		particlesEmitter.scale.set(0.5, 0.5, 0.65, 0.65, 0.8, 0.8, 1, 1);
+		particlesEmitter.color.set(0xFFFF0000, 0xFFFFC0CB, 0xFF0000FF, 0xFF00FFFF);
+		particlesEmitter.keepScaleRatio = true;
+		//particlesEmitter.camera = card.camera;
+		particlesEmitter.camera = this.camera;
+		//particlesEmitter.loadParticles(Paths.image("hazard/titleScreenNote"), 48);
+
+		var particle:FlxParticle;
+		for (i in 0...48) //Need to keep this high or else null sprites? WHAT?!
+		{
+			particle = new FlxParticle();
+			particle.x -= 5000; //So errrrrrr.... basically... errrrr it... err... stops the trail from loading in the centre of the... err... screen? and because its off screen it... errrrrrrr... doesn't load and cause frame drops? yeah... something like that... i think
+			particle.loadGraphic(Paths.image("freeplay/freeplay-nobody-card/noteParticle" + FlxG.random.int(1, 7)));
+			
+			if(doTrails){
+				var evilTrail = new FlxTrail(particle, null, 10, 6, 0.7, 0.08);
+				evilTrail.camera = particlesEmitter.camera;
+				//evilTrail.color = 0xFFFF0000;
+				if(freeplayState.dj != null){
+					freeplayState.insert(freeplayState.members.indexOf(freeplayState.dj), evilTrail);
+				}else{
+					freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), evilTrail);
+				}
+			}
+			particlesEmitter.add(particle);
+		}
+		
+		particlesEmitter.start(false, 0.23);
+		var freeplayState = FlxG.state.subState;
+		//if(freeplayState.dj != null){
+		//	freeplayState.insert(freeplayState.members.indexOf(freeplayState.dj), particlesEmitter);
+		//}else{
+		//	freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), particlesEmitter);
+		//}
+		//freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), particlesEmitter);
+		freeplayState.add(particlesEmitter);	
+  }
+
+  var beatFreq:Int = 1;
+  var beatFreqList:Array<Int> = [1, 2, 4, 8];
+
+  
+
+  
+  public override function onBeatHit(event):Void
+  {
+	if(pulseParticlesOnBeat) pulseParticles();	
+  
+    // increases the amount of beats that need to go by to pulse the glow because itd flash like craazy at high bpms.....
+    beatFreq = beatFreqList[Math.floor(Conductor.instance.bpm / 166)];
+
+    if (Conductor.instance.currentBeat % beatFreq != 0) return;
+    FlxTween.cancelTweensOf(glow);
+    FlxTween.cancelTweensOf(glowDark);
+
+    glow.alpha = 0.8;
+    FlxTween.tween(glow, {alpha: 0}, 16 / 24, {ease: FlxEase.quartOut});
+    glowDark.alpha = 0;
+    FlxTween.tween(glowDark, {alpha: 0.6}, 18 / 24, {ease: FlxEase.quartOut});
+  }
+
+  public override function introDone():Void
+  {
+    super.introDone();
+    moreWays.visible = true;
+    funnyScroll.visible = true;
+    txtNuts.visible = true;
+    funnyScroll2.visible = true;
+    moreWays2.visible = true;
+    funnyScroll3.visible = true;
+    glowDark.visible = true;
+    glow.visible = true;
+  }
+
+  public override function confirm():Void
+  {
+    super.confirm();
+
+    moreWays.visible = false;
+    funnyScroll.visible = false;
+    txtNuts.visible = false;
+    funnyScroll2.visible = false;
+    moreWays2.visible = false;
+    funnyScroll3.visible = false;
+    glowDark.visible = false;
+    glow.visible = false;
+  }
+
+  public override function disappear():Void
+  {
+    super.disappear();
+
+    moreWays.visible = false;
+    funnyScroll.visible = false;
+    txtNuts.visible = false;
+    funnyScroll2.visible = false;
+    moreWays2.visible = false;
+    funnyScroll3.visible = false;
+    glowDark.visible = false;
+    glow.visible = false;
+  }
+}

@@ -1,0 +1,84 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.data.event.SongEventRegistry;
+
+class LoopingSongs extends Module
+{
+	public var enabled:Bool = false;
+	public var repeatOffset:Float = 500;
+
+	public function new() {
+        super("LoopingSongs");	
+    }
+	
+	public function setSongTime(time:Float)
+	{
+		if(time < 0) time = 0;
+		if(FlxG.sound.music == null) return;
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.isGamePaused){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			//vocals.time = time;
+			if (Conductor.instance.songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.isGamePaused){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.instance.songPosition = time;		
+		PlayState.instance.handleSkippedNotes();
+		Conductor.instance.update();
+	}
+	
+	function getCurSongName():String
+	{
+		if(PlayState.instance == null) return "null";
+		if(PlayState.instance.currentChart == null) return "null";
+		if(PlayState.instance.currentChart.songName == null) return "null";
+		return PlayState.instance.currentChart.songName;
+	}
+	
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null || !enabled) return;
+		if(PlayState.instance.isGamePaused) return;
+		
+		if(Conductor.instance.songPosition < 0 || PlayState.instance.currentSongLengthMs < repeatOffset){
+			return;
+		}
+		
+		// Special exception for this song due to it having it's own looping song script.
+		if(getCurSongName().toLowerCase() == "it-never-ends"){
+			return;
+		}
+
+		if(Conductor.instance.songPosition >= PlayState.instance.currentSongLengthMs-repeatOffset){
+			//PlayState.instance.modDebugNotif(PlayState.instance.currentSongLengthMs, 0xFFFFFF00);
+			//PlayState.instance.modDebugNotif(Conductor.instance.songPosition, 0xFFFF00FF);
+			PlayState.instance.modDebugNotif("Looped song!", 0xFFFFFF00);
+			setSongTime(0);
+			SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);			
+		}
+	}
+
+	
+	
+	
+}

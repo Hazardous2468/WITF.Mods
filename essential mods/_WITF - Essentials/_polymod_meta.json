@@ -1,0 +1,18 @@
+{
+    "title": "What in the Funkin'?! Essentials",
+    "description": "Essentials for What in the Funkin'?!",
+    "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything"
+		},
+		{
+			"name": "?",
+			"role": "Mirin Template song and chart."
+		}
+	],
+	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+    "api_version": "0.8.0",
+    "mod_version": "1.0.1",
+    "license": "CC BY-NC-SA 4.0"
+}

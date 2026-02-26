@@ -1,0 +1,792 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.data.song.SongNoteDataRaw;
+import funkin.play.modchartSystem.ModConstants;
+import funkin.play.character.CharacterType;
+//import flixel.ui.FlxBarFillDirection;
+//import flixel.ui.FlxBar;
+import funkin.play.components.HealthIcon;
+import funkin.ui.freeplay.charselect.PlayableCharacter;
+import funkin.data.freeplay.player.PlayerRegistry;
+
+import flixel.math.FlxRandom;
+
+
+
+//A script which alters the placement of the notes in a chart (also known as turn mods)
+
+class ChartModifiersModule extends Module
+{
+	var displayNotif:Bool = true; //If true, will display the current shuffle.
+
+	// Todo: handy, random, smart random
+	// random -> Remove overlapping notes, including notes ontop of holds (unless it's a hurt cuz they can overlap with holds)
+	
+	var activeShuffles:Array<String> = [];
+	
+	//Settings
+	var gapRemovalChance:Float = 25; 	// % chance of a note being deleted
+	var desyncRange:Float = 55; 		// In MS
+	
+	var swapStrums:Bool = true; 		// If true, swap will flip the strum layout around so you're playing on the opponent side.
+
+	
+	public var allChartMods:Array<String> = [
+	"normal", 			// Does nothing
+	"flip u/d", 		// L>L, D>U, U>D, R>R
+	"flip l/r", 		// L>R, D>D, U>U, R>L
+	"flip all", 		// L>R, D>U, U>D, R>L
+	"invert", 			// L>D, D>L, U>R, R>U
+	"turn left", 		// L>D, D>R, U>L, R>U
+	"turn right", 		// L>U, D>L, U>R, R>D
+	"shift 1 right", 	// L>D, D>U, U>R, R>L
+	"shift 1 left", 	// L>R, D>L, U>D, R>U
+	"shuffle", 			// Random (blender)
+	"smart shuffle", 	// Random but keeps foot parity and patterns (smart blender)
+	
+	"swap",				// Swaps the player and opponent notes around
+	
+	//silly ones:
+	"desync",			// Moves the note's strumTime, making it offsync from the song
+	"jumpy", 			// If a note isn't already a jump / hand / quad, create an extra note to make it a jump. Mines are ignored.
+	"handy", 			// Same as jumpy but adds notes to create hands instead of jumps. Mines are ignored.
+	"quady", 			// Makes every note a quad... dear god.  Mines are NOT ignored but regular notes will take priority.
+	"minefield", 		// Every time there is an empty step in the chart, create a mine there. May take a while to generate.
+	"no left", 			// Left notes are randomly re-assigned to either up, down, or right randomly
+	"no down", 			// Down notes are randomly re-assigned to either up, left, or right randomly
+	"no up", 			// Up notes are randomly re-assigned to either left, down, or right randomly
+	"no right", 		// Right notes are randomly re-assigned to either up, down, or left randomly
+	"hold jacks", 		// All holds are replaced with 1/16th jacks
+	"gap", 				// Notes will be randomly deleted from the chart, leaving gaps where there should be a note.
+	"no holds", 		// All notes have 0 length, removing all holds
+	"no hurts" 			// All hurt notes are removed. 
+	 ];
+	 
+	 
+	 
+	var isWITF:Bool = false;
+	public function new() {
+		super("ChartModifiersModule");	
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+	 
+	 // Turn mods that invalidate a score:	 	 
+	 var illegalShuffles:Array<String> = [
+		"no hurts",
+		"no holds",
+		"gap",
+		"hold jacks",
+		"no right",
+		"no left",
+		"no up",
+		"no down",
+		"minefield",
+		"quady",
+		"handy",
+		"jumpy",
+		"swap",
+		"desync",
+		"shuffle",
+		"smart shuffle"
+		];
+	
+	// An array of song names where it WONT shuffle opponent side.
+	var dontShuffleDADNotesList:Array<String> = [];
+	
+	// An array of song names where it WONT shuffle player side.
+	var dontShuffleBFNotesList:Array<String> = [];
+	
+	// An array of song names where the swap shuffle mod will not work.
+	var swapBlacklist:Array<String> = ["merciless"];
+	
+	var shuffleDAD:Bool = true;	 
+	var shuffleBF:Bool = true;	 
+	
+	var alreadyShuffled:Bool = false;	 
+	override function onSongLoaded(event) {
+		super.onSongLoaded(event);	
+		
+		var curSongName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		shuffleDAD = !dontShuffleDADNotesList.contains(curSongName);
+		shuffleBF = !dontShuffleBFNotesList.contains(curSongName);
+		
+		//Remove the swap chart mod if this song is blacklisted
+		if(activeShuffles.contains("swap")){
+			trace("Swap Blacklist: \n" + swapBlacklist);
+		
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
+			var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+			//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
+			if(swapBlacklist.contains(curSongName) || (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+				activeShuffles.remove("swap");
+
+				if(displayNotif)
+					PlayState.instance.modDebugNotif("'Swap' not allowed for this song.", 0xFFFF0000, true);
+				
+			}	
+		}
+		
+		
+		if(!alreadyShuffled){
+			for (shuffleType in activeShuffles){
+			
+				if(shuffleType == "smart shuffle"){
+					smartShuffle(event.notes);
+				}
+				
+				event.notes = chartShuffle(shuffleType, event.notes, false);
+			}
+			alreadyShuffled = true;
+		}
+		
+		for (bannedShuffle in illegalShuffles){
+			if(activeShuffles.contains(bannedShuffle)){
+				if(!alreadyShowedScoreWarning){
+					PlayState.instance.modDebugNotif("Score will not be saved.", 0xFFFF0000, true);
+					alreadyShowedScoreWarning = true;
+				}
+				
+				PlayState.instance.currentSong.validScore = false;
+			}
+		}
+		
+		sillyWITF();
+	}
+	var alreadyShowedScoreWarning:Bool = false;
+	
+	function smartShuffle(notes){
+		
+		//Will randomly combine various other shuffles cuz idk how else to do this lmfao
+		var daShufflesWeCanUse:Array<String> = ["invert", "flip all", "flip u/d", "flip l/r", "turn left", "turn right"];
+		
+		var finalShuffleArray:Array<String> = [];
+		for (repeat in 0...2)
+		{
+			//Create a copy of the original array
+			var arr:Array<String> = [];
+			for (i in daShufflesWeCanUse){
+				arr.push(i);
+			}
+			
+			//PlayState.instance.modDebugNotif(arr, 0xFFFFFF00);
+			
+			// Randomise the order!
+			var maxValidIndex = arr.length - 1;
+			for (i in 0...maxValidIndex)
+			{
+				var j = FlxG.random.int(i, maxValidIndex);
+				var tmp = arr[i];
+				arr[i] = arr[j];
+				arr[j] = tmp;
+			}
+			
+			//PlayState.instance.modDebugNotif(arr, 0xFFFF00FF);
+			//FlxG.random.shuffle(arr);
+			
+			// Pop to remove one
+			arr.pop();
+			
+			for (i in arr){
+				finalShuffleArray.push(i);
+			}	
+		}
+		//PlayState.instance.modDebugNotif(finalShuffleArray, 0xFFFFFFFF);
+		
+		//apply!
+		for (shuffleType in finalShuffleArray){
+			if(shuffleType == "smart shuffle" || shuffleType == null)  continue; //Infinite loop failsafe
+			notes = chartShuffle(shuffleType, notes, true);
+		}
+	}
+	
+	function sillyWITF(){
+		if(!isWITF) return;
+		//ModConstants.invertStrumlineTarget = isSwapped && swapStrums;
+		if(isSwapped && swapStrums && PlayState.instance != null && PlayState.instance.modchartEventHandler != null){
+			for (strumLine in PlayState.instance.allStrumLines)
+			{
+				if (!strumLine.defaultPlayerControl)
+				{
+					strumLine.mods.invertValues = false;
+				}
+				else
+				{
+					strumLine.mods.invertValues = PlayState.instance.modchartEventHandler.invertForOpponent;
+				}
+			}
+		}
+	}
+	override function onModchartTimeline(event) {
+		sillyWITF();
+		super.onModchartTimeline(event);
+	}
+	
+	
+	function onStateChangeBegin(event)
+	{
+		alreadyShuffled = false;
+		alreadyShowedScoreWarning = false;
+		isSwapped = false;
+		super.onStateChangeBegin(event);
+		
+		//var hasSwapInActiveShuffles:Bool = activeShuffles.contains("swap");
+		//if(isWITF) ModConstants.invertStrumlineTarget = hasSwapInActiveShuffles && swapStrums;
+	}
+
+	var isSwapped(default, set):Bool = false;
+    function set_isSwapped(value:Bool):Bool { 
+		isSwapped = value;
+		if(isWITF) ModConstants.invertStrumlineTarget = isSwapped && swapStrums;
+		return isSwapped;
+	}
+	
+	function swapModeSetup(){
+		isSwapped = true;
+		var game = PlayState.instance;
+		if(game==null) return; //?
+		if(swapStrums){			
+			var opponentWashere = game.opponentStrumline.x;
+			game.opponentStrumline.x = game.playerStrumline.x;
+			game.playerStrumline.x = opponentWashere;
+		}
+		
+		//swapping vocal tracks
+		var tmp = game.vocals.opponentVoices;
+		game.vocals.opponentVoices = game.vocals.playerVoices;
+		game.vocals.playerVoices = tmp;
+		
+		game.currentStage.getBoyfriend().characterType = CharacterType.DAD;
+		game.currentStage.getDad().characterType = CharacterType.BF;
+		
+		
+		game.iconP1.autoUpdate = false;
+		game.iconP2.autoUpdate = false;		
+	}
+	
+	
+
+	override function onStepHit(event)
+	{
+		if(isSwapped && PlayState.instance != null && PlayState.instance.currentStage != null && !PlayState.instance.isPlayerDying){
+			PlayState.instance.currentStage.getBoyfriend().characterType = CharacterType.DAD;
+			PlayState.instance.currentStage.getDad().characterType = CharacterType.BF;
+		}
+	}
+	
+	function updateHealthicon(icon, isBF:Bool){
+		if(isBF){
+			icon.updateHealthIcon(HealthIcon.MAXIMUM_HEALTH - PlayState.instance.health);
+			icon.x = PlayState.instance.healthBar.x
+            + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.value, 0, 2, 100, 0) * 0.01) - HealthIcon.POSITION_OFFSET);
+		}else{
+			icon.updateHealthIcon(PlayState.instance.health);
+			icon.x = PlayState.instance.healthBar.x
+            + (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.value, 0, 2, 100, 0) * 0.01))
+            - (icon.width - HealthIcon.POSITION_OFFSET);
+		}
+		
+		
+		// Keep the icon centered vertically on the health bar.
+		icon.y = PlayState.instance.healthBar.y - (icon.height / 2); // - (PlayState.instance.healthBar.height / 2)
+	}	
+	
+	
+	var healthModified:Float = Constants.HEALTH_STARTING;
+	function onUpdate(callback)
+	{
+		if(PlayState.instance != null && isSwapped){	
+
+			updateHealthicon(PlayState.instance.iconP1, true);
+			updateHealthicon(PlayState.instance.iconP2, false);
+		
+			if(PlayState.instance.isBotPlayMode){
+				PlayState.instance.healthLerp = Constants.HEALTH_MIN;
+			}else{
+				healthModified = FlxMath.lerp(PlayState.instance.healthLerp, PlayState.instance.health, 0.15);
+				healthModified = FlxMath.remapToRange(PlayState.instance.health, 0, 2, 2, 0);
+				PlayState.instance.healthLerp = healthModified;
+			}
+		}
+	}
+
+	
+	function isHurtNote(kind:String):Bool{
+		return (kind == "hurt");
+	}
+	
+	
+	public function shuffleNote(daNote,  daChart, allowedLanes:Array<Int> = [0,1,2,3], smart:Bool = true ):Int{
+		
+		//Loop through every lane 
+		//Make a score based on how good this note placement would be.
+		
+		//Score system:
+		
+		//Default score: 100
+		//If overlap, set score to 0, no matter what.
+		
+		
+		//TODO:
+		//This is just for regular shuffles
+		//Smart Shuffle will preserve pattern layouts (so jacks stay as jacks for example)
+		
+		var sameTimeThreshold_MS:Float = 24;
+		var jackCheckThereshold_MS:Float = Conductor.instance.stepLengthMs;
+		
+		var scores = [];
+		for (noteDirection in allowedLanes){
+			var curScore:Float = 100;
+			
+			var alreadySomething:Bool = false;
+			for (songNote in daChart){
+				if(noteDirection == songNote.data){
+					var timeDif:Float = Math.abs(daNote.time - songNote.time);
+					var insideHold:Bool = (daNote.time >= songNote.time && daNote.time < songNote.time+songNote.length);
+					
+					//If overlap OR we are inside an active hold note...
+					
+					if(timeDif <= sameTimeThreshold_MS || (insideHold && !isHurtNote(daNote.kind)) ){
+						alreadySomething = true;
+						break;
+					}
+					else{
+					
+						//same thing as earlier but with extra length (0.5 step)
+						var insideHold:Bool = (daNote.time >= songNote.time && daNote.time < songNote.time+songNote.length+(Conductor.instance.stepLengthMs*0.5));
+
+						//if hold just ended
+						if(timeDif <= jackCheckThereshold_MS*1){
+							curScore -= 9;
+						}
+						
+						//var jackScore = timeDif / jackCheckThereshold_MS;
+						//curScore -= 
+						
+						//probably a better way of doing this lol
+						if(timeDif <= jackCheckThereshold_MS*1){
+							curScore -= 99;
+						}
+						else if(timeDif <= jackCheckThereshold_MS*2){
+							curScore -= 50;
+						}
+						else if(timeDif <= jackCheckThereshold_MS*3){
+							curScore -= 25;
+						}
+						else if(timeDif <= jackCheckThereshold_MS*4){
+							curScore -= 5;
+						}
+						//beyond 4 steps, we don't give a shit.
+
+					}
+				}
+			}
+			
+			if(alreadySomething || curScore < 0){
+				curScore = 0;
+			}
+			
+			scores.push(curScore);
+		}
+		
+
+
+		//pick a random using the score as weights
+		var daSelect = FlxG.random.weightedPick( scores );
+
+		//if(daNote.time > 7252 && daNote.time < 8201){
+		//	PlayState.instance.modDebugNotif(daNote.time + " - " + scores, 0xFFFFFFFF);
+		//}
+		
+		return allowedLanes[daSelect];
+	}
+
+	//A function that returns true if the provided note will stack ontop of another note, or will be inside a hold.
+	public function overlapCheck(daNote, daChart, hurtLap:Bool = false):Bool{
+		var sameTimeThreshold_MS:Float = 24;
+		var alreadySomething:Bool = false;
+		
+		//Loop through every note in the chart.
+		for (songNote_2 in daChart){
+		
+			//Check if same lane...
+			if(daNote.data == songNote_2.data){
+				var timeDif:Float = Math.abs(daNote.time - songNote_2.time);
+				var insideHold:Bool = (daNote.time >= songNote_2.time && daNote.time < songNote_2.time+songNote_2.length);
+				
+				// if inside a hold note AND we are NOT a hurt note...
+				if((insideHold && !isHurtNote(daNote.kind)) ){
+					alreadySomething = true;
+					break;
+				}
+
+				//If we are going to overlap with another note...
+				if(timeDif <= sameTimeThreshold_MS){
+					if(hurtLap){
+						//If both notes are the same type...
+						if(isHurtNote(daNote.kind) == isHurtNote(songNote_2.kind)){
+							alreadySomething = true;
+							break;
+						}
+					}else{
+						alreadySomething = true;
+						break;
+					}
+				}
+			}
+			
+		}
+
+		return alreadySomething;
+	}
+	 
+	public function chartShuffle(shuffleType:String, notes, skipNotifDisplay:Bool = false):Array<SongNoteData>{
+		if(notes == null || shuffleType == null || shuffleType == "normal"|| shuffleType == "") return notes;
+		
+		//hide cuz we already display the WIP error message.
+		var wipDisclaimer:Bool = shuffleType == "jumpy" || shuffleType == "handy" || shuffleType == "shuffle" || shuffleType == "smart shuffle";
+		
+		if(displayNotif && !skipNotifDisplay){
+			if(wipDisclaimer){
+				PlayState.instance.modDebugNotif("'" + shuffleType + "' is still a WIP!", 0xFFFF6A00);
+			}//else{
+			//	PlayState.instance.modDebugNotif("ShuffleType: '"+shuffleType+"'", 0xFFFFFF00);
+			//}
+			
+		}
+
+		//Invalidate any scores if the chart has been shuffled!
+		PlayState.instance.currentSong.validScore = false;
+			
+		if(shuffleType == "swap"){
+			swapModeSetup();
+		}
+		
+		
+		var jumpyAlreadyHandledTimes_player:Array<Float> = [];
+		var jumpyAlreadyHandledTimes_opponent:Array<Float> = [];
+		
+		var quadyAlreadyHandledTimes_player_Hurt:Array<Float> = [];
+		var quadyAlreadyHandledTimes_opponent_Hurt:Array<Float> = [];
+		
+		for (songNote in notes){
+		
+			var strumTime:Float = songNote.time;
+			var noteDirection:Int = songNote.getDirection(); //returns 0 - 3 based on direction
+			var strumIndex = songNote.getStrumlineIndex();
+			//if(strumIndex == 1){
+			//	PlayState.instance.modDebugNotif("ShuffleType: '"+shuffleType+"'", 0xFFFFFF00);
+			//}
+			
+
+			if(strumIndex == 1 && !shuffleDAD){
+				continue;
+			}else if(strumIndex == 0 && !shuffleBF){
+				continue;
+			}
+			
+			var needsToBeRemoved:Bool = false;
+			switch(shuffleType){
+			
+				case "desync":
+					songNote.time += FlxG.random.float(-desyncRange,desyncRange);
+					
+				case "swap":
+					if(strumIndex == 0) strumIndex = 1;
+					else if(strumIndex == 1) strumIndex = 0;
+			
+				case "no left":
+					noteDirection = shuffleNote(songNote,  notes, [1,2,3], false);
+				case "no down":
+					noteDirection = shuffleNote(songNote,  notes, [0,2,3], false);
+				case "no up":
+					noteDirection = shuffleNote(songNote,  notes, [1,0,3], false);
+				case "no right":
+					noteDirection = shuffleNote(songNote,  notes, [1,2,0], false);
+			
+				//case "smart shuffle":
+					//lol
+			
+				case "shuffle":
+					noteDirection = shuffleNote(songNote,  notes, [0,1,2,3], true);
+
+				case "quady":
+					var arr = isHurtNote(songNote.kind) ? quadyAlreadyHandledTimes_opponent_Hurt : jumpyAlreadyHandledTimes_opponent;
+					if(strumIndex == 0){
+						arr = isHurtNote(songNote.kind) ? quadyAlreadyHandledTimes_player_Hurt : jumpyAlreadyHandledTimes_player;
+					}
+							
+					if(!arr.contains(strumTime)){
+
+						var validDirections = [0,1,2,3];
+						
+						for (dir in validDirections){
+							var newNote = songNote.clone();
+							newNote.length = 0;
+				
+							newNote.data = dir;
+							newNote.data += (strumIndex * 4);
+								
+							var alreadySomethingThere:Bool = overlapCheck(newNote, notes, true);
+							if(!alreadySomethingThere){
+								notes.push(newNote);
+							}
+						}
+						
+						arr.push(strumTime);	
+					}
+					
+					
+					
+				case "jumpy":
+					//this is scuffed
+					//check the original chart data to see if there are any notes matching this strumTime.
+					//If yes, then we know there is already a jump here and don't do anything
+					
+					var arr = jumpyAlreadyHandledTimes_opponent;
+					if(strumIndex == 0){
+						arr = jumpyAlreadyHandledTimes_player;
+					}
+					
+					if(!arr.contains(strumTime)){
+					
+					
+						var directionsAlreadyTaken = [];
+						for (songNote in notes){
+							if(strumTime == songNote.time){
+								
+								if(!directionsAlreadyTaken.contains(songNote.getDirection())){
+									directionsAlreadyTaken.push(songNote.getDirection());
+								}
+							}
+						}
+						var alreadyJump:Bool = directionsAlreadyTaken.length > 1;
+						
+						if(!alreadyJump){
+							var validDirections = [0,1,2,3];
+							for (alreadyTakenDirection in directionsAlreadyTaken){
+								validDirections.remove(alreadyTakenDirection);
+							}
+							
+
+							var newNote = songNote.clone();
+							newNote.length = 0;
+				
+							newNote.data = validDirections[FlxG.random.int(0, validDirections.length-1)];
+							newNote.data += (strumIndex * 4);
+														
+							//First check if the note strumTime is overlapping a hold before adding.
+							var alreadySomethingThere:Bool = overlapCheck(newNote, notes, false);
+							if(!alreadySomethingThere){
+								notes.push(newNote);
+							}
+						}
+						arr.push(strumTime);
+					}
+					
+				case "hold jacks":
+					if(songNote.length > 0){
+						var stepLength:Float = getTypeLengthAtMs(strumTime, "step");
+						//var stepLength:Float = Conductor.instance.stepLengthMs;
+						var howMany:Int = Std.int(songNote.length / stepLength);
+						for (i in 1...howMany+1){
+							var newNote = songNote.clone();
+							newNote.length = 0;
+							newNote.time += stepLength * i;
+							
+							//Todo -> if note already there, don't add!
+							notes.push(newNote);
+						}
+					}
+					songNote.length = 0;
+				case "no holds":
+					songNote.length = 0;
+				case "no hurts":
+					if(isHurtNote(songNote.kind)){
+						needsToBeRemoved = true;
+					}
+				case "gap":
+					if(FlxG.random.bool(gapRemovalChance)){
+						needsToBeRemoved = true;
+					}
+					
+				case "turn left":
+					switch(noteDirection){
+						case 0:
+							noteDirection = 1;
+						case 1:
+							noteDirection = 3;
+						case 2:
+							noteDirection = 0;
+						case 3:
+							noteDirection = 2;
+					}
+				case "turn right":
+					switch(noteDirection){
+						case 0:
+							noteDirection = 2;
+						case 1:
+							noteDirection = 0;
+						case 2:
+							noteDirection = 3;
+						case 3:
+							noteDirection = 1;
+					}
+					
+				case "flip u/d":
+					if(noteDirection == 1){
+						noteDirection = 2;
+					}else if(noteDirection == 2){
+						noteDirection = 1;
+					}
+				case "flip l/r":
+					if(noteDirection == 0){
+						noteDirection = 3;
+					}else if(noteDirection == 3){
+						noteDirection = 0;
+					}
+				case "flip all":
+					noteDirection = 3-noteDirection;
+				case "invert":
+					if(noteDirection == 0){
+						noteDirection = 1;
+					}else if(noteDirection == 1){
+						noteDirection = 0;
+					}
+					else if(noteDirection == 2){
+						noteDirection = 3;
+					}else if(noteDirection == 3){
+						noteDirection = 2;
+					}
+				case "shift 1 right":
+					noteDirection = (noteDirection + 1) % 4;
+				case "shift 1 left":
+					noteDirection = (noteDirection + 3) % 4;
+
+			}
+			songNote.data = noteDirection + (strumIndex * 4);
+			if(needsToBeRemoved)
+				notes.remove(songNote);
+		
+		}
+		
+		if(shuffleType == "minefield"){		
+			//Can't access songLength because the song hasn't loaded yet -.-
+			//var songLength:Float = PlayState.instance.currentSongLengthMs;
+			
+			//Load the song we are gonna play instead
+			var instId:String = PlayState.instance.currentInstrumental;
+			var suffix:String = (instId != '') ? '-$instId' : '';
+			var songInst = FunkinSound.load(Paths.inst(PlayState.instance.currentChart.song.id, suffix), 0, false, false, true, false, null, null, true);
+			
+			var songLength:Float = songInst.length;	
+			var howManySteps:Float = Conductor.instance.getTimeInSteps(songLength);
+			var howManyStepsRounded:Int = Std.int(howManySteps)+1;
+			
+			var notesToAdd = [];
+			for (curStep in 0...howManyStepsRounded){
+				//if(curStep % 4 != 0) continue;
+				//var newNote = cloneNote.clone();
+				var strumTime:Float = Conductor.instance.getStepTimeInMs(curStep);
+				//PlayState.instance.modDebugNotif("tim: '"+strumTime+"'", 0xFFFFFF00);
+				
+				for (data in 0...Strumline.KEY_COUNT){
+				
+					var alreadySomething:Bool = false;
+					for (songNote in notes){
+						if(songNote.data == data){
+						
+							var stepLength:Float = getTypeLengthAtMs(songNote.time, "step");
+						
+							var noteTime:Int = Std.int(songNote.time);
+							var thisHurtTime:Int = Std.int(strumTime);
+							
+							var holdLength:Float = songNote.length;
+							if(holdLength != 0) holdLength += stepLength*2; //plus a little bit extra to make the end more visible
+							else if( !isHurtNote(songNote.kind) ){
+								noteTime -= stepLength;
+								holdLength += stepLength*2;
+							}
+							var holdEnd:Int = Std.int(songNote.time + holdLength);
+							
+							//Hold check
+							if(thisHurtTime < holdEnd && thisHurtTime >= noteTime){
+								alreadySomething = true;
+								break;
+							}
+						}
+					}
+					
+					if(!alreadySomething){
+						var newNote = new SongNoteDataRaw(strumTime, data, 0, "hurt");
+						notesToAdd.push(newNote);
+						//var newNote = new SongNoteDataRaw(strumTime, data+4, 0, "hurt");
+						//notesToAdd.push(newNote);
+					}
+				}				
+			}
+			for (a in notesToAdd){
+				notes.push(a);
+			}
+		}
+		return notes;
+		
+		//PlayState.instance.playerStrumline.applyNoteData(playerNoteData);
+		//for (customStrummer in PlayState.instance.customStrumLines)
+		//{
+		//	if(customStrummer.defaultPlayerControl){
+		//		customStrummer.applyNoteData(playerNoteData);
+		//	}
+		//}
+	}
+	
+	//Port of this silly function from that based fork which fixes time signatures lol:
+	
+	/**
+   * An all-in-one function for getting either a step, beat, or measure's length in milliseconds from a given time change.
+   * @param ms The time in milliseconds. The time change is determined by this.
+   * @param type The type of length to return. Either "step", "beat", or "measure" works, along with their first character.
+   * @return The length of a step/beat/measure in milliseconds.
+   */
+  public function getTypeLengthAtMs(ms:Float, type:String = "beat"):Float
+  {
+	var conductor = Conductor.instance;
+	if(conductor == null) return 0.0;
+
+	if (conductor.timeChanges.length == 0) return 0;
+	var wantedTimeChange:SongTimeChange = conductor.timeChanges[0];
+	for (timeChange in conductor.timeChanges)
+	{
+		if (ms >= timeChange.timeStamp)
+		{
+			wantedTimeChange = timeChange;
+		}
+		else
+		{
+			// This time change is after the requested time.
+			break;
+		}
+	}
+	var wantedBeatLengthMs:Float = ((Constants.SECS_PER_MIN / wantedTimeChange.bpm) * Constants.MS_PER_SEC) * (4 / wantedTimeChange.timeSignatureDen);
+	return switch (type.toLowerCase())
+	{
+		case "measure", "m": wantedBeatLengthMs * wantedTimeChange.timeSignatureNum;
+		case "beat", "b": wantedBeatLengthMs;
+		case "step", "s": wantedBeatLengthMs / Constants.STEPS_PER_BEAT;
+		default: wantedBeatLengthMs;
+	}
+  }
+	
+
+}

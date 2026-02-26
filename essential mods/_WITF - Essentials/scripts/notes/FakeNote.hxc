@@ -1,0 +1,69 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.Preferences;
+import flixel.FlxSprite;
+import flixel.FlxG;
+import funkin.play.notes.SustainTrail;
+import funkin.util.Constants;
+import funkin.Highscore;
+
+// A note that appears but cannot be hit or missed. Trying to hit it will not lead to anything happening.
+class FakeNote extends Module {
+
+	var hurtNoteName:String = "fake";	
+	
+	var isWITF:Bool = true;
+    function new() {
+        super("FakeNote");
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+    }
+	
+	function onNoteIncoming(event)
+	{
+		super.onNoteIncoming(event);
+		if (event.note.kind == hurtNoteName)
+		{
+			// Removing this note from the totalNotes tally to ensure they don't affect the final score!
+			if(event.note.noteData.getStrumlineIndex() == 0){ // If player strumline note
+				if(isWITF){
+					//Because WITF has additional players!
+					if(event.note.weBelongTo == PlayState.instance.playerStrumline){
+						Highscore.tallies.totalNotes--;
+					}
+				}else{
+					Highscore.tallies.totalNotes--;
+				}
+				
+			}
+		} 
+	}
+	
+	function onNoteHit(event) {
+		if(PlayState.instance == null) return;
+		if (event.note.noteData.kind == hurtNoteName) {
+			var strumLine = PlayState.instance.playerStrumline;
+			event.cancelEvent();
+			if(!event.note.hasBeenHit){
+				event.note.hasBeenHit = true;
+
+				var sus = event.note.holdNoteSprite;
+				if(sus != null && event.note.noteData.kind == hurtNoteName){
+					strumLine.playNoteHoldCover(sus);
+					sus.hitNote = true;
+				}
+			}	
+		}else{
+			super.onNoteHit(event);
+			return;
+		}
+	}
+	
+	function onNoteMiss(event) {
+		if (event.note.noteData.kind == hurtNoteName) {
+			event.cancelEvent();
+			event.note.handledMiss = true;
+		}
+	}
+}

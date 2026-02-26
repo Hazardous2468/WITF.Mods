@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="clapping_hands.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="clap_hands instance 10000" x="3" y="3" width="149" height="188" frameX="-20" frameY="0" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10001" x="155" y="3" width="147" height="182" frameX="-18" frameY="-34" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10002" x="305" y="3" width="146" height="178" frameX="-16" frameY="-65" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10003" x="454" y="3" width="145" height="174" frameX="-14" frameY="-94" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10004" x="602" y="3" width="144" height="170" frameX="-12" frameY="-121" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10005" x="749" y="3" width="144" height="166" frameX="-10" frameY="-147" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10006" x="749" y="172" width="143" height="163" frameX="-9" frameY="-170" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10007" x="602" y="176" width="142" height="159" frameX="-7" frameY="-192" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10008" x="454" y="180" width="141" height="157" frameX="-6" frameY="-211" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10009" x="305" y="184" width="141" height="155" frameX="-5" frameY="-229" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10010" x="155" y="188" width="140" height="152" frameX="-4" frameY="-245" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10011" x="3" y="194" width="140" height="149" frameX="-3" frameY="-260" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10012" x="598" y="338" width="139" height="148" frameX="-2" frameY="-272" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10013" x="883" y="338" width="138" height="147" frameX="-2" frameY="-282" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10014" x="298" y="342" width="139" height="145" frameX="-1" frameY="-291" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10015" x="3" y="346" width="138" height="145" frameX="-1" frameY="-297" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10016" x="881" y="488" width="137" height="144" frameX="-1" frameY="-302" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10017" x="740" y="486" width="138" height="143" frameX="0" frameY="-305" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10018" x="440" y="486" width="138" height="144" frameX="0" frameY="-305" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10019" x="144" y="492" width="137" height="120" frameX="0" frameY="-337" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10020" x="144" y="492" width="137" height="120" frameX="0" frameY="-337" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10021" x="3" y="494" width="137" height="119" frameX="0" frameY="-337" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10022" x="3" y="494" width="137" height="119" frameX="0" frameY="-337" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10023" x="581" y="489" width="133" height="133" frameX="0" frameY="-317" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10024" x="581" y="489" width="133" height="133" frameX="0" frameY="-317" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10025" x="146" y="343" width="138" height="146" frameX="0" frameY="-305" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10026" x="146" y="343" width="138" height="146" frameX="0" frameY="-305" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10027" x="740" y="338" width="140" height="145" frameX="0" frameY="-306" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10028" x="740" y="338" width="140" height="145" frameX="0" frameY="-306" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10029" x="449" y="340" width="141" height="143" frameX="0" frameY="-309" frameWidth="169" frameHeight="457"/>
+	<SubTexture name="clap_hands instance 10030" x="287" y="490" width="127" height="132" frameX="-1" frameY="-316" frameWidth="169" frameHeight="457"/>
+</TextureAtlas>

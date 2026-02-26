@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="Good_Great_Hazard_v3.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="HazardGood instance 10000" x="3" y="2208" width="445" height="731" frameX="0" frameY="-731" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10001" x="3" y="2208" width="445" height="731" frameX="0" frameY="-659" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10002" x="3" y="2208" width="445" height="731" frameX="0" frameY="-587" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10003" x="3" y="2208" width="445" height="731" frameX="0" frameY="-515" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10004" x="3" y="2208" width="445" height="731" frameX="0" frameY="-447" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10005" x="3" y="2208" width="445" height="731" frameX="0" frameY="-383" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10006" x="3" y="2208" width="445" height="731" frameX="0" frameY="-325" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10007" x="3" y="2208" width="445" height="731" frameX="0" frameY="-272" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10008" x="3" y="2208" width="445" height="731" frameX="0" frameY="-225" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10009" x="3" y="2208" width="445" height="731" frameX="0" frameY="-184" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10010" x="3" y="2208" width="445" height="731" frameX="0" frameY="-148" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10011" x="3" y="2208" width="445" height="731" frameX="0" frameY="-117" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10012" x="3" y="2208" width="445" height="731" frameX="0" frameY="-90" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10013" x="3" y="2208" width="445" height="731" frameX="0" frameY="-68" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10014" x="3" y="2208" width="445" height="731" frameX="0" frameY="-49" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10015" x="3" y="2208" width="445" height="731" frameX="0" frameY="-33" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10016" x="3" y="2208" width="445" height="731" frameX="0" frameY="-22" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10017" x="3" y="2208" width="445" height="731" frameX="0" frameY="-12" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10018" x="3" y="2208" width="445" height="731" frameX="0" frameY="-6" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10019" x="451" y="2208" width="445" height="731" frameX="0" frameY="-1" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10020" x="3" y="2942" width="445" height="731" frameX="0" frameY="-1" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10021" x="3" y="3" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10022" x="3" y="3" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10023" x="453" y="3" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10024" x="3" y="738" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10025" x="3" y="738" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10026" x="453" y="738" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10027" x="3" y="1473" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10028" x="3" y="1473" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+	<SubTexture name="HazardGood instance 10029" x="453" y="1473" width="447" height="732" frameX="0" frameY="0" frameWidth="447" frameHeight="1462"/>
+</TextureAtlas>

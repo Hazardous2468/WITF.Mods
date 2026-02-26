@@ -1,0 +1,194 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.Preferences;
+import flixel.FlxSprite;
+import flixel.FlxG;
+import funkin.play.notes.SustainTrail;
+import funkin.play.notes.Strumline;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.Highscore;
+import flixel.graphics.FlxGraphic;
+import funkin.play.notes.NoteSplash;
+import funkin.util.Constants;
+import funkin.data.notestyle.NoteStyleRegistry;
+
+
+class HurtNotesManager extends Module {
+	var hurtNoteName:String = "hurt";
+	var shouldComboBreak:Bool = true;
+	var healthPenalty:Float = -0.3;
+	var scorePenalty:Float = -350;
+	
+	var initialHurtSplashAmount:Int = 5;
+	var noteSplashes:Array<FlxSprite> = [];
+	
+    function new() {
+        super("HurtNotesManager");
+    }
+	
+	function onCountdownStart(event) {
+		super.onCountdownStart(event);		
+		
+		noteSplashes = [];
+		for (i in 0...initialHurtSplashAmount)
+		{
+			createNoteSplash().kill();	
+		}
+	}	
+	
+	function createNoteSplash():NoteSplash{
+		var smoke:NoteSplash = new NoteSplash(NoteStyleRegistry.instance.fetchEntry("hurtnotestyle")); 
+		noteSplashes.push(smoke);
+		return smoke;
+	}
+	
+	function firstAvailable():FlxSprite{
+		var r:FlxSprite = null;
+		for (spr in noteSplashes)
+		{	
+			if(spr != null){
+				if(!spr.alive){
+					r = spr;
+					break;
+				}
+			}
+		}
+		return r;
+	}
+	
+	function doSplash(event){
+		//Create a flxsprite for every strumline and position accordingly
+		for (strumLine in PlayState.instance.allStrumLines)
+		{
+			if (strumLine.isPlayerControlled && !strumLine.asleep)
+			{
+				if (!strumLine.showNotesplash) continue;
+				var smoke = firstAvailable();
+				if (smoke != null)
+				{
+					smoke.revive();
+				}
+				else
+				{
+					smoke = createNoteSplash();
+				}
+				
+				smoke.play(event.note.noteData.getDirection());
+
+				if(PlayState.instance.camNotes != null){
+					smoke.cameras = [PlayState.instance.camNotes];
+				}else{
+					smoke.cameras = [PlayState.instance.camHUD];
+				}
+				PlayState.instance.add(smoke);
+				smoke.animation.finishCallback = function(name:String) {
+					PlayState.instance.remove(smoke);	
+					smoke.kill();
+				}
+				
+				var whichStrumNote = strumLine.getByIndex(event.note.noteData.data % 4);
+				
+				//smoke.x = whichStrumNote.x + (whichStrumNote.width/2) - (smoke.width/2);
+				//smoke.y = whichStrumNote.y + (whichStrumNote.height/2) - (smoke.height/2);
+				
+				smoke.x = whichStrumNote.x;
+				smoke.y = whichStrumNote.y;
+				
+				//smoke.x += 112/2;
+				//smoke.y += 112/2;
+				smoke.x += 20;
+				smoke.y += 20;
+				
+				smoke.x -= whichStrumNote.strumExtraModData.noteStyleOffsetX; // undo strum offset
+				smoke.y -= whichStrumNote.strumExtraModData.noteStyleOffsetY;
+				
+				
+				//smoke.x = whichStrumNote.x;
+				//smoke.y = whichStrumNote.y;
+				//smoke.x -= whichStrumNote.strumExtraModData.noteStyleOffsetX; // undo strum offset
+				//smoke.y -= whichStrumNote.strumExtraModData.noteStyleOffsetY;
+				
+				var ay:Float = whichStrumNote.alpha;
+				ay -= whichStrumNote.strumExtraModData.alphaSplashMod;
+				smoke.alpha = ay;
+				
+				smoke.scale.set(whichStrumNote.scale.x, whichStrumNote.scale.y);
+			}
+		}
+	}
+	
+	//The logic for when the player hits a hurt note. 
+	//Make sure custom strumLines which mimick the player don't trigger this to avoid stacking the effect!
+	function hurtNoteHit(event){
+		doSplash(event);
+		
+		PlayState.instance.applyScore(scorePenalty, "miss", healthPenalty, shouldComboBreak);
+		FunkinSound.playOnce(Paths.sound('notitg_mine'));
+		
+		//Add one to total notes to make sure we aren't at 100% for hitting a hurt note.
+		Highscore.tallies.totalNotes++;
+		
+		if(PlayState.instance.currentStage == null) return;
+		
+		var bf = PlayState.instance.currentStage.getBoyfriend();
+		if(bf != null){
+			//check if there is a hit animation, if yes then play it
+			//else we'll use miss animations instead.
+			if(bf.hasAnimation("hit") ){
+				bf.playAnimation("hit", true,true);
+			}
+			else{
+				bf.playSingAnimation(event.note.noteData.data % 4, true);
+			}
+		}
+	}
+	
+	function onNoteHit(event) {		
+		if(PlayState.instance == null){ 	//To stop any potential errors
+			return; 
+		}		
+		
+		if (event.note.noteData.kind == hurtNoteName) {
+		
+			var strumLine = event.note.weBelongTo;
+		
+			//perfect judgement = botplay
+			if (event.judgement == "perfect") {
+				event.cancelEvent();
+				event.note.hasBeenHit = true;
+				return;
+			}
+		
+			event.cancelEvent();
+
+			//strumLine.killNote(event.note);
+			if(!event.note.hasBeenHit){
+				event.note.hasBeenHit = true;
+				strumLine.hitNote(event.note, true);
+				
+				if (event.note.isHoldNote && event.note.holdNoteSprite != null)
+				{
+				  strumLine.playNoteHoldCover(event.note.holdNoteSprite);
+				}
+				
+				//Logic only works for Boyfriend!
+				if(strumLine == PlayState.instance.playerStrumline){
+					hurtNoteHit(event);
+				}
+			}
+		}else{
+			super.onNoteHit(event);
+			return;
+		}
+	}
+		
+	// Handle miss here to prevent character miss animations from playing!
+	function onNoteMiss(event) {
+		if (event.note.noteData.kind == hurtNoteName) {
+			event.note.handledMiss = true;
+			event.cancelEvent();
+		}
+	}
+}

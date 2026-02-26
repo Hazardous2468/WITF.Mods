@@ -1,0 +1,107 @@
+import funkin.play.notes.notekind.NoteKind;
+import funkin.audio.FunkinSound;
+import funkin.play.PlayState;
+import funkin.Preferences;
+import funkin.play.notes.NoteSplash;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.Highscore;
+import flixel.FlxG;
+import flixel.FlxSprite;
+import funkin.play.notes.NoteSplash;
+import funkin.util.Constants;
+
+import funkin.FunkinMemory;
+
+class HurtNote extends NoteKind
+{		
+	var bakedSpin:Bool = false;
+	var isWITF:Bool = true;
+
+	public function new(noteKind:String, description:String = "", ?noteStyleId:String, ?params:Array<NoteKindParam>)
+	{
+		super("hurt", "Hurt Note", "hurtnotestyle", []);
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+		if(!isWITF) bakedSpin = true;
+		FunkinMemory.permanentCacheSound(Paths.sound("notitg_mine", "shared"));
+		FunkinMemory.permanentCacheTexture(Paths.image("splashes-notitg", "shared"));
+		//this.scoreable = false; //this bugged lol?
+	}
+	
+	function onUpdate(event)
+	{
+		super.onUpdate(event);
+		if(PlayState.instance == null) return;
+
+		for (note in getNotes())
+		{
+			//if(isWITF) note.angleAngularVelocityOffset += event.elapsed * 400;
+			 
+			var holdNote = note.holdNoteSprite;
+			
+			if(holdNote!=null && holdNote.alive){
+				// While the hold note is being hit, and there is length on the hold note...
+				  if (holdNote.hitNote && !holdNote.missedNote && holdNote.sustainLength > 0)
+				  {
+					// UNDO the health gain from holding a hold note!
+					if (!PlayState.instance.isBotPlayMode)
+					{
+					  PlayState.instance.health -= Constants.HEALTH_HOLD_BONUS_PER_SECOND * event.elapsed * 2;
+					  PlayState.instance.songScore -= Std.int(Constants.SCORE_HOLD_BONUS_PER_SECOND * event.elapsed*2);
+					}
+				  }
+			}
+		}
+	}
+
+
+	function onNoteIncoming(event)
+	{
+		super.onNoteIncoming(event);
+		if (event.note.kind == "hurt")
+		{
+				
+			// Removing this note from the totalNotes tally to ensure they don't affect the final score!
+			if(event.note.noteData.getStrumlineIndex() == 0){ // If player strumline note
+				if(isWITF){
+					//Because WITF has additional players!
+					if(event.note.weBelongTo == PlayState.instance.playerStrumline){
+						Highscore.tallies.totalNotes--;
+					}
+				}else{
+					Highscore.tallies.totalNotes--;
+				}
+				
+			}
+		
+			var randomFrameRate:Int = 33 + FlxG.random.int(-2, 3);
+			event.note.animation.curAnim.frameRate = randomFrameRate;
+			if(bakedSpin){
+				event.note.animation.curAnim.reversed = FlxG.random.bool();
+			}else{
+				if(isWITF){
+					event.note.spinVelocity = FlxG.random.float(340, 380) * FlxG.random.sign();
+					//event.note.spinAngle = 360;
+				}
+				else
+					event.note.angularVelocity = FlxG.random.float(340, 380) * FlxG.random.sign();
+				
+			}
+			
+			event.note.active = true;
+			event.note.lowPriority = true;
+			if(isWITF) event.note.hitWindowMultiplier = 0.25; // 25% hit window size
+			
+			//event.note.offset.x = 45;
+			//event.note.offset.y = !Preferences.downscroll ? 150 : 260;
+		} 
+	}
+	
+	function onNoteHoldDrop(event)
+	{
+		if (event.holdNote.noteData.kind == "hurt") {
+			event.cancelEvent();
+		}
+	}
+}

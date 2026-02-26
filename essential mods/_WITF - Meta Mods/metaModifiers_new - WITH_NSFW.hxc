@@ -1,0 +1,1366 @@
+// EDITED VERSION TO HAVE "CENSOR" OPTIONS FOR SEX MOD
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.ui.AtlasMenuItem;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.FlxSprite;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.play.scoring.Scoring;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.play.modchartSystem.ModHandler;
+import funkin.play.modchartSystem.ModConstants;
+import funkin.modding.module.ModuleHandler;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.story.StoryMenuState;
+import funkin.ui.AtlasText;
+import StringTools;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModEventHandler;
+
+import funkin.ui.UIStateMachine;
+import funkin.ui.UIState;
+import flixel.FlxObject;
+
+//import flixel.util.FlxSave; //Blacklisted now :(
+import funkin.util.FileUtil;
+import funkin.util.FileWriteMode;
+
+class SelectableModifiers_NEW extends Module
+{
+	//CHANGE THIS TO FALSE IF YOU WISH TO KEEP THE DEFAULT STRUM BACKGROUND SPRITE
+	var replaceStrumBackgroundWithPath:Bool = true;
+	
+	
+	public var modifiersEnabled:Array<String> = [];
+	public var metaSpeedMod:Float = 1.0;
+	public var playbackRate:Float = 1.0;
+	
+	var playbackRateAffectTimingWindows:Bool = false;
+	var canAccessModMenu:Bool = false;
+	var closingModsMenuDelay:Bool = false;
+	
+	var curSaveFormatVersion:String = "v1.0";
+	var daSavePath:String = "mods/_WITF - Meta Mods/memory.txt";
+	public function new() {
+        super("SelectableModifiers_NEW",10);
+
+		for (arr in modifiers_chart){
+			for (i in arr){
+				var shuffleName:String = aliasConvert(i);
+				modifiers_chart_lowerCase.push(shuffleName);
+				
+				skipTheseMods.push(i.toLowerCase());
+			}
+		}
+		readSaveData();
+		
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		playbackRateModule.scriptSet("playbackRate", playbackRate);
+		
+		updateVarsWithNSFW();
+    }
+	var modifiers_chart_lowerCase:Array<String> = [];
+	
+	function readSaveData():Void{
+		var data:String = "";
+		if(!FileUtil.pathExists(daSavePath)){
+			saveData();
+		}else{
+			trace("Reading metamods data");
+			
+			data = FileUtil.readStringFromPath(daSavePath);
+			trace(data);
+			var dataSplit1 = data.split("#activeMods:");
+			var dataSplit2 = dataSplit1[0].split("_");
+			
+			var version:String = dataSplit2.shift();
+			
+			trace("Version: " + version);
+			
+			for (str in dataSplit2){
+				var strSplit = str.split("=");
+				var daNumber = strSplit[1];
+				
+				if(StringTools.contains(str, "playbackRate") ){
+					playbackRate = Std.parseFloat(daNumber);
+					trace("Set playbackRate to: " + playbackRate);
+				}else if(StringTools.contains(str, "metaSpeedMod")){
+					metaSpeedMod = Std.parseFloat(daNumber);
+					trace("Set metaSpeedMod to: " + metaSpeedMod);
+				}
+				
+			}
+			
+			modifiersEnabled = [];
+			if(dataSplit1[1].length > 0){
+				//The "active mods"
+				for (str in dataSplit1[1].split(",")){
+					modifiersEnabled.push(str);
+				}
+			}
+			
+		}
+		
+		updateChartModsModule();
+	}
+	
+	function updateChartModsModule():Void{
+		var activeShuffles:Array<String> = []; 
+		var chartModifiersModule = ModuleHandler.getModule("ChartModifiersModule");
+		if(chartModifiersModule!=null){
+			for (nameOfMod_real in modifiersEnabled)
+			{	
+				var shuffleName:String = aliasConvert(nameOfMod_real);
+				if(modifiers_chart_lowerCase.contains(shuffleName)){
+					activeShuffles.push(shuffleName);
+				}	
+			}
+			chartModifiersModule.scriptSet("activeShuffles", activeShuffles);
+			trace(activeShuffles);
+		}
+	}
+	
+	function saveData():Void{
+		trace("Saving metamods data");
+		var data:String = curSaveFormatVersion;
+		data += "_playbackRate=" + playbackRate;
+		data += "_metaSpeedMod=" + metaSpeedMod;
+		data += "#activeMods:";
+		for (m in modifiersEnabled){
+			data += m;
+			if(m != modifiersEnabled[modifiersEnabled.length-1]) //Don't add comma if we are last in the array
+				data += ",";
+		}
+		FileUtil.writeStringToPath(daSavePath, data, FileWriteMode.Force);
+		
+		
+		updateChartModsModule();
+	}
+		
+	override function onStateChangeEnd(event) {
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		playbackRateModule.scriptSet("playbackRate", playbackRate);
+	
+		super.onStateChangeEnd(event);
+		closeMenu();
+
+		
+		canAccessModMenu = false;
+		
+		curState = event.targetState;
+		
+		if (Std.isOfType(event.targetState, FreeplayState)) {
+			canAccessModMenu = true;
+		}
+		
+		inModMenu = false;
+		
+		var isPlayState:Bool = Std.isOfType(event.targetState, PlayState);
+		if(!isPlayState) addedAlready = false;
+	}
+	
+	var curState:FlxState;
+	
+	var inModMenu:Bool = false;
+	
+	var blackBG:FlxSprite;
+	var dividers:FlxSprite;
+	
+	var txtTitle_main:AtlasText;
+	var titles:FlxSprite;
+	var titleChart:FlxSprite;
+	
+	var modifiers_misc:Array<Array<String>> = [
+	["Botplay","Practice Mode","Loop Song", "Speed Mult", "Playback", "Sicks Only", "No Combo Breaks", "No Misses", "No Ghost Taps", "CHAOS"]
+	];
+		
+	var modifiers_uncatagorised:Array<Array<String>> = [
+	["Drunk", "Tipsy", "Tornado", "Beat", "Confusion"], 
+	["Bumpy", "Bounce", "ZigZag", "HourGlass", "Dizzy"], 
+	["TanDrunk", "TanTipsy", "TanTornado", "Jump", "Boomerang"]
+	];
+	
+	var modifiers_stealth:Array<Array<String>> = [
+	["Stealth", "Vanish"], 
+	["Hidden", "Sudden"]
+	];		
+	
+	var modifiers_speed:Array<Array<String>> = [
+	["Brake","Boost"], 
+	["Wave","Expand"]
+	];
+	
+	var modifiers_column:Array<Array<String>> = [
+	["Invert"], 
+	["VideoGames"], 
+	["Flip"]
+	];
+	
+	var modifiers_scale:Array<Array<String>> = [
+	["Tiny"], 
+	["Big"], 
+	["Pulse"]
+	];
+	
+	
+	var modifiers_chart:Array<Array<String>> = [
+	["Flip Up/Down","Flip All", "Shift 1 Left","Turn Left", "Swap","No Holds", "Random Shuffle"], 
+	["Flip Left/Right", "Chart Invert", "Shift 1 Right", "Turn Right", "Gaps","No Hurts", "Smart Shuffle"]
+	];
+		
+
+	var txt:Array<FlxText> = [];
+	
+	function updateVarsWithNSFW():Bool{
+		var returnVal:Bool = false;
+		if (isNSFWplayer() && !modifiers_misc[0].contains(sexModStringNames[0])){
+			modifiers_misc[0].push(sexModStringNames[0]);
+			modifiers_misc[0].push(sexModStringNames[1]);
+			modifiers_misc[0].push(sexModStringNames[2]);
+			
+			skipTheseMods.push(sexModStringNames[0].toLowerCase());
+			skipTheseMods.push(sexModStringNames[1].toLowerCase());
+			skipTheseMods.push(sexModStringNames[2].toLowerCase());
+			
+			returnVal = true;
+		}
+		
+		if (!isNSFWplayer() && modifiers_misc[0].contains(sexModStringNames[0])){
+			modifiers_misc[0].remove(sexModStringNames[0]);
+			modifiers_misc[0].remove(sexModStringNames[1]);
+			modifiers_misc[0].remove(sexModStringNames[2]);
+			
+			skipTheseMods.remove(sexModStringNames[0].toLowerCase());
+			skipTheseMods.remove(sexModStringNames[1].toLowerCase());
+			skipTheseMods.remove(sexModStringNames[2].toLowerCase());
+			
+			returnVal = true;
+		}
+		return returnVal;
+	}
+	
+	var theStateWeWereAddedTo;
+	function createMenu(){
+	
+		var stateToAddTo = FlxG.state;
+		var cameraToUse = FlxG.camera;
+		if(!onStoryState){ 
+			stateToAddTo = FlxG.state.subState;
+			cameraToUse = FlxG.state.subState.funnyCam;
+		}
+		
+		var sillyTextNeedsGenerating:Bool = false;
+		
+		trace("Created Meta Mods Menu!");
+		
+		if (updateVarsWithNSFW()){
+			sillyTextNeedsGenerating = true;
+		}
+
+		if(blackBG == null){
+			blackBG = new FlxSprite();
+		}
+		blackBG.makeGraphic(FlxG.width, FlxG.height, 0xFF000000);
+		blackBG.scrollFactor.set();
+		blackBG.alpha = 0.7;
+		blackBG.cameras = [cameraToUse];
+		blackBG.screenCenter();
+		stateToAddTo.add(blackBG);
+		
+		if(dividers == null){
+			dividers = new FlxSprite().loadGraphic(Paths.image("metaModMenu/dividers"));
+			dividers.scrollFactor.set();
+		}
+		dividers.cameras = [cameraToUse];
+		dividers.screenCenter();
+		//stateToAddTo.add(dividers);
+		
+		
+		if(scoreWarningTxt == null){
+			scoreWarningTxt = new FlxText(0, 0, 0, "Score will not be saved!");
+			scoreWarningTxt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFF0000, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+			scoreWarningTxt.borderSize = 1.5;
+			scoreWarningTxt.active = false;
+		}
+		scoreWarningTxt.cameras = [cameraToUse];
+		scoreWarningTxt.x = (FlxG.width * 0.5) - (scoreWarningTxt.width/2);
+		stateToAddTo.add(scoreWarningTxt);
+		scoreWarningTxt.visible = !checkIfScoreable();
+		
+		
+		if(titles == null){
+			titles = new FlxSprite().loadGraphic(Paths.image("metaModMenu/titles"));
+			titles.scrollFactor.set();
+		}
+		titles.cameras = [cameraToUse];
+		titles.screenCenter();
+		txtTitles_x = titles.x;
+		stateToAddTo.add(titles);
+		
+		if(titleChart == null){
+			titleChart = new FlxSprite().loadGraphic(Paths.image("metaModMenu/titles_chart"));
+			titleChart.scrollFactor.set();
+		}
+		titleChart.screenCenter();
+		titleChart.y = titleChart.height*0.75;
+		txtTitleChart_x = titleChart.x;
+		titleChart.offset.x = 175;
+		titleChart.cameras = [cameraToUse];		
+		stateToAddTo.add(titleChart);
+		
+		if(txtTitle_main == null){
+			txtTitle_main = new AtlasText(FlxG.width * 0.41, 24, "Meta Modifiers", "bold");
+			txtTitle_main.scrollFactor.set();
+			txtTitle_main_x_right=txtTitle_main.x;
+			sillyTextNeedsGenerating = true;
+		}
+		
+		if(sillyTextNeedsGenerating){
+			txtMap = null;
+			txtMap_xPos = null;
+			txtMap_yPos = null;
+			txt_Misc = [];
+			txt = [];
+			txt_y = [];
+			
+			//Set up the mod options!
+			createSillyText(modifiers_uncatagorised, FlxG.width*0.42, 148, 68*4, 32);
+			createSillyText(modifiers_misc, 178, 48, 0, 42);
+			createSillyText(modifiers_stealth, FlxG.width*0.72, FlxG.height * 0.62, 68*3, 32);
+			//createSillyText(modifiers_speed, FlxG.width*0.275, FlxG.height * 0.63, 68*2, 48);
+			createSillyText(modifiers_speed, FlxG.width*0.3425, FlxG.height * 0.6125, 68*2.7, 48);
+			createSillyText(modifiers_scale, FlxG.width*0.25, FlxG.height * 0.9, 68*1.8, 32);
+			createSillyText(modifiers_column, FlxG.width*0.63, FlxG.height * 0.9, 68*2.7, 32);
+			
+			createSillyText(modifiers_chart, FlxG.width*-0.64, 240, 68*6, 48);
+			
+			var sampleTxt = txt_Misc[0];
+			howMuchToGoToCenter = (FlxG.width/2) - (sampleTxt.width/2);
+			howMuchToGoToCenter = howMuchToGoToCenter - sampleTxt.x;
+		}
+		
+		
+		for (newTxt in txt){
+			newTxt.cameras = [cameraToUse];
+			stateToAddTo.add(newTxt);
+		}
+		
+		
+		txtTitle_main.cameras = [cameraToUse];
+		stateToAddTo.add(txtTitle_main);
+
+		
+		theStateWeWereAddedTo = stateToAddTo;
+		tryMove(0,0);
+		updateFakeCam(0, true); //snap them to correct pos!
+	}
+	
+	var txtTitle_main_x_right:Float = 0;
+	var txtTitles_x:Float = 0;
+	var txtTitleChart_x:Float = 0;
+	var txt_y:Array<Float> = [];
+	var txt_Misc:Array<FlxText> = [];
+	
+	var scoreWarningTxt:FlxText = null;
+
+	
+	//For consistency
+	function lerpThing(current, target, elapsed:Float, snap:Bool = false):Float{
+		return (snap ? target : FlxMath.lerp(current, target, FlxMath.bound(elapsed * 12, 0, 1) ) );
+	}
+	
+	var howMuchToGoToCenter = 0;
+	var howMuchToGoToCenter_multiplier = 1.2;
+	function updateFakeCam(elapsed:Float, snap:Bool = false){
+		
+		if(txtTitle_main!=null){
+			var intendedPos:Float = (FlxG.width/2) - (txtTitle_main.getWidth()*0.5);
+			if(curSelect[2] > 0) intendedPos = txtTitle_main_x_right;
+			else if(curSelect[2] < 0) intendedPos = intendedPos + (intendedPos - txtTitle_main_x_right);
+			
+			txtTitle_main.x = lerpThing(txtTitle_main.x, intendedPos, elapsed, snap);
+		}	
+
+		if(titles!=null){
+			var intendedPos:Float = txtTitles_x;
+			if(curSelect[2] <= 0) intendedPos += howMuchToGoToCenter*howMuchToGoToCenter_multiplier;
+			if(curSelect[2] < 0) intendedPos += howMuchToGoToCenter*howMuchToGoToCenter_multiplier;
+			
+			titles.x = lerpThing(titles.x, intendedPos, elapsed, snap);
+		}	
+		
+		if(titleChart!=null){
+			var intendedPos:Float = txtTitleChart_x;
+			if(curSelect[2] >= 0) intendedPos -= howMuchToGoToCenter*howMuchToGoToCenter_multiplier;
+			if(curSelect[2] > 0) intendedPos -= howMuchToGoToCenter*howMuchToGoToCenter_multiplier;
+			titleChart.x = lerpThing(titleChart.x, intendedPos, elapsed, snap);
+		}	
+		if(txt != null && txt.length > 0 && txtMap_xPos != null){			
+			for (i in 0...txt.length){
+				var t:FlxText = txt[i];
+				
+				var isMiscText:Bool = txt_Misc.contains(t);
+				
+				var intendedPos:Float = txtMap_xPos.get(t);
+				if(curSelect[2] <= 0){ 
+					intendedPos += howMuchToGoToCenter * (isMiscText ? 1.0 : howMuchToGoToCenter_multiplier);
+				}
+				if(curSelect[2] < 0){ 
+					intendedPos += howMuchToGoToCenter * (isMiscText ? 1.0 : howMuchToGoToCenter_multiplier);
+				}
+				
+				if(curTxt !=null && curTxt==t){
+					intendedPos -= 26;
+				}
+
+				t.x = lerpThing(t.x, intendedPos, elapsed, snap);	
+
+				if(isMiscText){
+					intendedPos = txtMap_yPos.get(t);
+					if(curSelect[2] == 0){ 
+						intendedPos += 100;
+					}
+					t.y = lerpThing(t.y, intendedPos, elapsed, snap);	
+				}
+			}
+		}
+
+	}
+	
+	var curTxt:FlxText = null;
+	
+	function createSillyText(arr:Array<Array<String>>,xOffset:Float, yOffset:Float, xSpacing:Float, ySpacing:Float){
+		var xCounter:Int = 0;
+		var yCounter:Int = 0;
+		
+		for (x in arr){
+			yCounter = 0;
+			for (y in x){
+				var t = y;
+				
+				var newTxt:FlxText = new FlxText(xOffset+(xCounter*xSpacing), yOffset+(yCounter*ySpacing), 0, t);
+				newTxt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+				newTxt.borderSize = 1.5;
+				newTxt.x -= newTxt.width/2;
+				newTxt.active = false;
+				txt.push(newTxt);
+				txt_y.push(newTxt.y);
+				if(arr == modifiers_misc){
+					txt_Misc.push(newTxt);
+				}
+				yCounter++;
+			}
+			xCounter++;
+		}
+	}
+	
+	function closeMenu(){
+		if(theStateWeWereAddedTo==null) return;
+		theStateWeWereAddedTo.remove(blackBG);
+		theStateWeWereAddedTo.remove(dividers);
+		theStateWeWereAddedTo.remove(txtTitle_main);
+		theStateWeWereAddedTo.remove(titles);
+		theStateWeWereAddedTo.remove(titleChart);
+		theStateWeWereAddedTo.remove(scoreWarningTxt);
+		for (i in txt){
+			theStateWeWereAddedTo.remove(i);
+		}
+		
+		
+		saveData();	
+		
+	}
+	
+	//X, Y, CATAGORY (see below)
+	//0 = playback rate / misc
+	//1 = main
+	//2 = speed
+	//3 = stealth
+	//4 = scale
+	//5 = column
+	//-1 = modifiers
+	var curSelect:Array<Int> = [0,0,0];
+	
+	function catagoryMoveTo(id:Int){
+		curSelect[2] = id;
+	}
+	
+	var editingValue:Bool = false;
+	var editingPlaybackValue:Bool = false;
+	
+	//Gets a mod name and converts it to it's true name. Mainly used for chart mods.
+	function aliasConvert(daString:String):String{
+		daString = daString.toLowerCase();
+		switch(daString){
+			case "chart invert":
+				daString = "invert";
+			case "flip up/down":
+				daString = "flip u/d";
+			case "flip left/right":
+				daString = "flip l/r";
+			case "gaps":
+				daString = "gap";
+			case "random shuffle":
+				daString = "shuffle";
+		}
+		return daString;
+	}
+	
+	function tryInteract(){
+		curTxt = curSelectToFlxText();
+		var t:String = txtMap.get(curTxt).toLowerCase();
+		
+		if(StringTools.contains(t, "speed")){
+			editingValue = !editingValue;
+			editingPlaybackValue = false;
+			if(editingValue){
+				curTxt.color = 0xFF99FF00;
+			}else{
+				curTxt.color = 0xFFFFFFFF;
+			}
+			FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65);
+		}else if(StringTools.contains(t, "playback")){
+			editingPlaybackValue = true;
+			editingValue = !editingValue;
+			if(editingValue){
+				curTxt.color = 0xFF99FF00;
+			}else{
+				curTxt.color = 0xFFFFFFFF;
+			}
+			FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65);
+		}else{
+			editingValue = false;
+			if(modifiersEnabled.contains(t)){
+				modifiersEnabled.remove(t);
+				curTxt.color = 0xFFFFFFFF;
+				FunkinSound.playOnce(Paths.sound("unfav"), 0.63);
+			}else{
+				curTxt.color = 0xFF00FF00;
+				modifiersEnabled.push(t);
+				FunkinSound.playOnce(Paths.sound("fav"), 0.63);
+			}
+		}
+		if(scoreWarningTxt!=null)
+			scoreWarningTxt.visible = !checkIfScoreable();
+	}
+	
+	
+	function tryMove(changeX:Int = 0, changeY:Int = 0){
+
+		if(editingValue){
+
+			var changeAmount:Float = changeX * 0.1;
+			changeAmount *= FlxG.keys.pressed.SHIFT ? 0.25 : 1.0;
+			
+			if(editingPlaybackValue){
+				var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+				if(playbackRateModule == null){ 
+					FunkinSound.playOnce(Paths.sound("CS_locked"), 0.65);
+					return;
+				}else{
+					playbackRateModule.scriptCall("addToPlaybackRate", [changeAmount]);
+					playbackRate = playbackRateModule.scriptGet("playbackRate");
+				}
+				if(playbackRate > 0.075)
+					FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65).pitch = playbackRate;
+			}else{
+				metaSpeedMod += changeAmount;
+				metaSpeedMod = FlxMath.roundDecimal(metaSpeedMod, 3);
+				metaSpeedMod = FlxMath.bound(metaSpeedMod, 0, 3); // clamp
+				FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65).pitch += changeX*0.075;
+			}
+			
+			//FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65).pitch += changeX*0.075;
+
+			curTxt = curSelectToFlxText();
+			curTxt.text = "> " + txtMap.get(curTxt);
+			curTxt.text += ": " + (editingPlaybackValue ? playbackRate : metaSpeedMod);
+			
+			if(scoreWarningTxt!=null)
+				scoreWarningTxt.visible = !checkIfScoreable();
+			
+			return;
+		}
+	
+		curSelect[0] += changeX;
+		curSelect[1] += changeY;
+		
+		if(curSelect[0] < 0){
+			//overflow left			
+			switch(curSelect[2]){
+				case -1:
+					catagoryMoveTo(1);
+					
+					if(curSelect[1] > 4){
+						curSelect[1] = 4;
+					}
+				case 0:
+					catagoryMoveTo(-1);
+					curSelect[0] = 0;
+					curSelect[0] = 0;
+				case 1:
+					catagoryMoveTo(0);
+				case 2:
+					catagoryMoveTo(0);
+				case 3:
+					catagoryMoveTo(2);
+					if(curSelect[1] > 0)
+						curSelect[1] = 0;
+				case 4:
+					catagoryMoveTo(5);
+				case 5:
+					catagoryMoveTo(4);
+			}
+			
+			curSelect[0] = getCurCatagory().length-1;
+		}
+		if(curSelect[0] >= getCurCatagory().length){
+			//overflow right
+			switch(curSelect[2]){
+				case -1:
+					catagoryMoveTo(0);
+				case 0:
+					catagoryMoveTo(1);
+					if(curSelect[1] > 4){
+						curSelect[1] = 4;
+					}
+				case 1:
+					catagoryMoveTo(0);
+				case 2:
+					catagoryMoveTo(3);
+				case 3:
+					catagoryMoveTo(2);
+				case 4:
+					catagoryMoveTo(5);
+				case 5:
+					catagoryMoveTo(4);
+			}
+			curSelect[0] = 0;
+		}
+		if(curSelect[1] < 0){
+			//overflow up
+			switch(curSelect[2]){
+				case 5:
+					catagoryMoveTo(3);
+					curSelect[0] = getCatagoryFromID(3).length-1;
+				case 4:
+					catagoryMoveTo(2);
+				case 2:
+					catagoryMoveTo(1);
+					curSelect[0] = 0;
+				case 3:
+					catagoryMoveTo(1);
+					curSelect[0] = getCatagoryFromID(1).length-1;
+				case 1:
+				
+					if(curSelect[0] >= 1){
+						catagoryMoveTo(5);
+						curSelect[0] = 0;
+					}else{
+						catagoryMoveTo(4);
+					}
+			}
+			
+			var curCata = getCurCatagory();
+			if(curSelect[0] >= curCata.length-1 ){
+				curSelect[0] = curCata.length-1;
+			}
+			curSelect[1] = curCata[curSelect[0]].length-1;
+		}
+		if(curSelect[1] >= getCurCatagory()[curSelect[0]].length){
+			//overflow down
+			switch(curSelect[2]){
+				case 4:
+					catagoryMoveTo(1);
+					curSelect[0] = 0;
+				case 5:
+					catagoryMoveTo(1);
+					curSelect[0] = getCurCatagory().length-1;
+				case 1:
+					if(curSelect[0] >= 1){
+						catagoryMoveTo(3);
+						curSelect[0] = 0;
+					}else{
+						catagoryMoveTo(2);
+					}
+				case 2:
+					catagoryMoveTo(4);
+				case 3:
+					catagoryMoveTo(5);
+					if(curSelect[0] >= 1){
+						curSelect[0] = getCurCatagory().length-1;
+					}
+			}
+			curSelect[1] = 0;
+		}
+		
+		FunkinSound.playOnce(Paths.sound("scrollMenu"), 0.65);
+		
+		//setup txtMap if not already done
+		if(txtMap == null){
+			for (i in txt){
+				if(txtMap == null){
+					txtMap = [i => i.text];
+				}else{
+					txtMap.set(i, i.text);
+				}
+				
+				if(txtMap_xPos == null){
+					txtMap_xPos = [i => i.x];
+				}else{
+					txtMap_xPos.set(i, i.x);
+				}
+				if(txtMap_yPos == null){
+					txtMap_yPos = [i => i.y];
+				}else{
+					txtMap_yPos.set(i, i.y);
+				}
+			}
+		}
+		
+		curTxt = curSelectToFlxText();
+		
+		for (i in txt){
+			i.text = txtMap.get(i);
+			
+			if(StringTools.contains(i.text.toLowerCase(), "speed")){
+				i.text += ": " + metaSpeedMod;
+			}else if(StringTools.contains(i.text.toLowerCase(), "playback")){
+				i.text += ": " + playbackRate;
+			}
+			
+			//i.x = txtMap_xPos.get(i);
+			i.scale.set(1,1);
+			if(modifiersEnabled.contains(i.text.toLowerCase())){
+				if(i == curTxt){
+					i.color = 0xFF00FF00;
+				}else{
+					i.color = 0xFF00D500;
+				}
+			}else{
+				if(i == curTxt){
+					i.color = 0xFFFFFFFF;
+				}else{
+					i.color = 0xFFE0E0E0;
+				}
+			}
+		}
+		
+		
+		if(curTxt !=null){
+			curTxt.text = "> " + curTxt.text;
+			//curTxt.x -= 26;
+			curTxt.scale.set(1.2,1.2);
+		}
+		
+	}
+	
+	var txtMap:Map<FlxText,String>;
+	var txtMap_xPos:Map<FlxText,Float>;
+	var txtMap_yPos:Map<FlxText,Float>;
+	
+	function getCatagoryFromID(id:Int):Array<Array<String>>{
+		var curCatagory = modifiers_misc;
+		switch(id){
+			case -1:
+				curCatagory = modifiers_chart;
+			case 0:
+				curCatagory = modifiers_misc;
+			case 1:
+				curCatagory = modifiers_uncatagorised;
+			case 2:
+				curCatagory = modifiers_speed;
+			case 3:
+				curCatagory = modifiers_stealth;
+			case 4:
+				curCatagory = modifiers_scale;
+			case 5:
+				curCatagory = modifiers_column;
+		}
+		return curCatagory;
+	}
+	
+	function getCurCatagory():Array<Array<String>>{
+		return getCatagoryFromID(curSelect[2]);
+	}
+	
+	function curSelectToString():String{
+		var s:String = "?";
+		
+		var curCatagory = getCurCatagory();
+		s = curCatagory[curSelect[0]][curSelect[1]];
+		
+		return s;
+	}
+	
+	
+	function curSelectToFlxText():FlxText{
+		//Special check for Playback and ScrollMod options
+		if(curSelect[2] == 0){
+			if(curSelect[1] == 0 && curSelect[0] == 0){
+				//Playback selected!
+			}
+		}
+	
+		var s = curSelectToString();
+		for (i in txt){
+			if (StringTools.contains(i.text, s)){
+				return i;
+			}
+		}
+		return null;
+	}
+
+		
+	var onStoryState:Bool = false;
+		
+	function onUpdate(callback)
+	{
+		if(PlayState.instance != null) return; //Skip all logic if in playstate!
+		
+		//Temporarily disabled for storyState until softlock can be fixed!
+		onStoryState = Std.isOfType(FlxG.state, StoryMenuState);
+		//onStoryState = false;
+		
+		canAccessModMenu = (Std.isOfType(FlxG.state.subState, FreeplayState) || onStoryState);
+		
+		
+		
+		if(closingModsMenuDelay){
+			closingModsMenuDelay = false;
+			if(!onStoryState)
+				FlxG.state.subState.uiStateMachine.transition(UIState.Idle);
+			else
+				FlxG.state.selectedLevel = false;
+		}
+		
+		if(canAccessModMenu){
+		
+			var state = (onStoryState ? FlxG.state : FlxG.state.subState);
+			
+	
+			
+
+			if(onStoryState){
+				if(!inModMenu && (state.selectedLevel || state.exitingMenu)) return;
+			}else{
+				if(!inModMenu && !FlxG.state.subState.uiStateMachine.canInteract()) return;
+			}
+
+
+			if(FlxG.keys.justPressed.CONTROL || (state.controls.BACK && inModMenu && !editingValue)){
+				if(editingValue && FlxG.keys.justPressed.CONTROL){
+					tryInteract(); return;
+				}
+				
+				inModMenu = !inModMenu;
+				
+				if(inModMenu){
+					if(!onStoryState)
+						FlxG.state.subState.uiStateMachine.transition(UIState.Disabled);
+						//FlxG.state.subState.controls.active = false;
+					else
+						state.selectedLevel = true;
+					createMenu();
+				}else{
+					if(state.controls.BACK)
+						closingModsMenuDelay = true;
+					else
+						if(!onStoryState)
+							FlxG.state.subState.uiStateMachine.transition(UIState.Idle);
+						else
+							FlxG.state.selectedLevel = false;
+							
+						
+					closeMenu();
+				}
+			}
+		}
+	
+		if(inModMenu){
+			var state = (onStoryState ? FlxG.state : FlxG.state.subState);
+			if(state.controls.BACK && editingValue){
+				tryInteract();
+			}
+		
+			//Reset!
+			if(state.controls.RESET_P){
+				metaSpeedMod  = 1.0;
+				playbackRate  = 1.0;
+				modifiersEnabled = [];
+				
+				var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+				playbackRateModule.scriptSet("playbackRate", 1.0);
+				
+				
+				var chaosModule = ModuleHandler.getModule("ChaosMode");
+				var resetOnMissModule = ModuleHandler.getModule("ResetOnMiss");
+				var loopingSongsModule = ModuleHandler.getModule("LoopingSongs");
+				chaosModule.scriptSet("enabled", false);
+				loopingSongsModule.scriptSet("enabled", false);
+				resetOnMissModule.scriptSet("sickOnly", false);
+				resetOnMissModule.scriptSet("noComboBreaks", false);
+				resetOnMissModule.scriptSet("noGhost", false);
+				resetOnMissModule.scriptSet("noMiss", false);
+				
+				FunkinSound.playOnce(Paths.sound("cancelMenu"), 0.65);
+				tryMove(0,0);
+				if(scoreWarningTxt!=null)
+					scoreWarningTxt.visible = !checkIfScoreable();
+			}
+		
+			//Interact with curSelect!
+			if(state.controls.ACCEPT_P){
+				tryInteract();
+			}
+		
+			if(state.controls.UI_RIGHT_P)
+				tryMove(1,0);
+			if(state.controls.UI_LEFT_P)
+				tryMove(-1,0);
+			if(state.controls.UI_UP_P)
+				tryMove(0,-1);
+			if(state.controls.UI_DOWN_P)
+				tryMove(0,1);
+				
+			updateFakeCam(callback.elapsed, false);
+			
+		}
+	}
+	
+	
+	
+	
+	
+	//
+	// Logic for adding the meta mods to PlayState!
+	//
+	
+	public var skipTheseMods:Array<String> = [
+	"chaos","loop song", "practice", "practice mode", "botplay", 
+	"sicks only", "no combo breaks", "no misses", "no ghost taps", 
+	"playback", "speed mult"];
+	
+
+	public function createMetaMod(nameOfMod_real:String, strumLine:Strumline){
+		var nameOfMod:String = nameOfMod_real;
+		if(nameOfMod_real == "big") nameOfMod = "tiny";
+		if(nameOfMod_real == "boomerang") nameOfMod = "circy";
+		if(nameOfMod_real == "bounce") nameOfMod = "bouncez";
+		if(nameOfMod_real == "pulse") nameOfMod = "bumpyscale";
+	
+		var mod = ModConstants.createNewMod(nameOfMod);
+		var mmm:Float = 1.0;
+		if (strumLine.mods.isDad && ModConstants.dadInvert.contains(nameOfMod)) mmm = -1;
+		
+		var startingValue:Float = 1.0 * mmm;
+		
+		
+		//Some small fixes for these mods until the actual mod logic gets improved
+		switch(nameOfMod_real){
+			case "bounce":
+				startingValue *= 2.0;
+			case "bumpy":
+				startingValue *= 2.25;
+			case "confusion":
+				startingValue *= 180;
+			case "hourglass":
+				if(modifiersEnabled.contains("flip"))
+					startingValue *= -1;
+			case "boomerang":
+				startingValue = 0.74;
+			case "big":
+				startingValue *= 0.5;
+				startingValue *= -1.0;
+				mod.tag = "big";
+			case "stealth":
+				startingValue *= 0.5;
+			case "tiny":
+				startingValue *= 0.5;
+			case "bangarang":
+				startingValue *= 1.5;
+				
+			case "tandrunk": //nerf the intensity
+				startingValue *= 0.75;
+				
+			case "jump":
+				startingValue *= metaSpeedMod;
+			
+			case "oldboost": //Because this mod sucks ass unless you slow the scroll speed right down lmao
+				startingValue *= 2.4;
+				var mod_2 = ModConstants.createNewMod("speedmod");
+				var startingValue2:Float = 0.35;
+				mod_2.baseValue = startingValue2;
+				mod_2.setVal(startingValue2);
+				mod_2.strumOwner = strumLine;
+				mod_2.tag = "meta" + mod.tag + "_"+mod_2.tag;
+				strumLine.mods.modifiers.set(mod_2.tag, mod_2);
+		}
+		
+		if(mod == null) return null;
+		mod.baseValue = startingValue;
+		mod.setVal(startingValue);
+		
+		
+		mod.strumOwner = strumLine;
+		
+		mod.tag = "meta" + mod.tag;
+		
+		trace("created: " + mod.tag);
+		return mod;
+	}
+	
+	function checkIfWeEnableWITF():Bool{
+		var shouldWeEnableWITF:Array<String> = [];
+		for (m in modifiersEnabled){
+			if(!skipTheseMods.contains(m.toLowerCase())){
+				shouldWeEnableWITF.push(m);
+			}
+		}
+		
+		//PlayState.instance.modDebugNotif("a: " + shouldWeEnableWITF, 0xFFFFFF00);
+		//PlayState.instance.modDebugNotif(shouldWeEnableWITF.length <= 0 ? "0 boi" : "enable me", 0xFFFFFF00);
+		
+	
+		if(shouldWeEnableWITF.length <= 0 && metaSpeedMod == 1.0){ //don't do anything if there are no meta mods available to add
+			return false;
+		}else{
+			return true;
+		}
+	}
+	
+	function addMetaMods(){
+
+		//Do nothing if chartingMode!!!
+		if(PlayState.instance.isChartingMode){
+			return;
+		}
+		
+		
+		var chaosModule = ModuleHandler.getModule("ChaosMode");
+		chaosModule.scriptSet("enabled", (modifiersEnabled.contains("chaos")));
+		if(chaosModule.scriptGet("enabled")){
+			//Mark notifs as critical error to display them on songs which hide notifs lol
+			PlayState.instance.modDebugNotif("'Chaos Mode' is still a WIP!", 0xFFFF6A00, true);
+		}
+
+		
+		PlayState.instance.isPracticeMode = modifiersEnabled.contains("practice mode");
+		PlayState.instance.isBotPlayMode = modifiersEnabled.contains("botplay");
+		PlayState.instance.updateScoreText();
+				
+		
+		var resetOnMissModule = ModuleHandler.getModule("ResetOnMiss");
+		resetOnMissModule.scriptSet("sickOnly", (modifiersEnabled.contains("sicks only")));
+		resetOnMissModule.scriptSet("noComboBreaks", (modifiersEnabled.contains("no combo breaks")));
+		resetOnMissModule.scriptSet("noGhost", (modifiersEnabled.contains("no ghost taps")));
+		resetOnMissModule.scriptSet("noMiss", (modifiersEnabled.contains("no misses")));
+		
+		var loopingSongsModule = ModuleHandler.getModule("LoopingSongs");
+		loopingSongsModule.scriptSet("enabled", (modifiersEnabled.contains("loop song")));
+				
+
+		if(!checkIfWeEnableWITF()){ //don't do anything if there are no meta mods available to add
+			return;
+		}
+		
+		//For fnf v0.6.3 as they fixed the drawDistance logic or something
+		var drawDistanceFix:Bool = false;
+		
+		if(modifiersEnabled.contains("chaos")) drawDistanceFix = true; //For bigger drawdistance for chaos mode!
+		
+		//Now we create the mods and apply them to the active mod list.
+		for (strumLine in PlayState.instance.allStrumLines){
+			for (nameOfMod_real in modifiersEnabled)
+			{				
+				//skip these
+				if(skipTheseMods.contains(nameOfMod_real)){
+					continue;
+				}
+				
+				var mod = createMetaMod(nameOfMod_real, strumLine);
+				if(mod == null) continue;
+				strumLine.mods.modifiers.set(mod.tag, mod);
+				trace("added: " + mod.tag);
+				
+				//Some small fixes for these mods until the actual mod logic gets improved
+				switch(nameOfMod_real){
+					case "brake":
+						drawDistanceFix = true;
+					case "boomerang":
+						drawDistanceFix = true;
+					case "bangarang":
+						drawDistanceFix = true;						
+					case "boost": 
+						drawDistanceFix = true;
+					case "oldboost": 
+						drawDistanceFix = true;
+				}
+
+				
+			}		
+			
+			if(metaSpeedMod != 1.0){
+				drawDistanceFix = true;
+				var mod_3 = ModConstants.createNewMod("speedmod");
+				var startingValue3:Float = metaSpeedMod;
+				mod_3.baseValue = startingValue3;
+				mod_3.setVal(startingValue3);
+				mod_3.strumOwner = strumLine;
+				mod_3.tag = "meta" + mod_3.tag;
+				strumLine.mods.modifiers.set(mod_3.tag, mod_3);
+			}
+			
+			
+			if(drawDistanceFix && metaSpeedMod != 0.0){
+				var drawD:Float = 1.5;
+				if(metaSpeedMod != 1.0){
+					drawD = 1/(Math.abs(metaSpeedMod));
+					drawD += 0.78;
+				}
+			
+				var mod_d = ModConstants.createNewMod("drawdistance");
+				mod_d.baseValue = drawD;
+				mod_d.setVal(drawD);
+				mod_d.strumOwner = strumLine;
+				mod_d.tag = "meta" + mod_d.tag;
+				strumLine.mods.modifiers.set(mod_d.tag, mod_d);
+			}
+			
+			
+			//If player has background opacity for their strums, we'll disable it and replace it with our own background using an arrowpath
+			if(replaceStrumBackgroundWithPath && Preferences.strumlineBackgroundOpacity > 0){
+				var doWeAlreadyArrowpath:Bool = false;
+				//But before that, we need to make sure arrowpath isn't already being used for an already existing modchart.
+				//Go through every single modifier for this strum if we already have one active
+				for (mod in strumLine.mods.mods_all)
+				{
+					if(StringTools.contains(mod.tag.toLowerCase(), "arrowpath")){
+						doWeAlreadyArrowpath = true;
+					}
+				}
+				if(strumLine.notitgPathSprite != null){
+					doWeAlreadyArrowpath = true;
+				}
+				
+				if(!doWeAlreadyArrowpath){
+					strumLine.background.visible = false;
+				
+					strumLine.arrowPathSetup();
+					strumLine.refresh();
+					strumLine.drawArrowPaths = true;
+					
+
+					var mod_path = ModConstants.createNewMod("arrowpath");
+					mod_path.baseValue = Preferences.strumlineBackgroundOpacity/100;
+					mod_path.setVal(Preferences.strumlineBackgroundOpacity/100);
+					mod_path.strumOwner = strumLine;
+					mod_path.tag = "meta" + mod_path.tag;
+					strumLine.mods.modifiers.set(mod_path.tag, mod_path);
+					
+					var mod_path = ModConstants.createNewMod("arrowpathwidth");
+					mod_path.baseValue = 2.25;
+					mod_path.setVal(2.25);
+					mod_path.strumOwner = strumLine;
+					mod_path.tag = "meta" + mod_path.tag;
+					strumLine.mods.modifiers.set(mod_path.tag, mod_path);
+					
+					var mod_path = ModConstants.createNewMod("arrowpathred");
+					mod_path.baseValue = 0;
+					mod_path.setVal(0);
+					mod_path.strumOwner = strumLine;
+					mod_path.tag = "meta" + mod_path.tag;
+					strumLine.mods.modifiers.set(mod_path.tag, mod_path);
+					var mod_path = ModConstants.createNewMod("arrowpathgreen");
+					mod_path.baseValue = 0;
+					mod_path.setVal(0);
+					mod_path.strumOwner = strumLine;
+					mod_path.tag = "meta" + mod_path.tag;
+					strumLine.mods.modifiers.set(mod_path.tag, mod_path);
+					var mod_path = ModConstants.createNewMod("arrowpathblue");
+					mod_path.baseValue = 0;
+					mod_path.setVal(0);
+					mod_path.strumOwner = strumLine;
+					mod_path.tag = "meta" + mod_path.tag;
+					strumLine.mods.modifiers.set(mod_path.tag, mod_path);
+				}
+			}
+			
+			
+			strumLine.mods.sortMods();
+		}	
+		//FunkinSound.playOnce(Paths.sound("ANGRY_TEXT_BOX"), 1);
+	}
+	
+	function isNSFWplayer():Bool{
+		var curFreeplayChar = "?";
+		if (FlxG.state.subState!=null && Std.isOfType(FlxG.state.subState, FreeplayState) ) {
+			curFreeplayChar = FlxG.state.subState.currentCharacterId;
+		}else{
+			curFreeplayChar = FreeplayState.rememberedCharacterId;
+		}
+		curFreeplayChar = curFreeplayChar.toLowerCase();
+		
+		trace(curFreeplayChar);
+		
+		return curFreeplayChar == "nsfw";
+	}
+	
+	var sexModStringNames:Array<String> = ["SexMod - Censor", "SexMod - Silhouette", "SexMod - BlackOut"];
+	//Censor handling!
+	function setCensorVars(){
+		if(isNSFWplayer()){
+			PlayState.instance.variables.set("meta_censor_set", true);
+			//PlayState.instance.modDebugNotif("meta_censor_set");
+			//if(modifiersEnabled.contains(sexModStringNames[0].toLowerCase())){
+			//	PlayState.instance.modDebugNotif("censor!");
+			//}
+			PlayState.instance.variables.set("censorEnabled", modifiersEnabled.contains(sexModStringNames[0].toLowerCase()));
+			PlayState.instance.variables.set("blackOutCharacters", modifiersEnabled.contains(sexModStringNames[1].toLowerCase()));
+			PlayState.instance.variables.set("backgroundDim", (modifiersEnabled.contains(sexModStringNames[2].toLowerCase()) ? 1.0 : 0.0));
+		}
+	}
+	
+	
+	override function onModchartReset(event) {
+		super.onModchartReset(event);
+	}
+	
+	override function onModchartSetup(event) {
+		if(!addedAlready){ 
+			setCensorVars();
+			//PlayState.instance.modDebugNotif("yo");
+		}
+		super.onModchartSetup(event);
+	}
+	
+	//This gets called if we already have a modchart system in place!
+	//So we add the meta mods after the timeline has been created.
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		if(!addedAlready){
+			addMetaMods();
+			addedAlready = true;
+		}
+	}
+	
+	var invalidScoreMods:Array<String> = [
+	"chaos", "loop song", "practice mode", "botplay"
+	];
+	
+	function checkIfScoreable():Bool{
+		if(playbackRate < 1.0)
+			return false;
+		for (bannedMod in invalidScoreMods){
+			if(modifiersEnabled.contains(bannedMod)){
+				return false;
+			}
+		}
+		
+		var chartModifiersModule = ModuleHandler.getModule("ChartModifiersModule");
+		if(chartModifiersModule!=null){
+			var invalidShuffles = chartModifiersModule.scriptGet("illegalShuffles");
+			for (mmm in modifiersEnabled){
+			
+				if( invalidShuffles.contains( aliasConvert(mmm) ) ){
+					return false;
+				}
+			}
+		}
+		
+		
+		return true;
+	}
+	
+	//Otherwise, without a modchart system already present, we need to manually inject it ourselves!
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);
+		
+		if(!checkIfScoreable()){
+			trace("Score will not be saved due to unscorable metamods in use!");
+			//PlayState.instance.modDebugNotif("Score will not be saved.", 0xFFFF0000);
+			PlayState.instance.currentSong.validScore = false;
+		}
+		
+		//If the song already has modchart stuff prepared!
+		if(PlayState.instance.isModchartSong || addedAlready){
+			return;
+		}
+
+		if(PlayState.instance.isChartingMode){
+			return;
+		}
+		
+		addedAlready = true;
+		
+
+		
+		if(!checkIfWeEnableWITF()){ //don't do anything if there are no meta mods available to add
+			PlayState.instance.modDebugNotif("No need to enable WITF", 0xFFFFFF00);
+			addMetaMods(); //for botplay and what not to still be enabled / disabled
+			return;
+		}else{
+			PlayState.instance.modDebugNotif("Force Enabling WITF", 0xFFFFFF00);
+		}
+		
+		//Forces the song to act like there is a modchart!
+		PlayState.instance.isModchartSong = true;
+		PlayState.instance.initHazardModchart();
+		PlayState.instance.scanForModchart(false);
+		
+		if(PlayState.instance.modchartEventHandler == null){
+			PlayState.instance.modchartEventHandler = new ModEventHandler();
+		}
+		PlayState.instance.isModchartSong = true;
+		
+		if (PlayState.instance.playerStrumline != null){ 
+			PlayState.instance.playerStrumline.setupModStuff();
+			PlayState.instance.playerStrumline.drawArrowPaths = false;
+			PlayState.instance.playerStrumline.mods.isDad = false;
+			PlayState.instance.playerStrumline.mods.invertValues = false;
+			
+			PlayState.instance.playerStrumline.txtActiveMods.visible = false;
+			
+			PlayState.instance.playerStrumline.strumlineNotes.forEach(function(arrow:StrumlineNote) {
+				arrow.strumExtraModData.introTweenPercentage = 0;
+				FlxTween.tween(arrow.strumExtraModData, {introTweenPercentage: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * arrow.direction)});
+			});
+
+		}
+		
+		if (PlayState.instance.opponentStrumline != null){ 
+			PlayState.instance.opponentStrumline.setupModStuff();
+			PlayState.instance.opponentStrumline.drawArrowPaths = false;
+			
+			PlayState.instance.opponentStrumline.txtActiveMods.visible = false;
+			
+			//Fix for invis strums
+			PlayState.instance.opponentStrumline.strumlineNotes.forEach(function(arrow:StrumlineNote) {
+				arrow.strumExtraModData.introTweenPercentage = 0;
+				FlxTween.tween(arrow.strumExtraModData, {introTweenPercentage: 1}, 1, {ease: FlxEase.circOut, startDelay: 0.5 + (0.2 * arrow.direction)});
+			});
+		}
+		
+		addMetaMods();
+	}
+	
+	var addedAlready:Bool = false;
+
+	
+
+	
+	
+	
+}

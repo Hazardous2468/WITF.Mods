@@ -1,0 +1,58 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.util.FlxStringUtil;
+
+
+//A script which makes the holds dimmed by default, but makes them undim when being hit.
+class ResponsiveHoldsModule extends Module
+{
+	var hitValue:Float = 1;
+	var normalValue:Float = 0.75;
+	var missValue:Float = 0.5;
+
+	var skinNames:Array<String> = [
+		"simple", "triangulate", "groovin", "simple_simple", "simple_holdcovers", "halvedhalvedhalved"
+	];	
+	
+	public function new() {
+        super("ResponsiveHoldsModule");	
+    }
+
+	
+	function onUpdate(e) {
+		if (PlayState.instance != null) {
+			if(PlayState.instance.isGamePaused) return;
+			
+			for (strumLine in PlayState.instance.allStrumLines)
+			{			
+				for (holdNote in strumLine.holdNotes.members){
+					if(holdNote==null) continue;
+					if(holdNote.alive == false) continue;
+					
+					if(skinNames.contains(holdNote.noteStyleName)){
+						if (holdNote.missedNote && holdNote.handledMiss)
+						{
+							if(holdNote.hsvShader != null)
+								holdNote.hsvShader.value = missValue;
+						}else if(holdNote.hitNote && !holdNote.missedNote && !holdNote.handledMiss){
+							if(holdNote.hsvShader != null)
+								holdNote.hsvShader.value = hitValue;
+						}else{ //ideally this shouldn't be needed but the onNoteIncoming doesn't seem to always work or something
+							holdNote.hsvShader.value = normalValue;
+						}
+						
+						if(holdNote.cover != null){
+							holdNote.cover.setHSV(holdNote.hsvShader.hue, holdNote.hsvShader.saturation, holdNote.hsvShader.value);
+						}
+					}
+				}
+			}
+        }
+    }
+
+}

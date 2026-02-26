@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TextureAtlas imagePath="nobodypixel.png" width="119" height="56">
+  <SubTexture name="idle0001" x="44" y="0"  width="42" height="28" frameX="-3" frameY="-12" frameWidth="50" frameHeight="50"/>
+
+  
+  <SubTexture name="confirm0001" x="44" y="0"  width="42" height="28" frameX="-3" frameY="-12" frameWidth="50" frameHeight="50"/>
+  <SubTexture name="confirm0002" x="44" y="0"  width="42" height="28" frameX="-3" frameY="-12" frameWidth="50" frameHeight="50"/>
+  <SubTexture name="confirm-hold0001" x="44" y="0"  width="42" height="28" frameX="-3" frameY="-12" frameWidth="50" frameHeight="50"/>
+</TextureAtlas>

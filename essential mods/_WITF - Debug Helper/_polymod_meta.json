@@ -1,0 +1,17 @@
+{
+    "title": "Hazard's Modchart System - Helpful debug scripts",
+    "description": "Some useful scripts to help with modchart creation!",
+	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+    "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "2.3.0",
+	"dependencies": {
+		"_WITF - Essentials": "*"
+	},
+    "license": "CC BY-NC-SA 4.0"
+}

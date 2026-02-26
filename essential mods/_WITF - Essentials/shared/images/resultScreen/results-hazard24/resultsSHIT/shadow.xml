@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="shadow.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="shadow_tween instance 10000" x="3" y="3" width="242" height="71" frameX="-546" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10001" x="3" y="3" width="242" height="71" frameX="-487" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10002" x="3" y="3" width="242" height="71" frameX="-431" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10003" x="3" y="3" width="242" height="71" frameX="-379" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10004" x="3" y="3" width="242" height="71" frameX="-330" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10005" x="3" y="3" width="242" height="71" frameX="-284" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10006" x="3" y="3" width="242" height="71" frameX="-242" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10007" x="3" y="3" width="242" height="71" frameX="-203" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10008" x="3" y="3" width="242" height="71" frameX="-168" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10009" x="3" y="3" width="242" height="71" frameX="-136" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10010" x="3" y="3" width="242" height="71" frameX="-107" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10011" x="3" y="3" width="242" height="71" frameX="-82" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10012" x="3" y="3" width="242" height="71" frameX="-60" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10013" x="3" y="3" width="242" height="71" frameX="-42" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10014" x="3" y="3" width="242" height="71" frameX="-26" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10015" x="3" y="3" width="242" height="71" frameX="-15" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10016" x="3" y="3" width="242" height="71" frameX="-6" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10017" x="3" y="3" width="242" height="71" frameX="-1" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10018" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10019" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10020" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10021" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10022" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10023" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10024" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10025" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+	<SubTexture name="shadow_tween instance 10026" x="3" y="3" width="242" height="71" frameX="0" frameY="0" frameWidth="788" frameHeight="71"/>
+</TextureAtlas>

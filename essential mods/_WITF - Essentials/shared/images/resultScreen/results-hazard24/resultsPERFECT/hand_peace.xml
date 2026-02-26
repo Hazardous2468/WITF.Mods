@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="hand_peace.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="peacehand_animate instance 10000" x="3" y="3" width="0" height="0" frameX="175" frameY="124" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10001" x="3" y="3" width="0" height="0" frameX="175" frameY="124" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10002" x="3" y="3" width="0" height="0" frameX="175" frameY="124" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10003" x="3" y="3" width="0" height="0" frameX="175" frameY="124" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10004" x="172" y="438" width="86" height="138" frameX="-844" frameY="-16" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10005" x="3" y="139" width="112" height="131" frameX="-540" frameY="-13" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10006" x="124" y="3" width="114" height="132" frameX="-251" frameY="-10" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10007" x="3" y="3" width="118" height="133" frameX="-175" frameY="-20" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10008" x="347" y="139" width="102" height="143" frameX="-121" frameY="-11" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10009" x="367" y="437" width="81" height="148" frameX="-77" frameY="-5" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10010" x="190" y="284" width="87" height="151" frameX="-35" frameY="0" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10011" x="3" y="426" width="82" height="151" frameX="-48" frameY="0" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10012" x="261" y="438" width="78" height="149" frameX="-56" frameY="-3" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10013" x="367" y="285" width="84" height="149" frameX="-64" frameY="-2" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10014" x="347" y="3" width="111" height="133" frameX="-83" frameY="-20" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10015" x="347" y="3" width="111" height="133" frameX="-83" frameY="-20" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10016" x="124" y="138" width="103" height="143" frameX="-86" frameY="-12" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10017" x="124" y="138" width="103" height="143" frameX="-86" frameY="-12" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10018" x="124" y="138" width="103" height="143" frameX="-86" frameY="-12" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10019" x="124" y="138" width="103" height="143" frameX="-86" frameY="-12" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10020" x="96" y="284" width="91" height="148" frameX="-72" frameY="-2" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10021" x="96" y="284" width="91" height="148" frameX="-72" frameY="-2" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10022" x="88" y="435" width="81" height="151" frameX="-47" frameY="0" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10023" x="3" y="273" width="90" height="150" frameX="-26" frameY="-3" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10024" x="230" y="151" width="104" height="130" frameX="0" frameY="-36" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10025" x="230" y="151" width="104" height="130" frameX="0" frameY="-36" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10026" x="241" y="3" width="103" height="145" frameX="-1" frameY="-19" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10027" x="241" y="3" width="103" height="145" frameX="-1" frameY="-19" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10028" x="241" y="3" width="103" height="145" frameX="-1" frameY="-19" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10029" x="280" y="285" width="84" height="150" frameX="-32" frameY="-7" frameWidth="930" frameHeight="166"/>
+	<SubTexture name="peacehand_animate instance 10030" x="280" y="285" width="84" height="150" frameX="-32" frameY="-7" frameWidth="930" frameHeight="166"/>
+</TextureAtlas>

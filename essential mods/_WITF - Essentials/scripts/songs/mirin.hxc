@@ -1,0 +1,50 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+//import funkin.play.modchartSystem.modifiers.BaseModifier;
+import funkin.Conductor;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import funkin.data.event.SongEventRegistry;
+
+class MirinSong extends Song {
+
+	public function new() {
+		super('mirin');
+	}
+
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+	}
+
+	function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+	}
+	
+	
+	//USE THIS TO SETUP MOD STUFF BEFORE CUSTOM STRUMS ARE ADDED
+	override function onModchartSetup(event) {
+		super.onModchartSetup(event);
+	}
+	
+	//USE THIS TO RESET EVERYTHING BACK TO DEFAULT WHEN GOING BACKWARDS
+	override function onModchartReset(event) {
+		super.onModchartReset(event);	
+	}
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);		
+	}
+	
+	
+	function onUpdate(callback)
+	{
+	}
+	
+}

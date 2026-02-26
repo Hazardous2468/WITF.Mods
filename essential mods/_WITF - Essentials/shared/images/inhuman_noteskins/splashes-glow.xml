@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="splashes-glow.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="note splash red 10000" x="1" y="1" width="376" height="376"/>
+	<SubTexture name="note splash red 10001" x="1" y="378" width="376" height="376"/>
+	<SubTexture name="note splash red 10002" x="1" y="755" width="376" height="376"/>
+	<SubTexture name="note splash red 10003" x="1" y="1132" width="376" height="376"/>
+	<SubTexture name="note splash red 10004" x="1" y="1509" width="376" height="376"/>
+</TextureAtlas>

@@ -1,0 +1,255 @@
+{
+  "version": "1.0.0",
+  "name": "Nobody",
+  "ownedChars": [
+    "nobody",
+    "nobody_test",
+	"bf_modchart"
+  ],
+  "showUnownedChars": false,
+  "unlocked": true,
+  "freeplayStyle": "nobody",
+  "stickerPack": "hazard-modchart_hell",
+  "freeplayDJ": {
+    "assetPath": "freeplay/freeplay-nobody",
+	"charSelect": {
+      "transitionDelay": 0.4
+    },
+	"applyStageMatrix": true,
+    "text1": "HOLY SHIT",
+    "text2": "WHAT THE FUCK ARE THE NOTES DOING?!",
+    "text3": "JUST READ THE NOTES IDIOT",
+    "fistPump": {
+      "introStartFrame": 0,
+      "introEndFrame": 4,
+
+      "loopStartFrame": 4,
+      "loopEndFrame": -1,
+
+      "introBadStartFrame": 0,
+      "introBadEndFrame": 4,
+
+      "loopBadStartFrame": 4,
+      "loopBadEndFrame": -1
+    },
+    "animations": [
+      {
+        "name": "intro",
+        "prefix": "boyfriend dj intro",
+        "offsets": [631.7, 362.6]
+      },
+      {
+        "name": "idle",
+        "prefix": "Boyfriend DJ",
+        "offsets": [625, 360]
+      },
+      {
+        "name": "idleEasterEgg",
+        "prefix": "bf dj afk",
+        "offsets": [649.5, 58.5]
+      },
+      {
+        "name": "confirm",
+        "prefix": "Boyfriend DJ confirm",
+        "offsets": [625, 360]
+      },
+      {
+        "name": "fistPump",
+        "prefix": "Boyfriend DJ fist pump",
+        "offsets": [625, 360]
+      },
+      {
+        "name": "loss",
+        "prefix": "Boyfriend DJ loss reaction 1",
+        "offsets": [625, 360]
+      },
+      {
+        "name": "charSelect",
+        "prefix": "Boyfriend DJ to CS",
+        "offsets": [625, 360]
+      },
+      {
+        "name": "newUnlock",
+        "prefix": "Boyfriend DJ new character ",
+        "offsets": [625, 360]
+      }
+    ]
+  },
+  "charSelect": {
+    "position": 1,
+    "gf": {
+      "assetPath": "charSelect/haz_character_select",
+      "animInfoPath": "charSelect/hazard24AnimInfo",
+      "visualizer": false
+    }
+  },
+  "results": {
+    "music": {
+      "PERFECT_GOLD": "resultsPERFECT-hazard",
+      "PERFECT": "resultsPERFECT-hazard",
+      "EXCELLENT": "resultsEXCELLENT-hazard",
+      "GREAT": "resultsGREAT-hazard",
+      "GOOD": "resultsGOOD-hazard",
+      "SHIT": "resultsSHIT-hazard"
+    },
+    "perfectGold": [
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT-ALT/Condoms",
+        "zIndex": 498,
+        "offsets": [834, 430],
+		"filter": "naughty",
+		"looped": false,
+        "loopFrame": 12
+	  },
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT-ALT/PERFECT_horny",
+        "zIndex": 500,
+        "offsets": [687, 67],
+		"filter": "naughty",
+		"looped": true,
+        "loopFrame": 6
+      },
+	  {
+		"renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/PERFECT",
+        "zIndex": 500,
+		"filter": "safe",
+        "offsets": [687, 67],
+		"looped": true,
+        "loopFrame": 6
+      },
+	   {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/hand_peace_v2_1",
+        "zIndex": 520,
+		"delay": 0.49,
+        "offsets": [1054, 107],
+		"looped": true,
+        "loopFrame": 13
+      },
+	    {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/hand_peace_v2_1",
+        "zIndex": 521,
+		"delay": 0.4,
+        "offsets": [528, 242],
+		"looped": true,
+        "loopFrame": 13
+      }
+    ],
+    "perfect": [
+      {
+		"renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/PERFECT",
+        "zIndex": 500,
+        "offsets": [687, 67],
+		"looped": true,
+        "loopFrame": 6
+      },
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/hand_peace_v2_1",
+        "zIndex": 520,
+		"delay": 0.49,
+        "offsets": [1054, 112],
+		"looped": true,
+        "loopFrame": 13
+      },
+	    {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsPERFECT/hand_peace_v2_1",
+        "zIndex": 521,
+		"delay": 0.4,
+        "offsets": [528, 242],
+		"looped": true,
+        "loopFrame": 13
+      }
+    ],
+    "excellent": [
+      {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsEXCELLENT/EXCELLENT",
+        "zIndex": 500,
+        "offsets": [669, 118],
+        "looped": true,
+        "loopFrame": 23
+      }
+    ],
+    "great": [
+      {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsGoodGreat/Good_Great_Hazard_v3",
+        "zIndex": 500,
+        "offsets": [764, 85],
+        "loopFrame": 19
+      },
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsGoodGreat/clapping_hands",
+        "zIndex": 498,
+		"delay": 0.64,
+        "offsets": [668, -100],
+		"looped": true,
+        "loopFrame": 20
+      }
+    ],
+    "good": [
+      {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsGoodGreat/Good_Great_Hazard_v3",
+        "zIndex": 500,
+        "offsets": [764, 85],
+        "loopFrame": 19
+      },
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsGoodGreat/clapping_hands",
+        "zIndex": 498,
+		"delay": 0.64,
+        "offsets": [668, -100],
+		"looped": true,
+        "loopFrame": 20
+      }
+    ],
+    "loss": [
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsSHIT/shit_back",
+        "zIndex": 500,
+        "offsets": [-40,-1200],
+		"looped": false,
+        "loopFrame": 50
+      },
+	{
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsSHIT/shadow",
+        "zIndex": 505,
+		"offsets": [885,620],
+		"looped": false,
+        "loopFrame": 23
+      },
+      {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsSHIT/Shit_Results_Test5",
+        "zIndex": 510,
+        "offsets": [932,128],
+		"looped": true,
+        "loopFrame": 26
+      },
+	  {
+        "renderType": "sparrow",
+        "assetPath": "shared:resultScreen/results-hazard24/resultsSHIT/shit_overlay",
+        "zIndex": 520,
+        "offsets": [-40,-1230],
+		"looped": false,
+        "loopFrame": 50
+      }
+	  
+	   
+	 
+	  
+    ]
+  }
+}

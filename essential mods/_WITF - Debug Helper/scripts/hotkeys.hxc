@@ -1,0 +1,209 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import funkin.data.event.SongEventRegistry;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import flixel.ui.FlxBar;
+import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.play.PauseSubState;
+import funkin.Highscore;
+
+
+class ModchartDebug_HotKeys extends Module
+{
+	//starting with botplay now moved to meta Mods!
+
+	var enableTimeManipulation:Bool = true;
+	var skipToEndOffset = 10000; //10 seconds off
+	var beatOffsetShiftMult = 3;
+	var beatOffsetAmount = 2;
+	var timeManipulateInBeats:Bool = true;
+	
+	//if true, will try to snap to the nearest beat! [A bit experimental right now]
+	var snapToBeat:Bool = true;
+
+	public function new() {
+        super("ModchartDebug_HotKeys");	
+    }
+	
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);		
+	}
+	override function onStateChangeStart(event) {
+		super.onStateChangeStart(event);
+	}
+	override function onStateChangeEnd(event) {
+		super.onStateChangeEnd(event);
+	}
+	
+	public function setSongTime(time:Float)
+	{
+		if(time < 0) time = 0;
+		
+		
+		if(snapToBeat){
+			var timeOffset:Float = 0;
+			var noteTime:Float = time;		
+			
+			var currentTimeChange = Conductor.instance.timeChanges[0];
+			if (noteTime > 0.0)
+			{
+			  for (i in 0...Conductor.instance.timeChanges.length)
+			  {
+				if (noteTime >= Conductor.instance.timeChanges[i].timeStamp) currentTimeChange = Conductor.instance.timeChanges[i];
+
+				if (noteTime < Conductor.instance.timeChanges[i].timeStamp) break;
+			  }
+			}
+			
+			//reverse the beatTime back to normalTime!
+			timeOffset = currentTimeChange.timeStamp;
+			var strumTimeCorrection:Float = noteTime-timeOffset;
+			var beatLengthMS:Float = ((Constants.SECS_PER_MIN / currentTimeChange.bpm) * Constants.MS_PER_SEC);
+			var beat:Float = ((strumTimeCorrection % beatLengthMS) / beatLengthMS);
+			
+			beat = FlxMath.roundDecimal(beat, 4);
+			
+			var timeToBeatPoint:Float = beat * beatLengthMS;
+			
+			time = time - timeToBeatPoint;
+			
+			//PlayState.instance.debugNotification("-\nb: " + beat);
+			//PlayState.instance.debugNotification("tb: " + timeToBeatPoint);
+			//PlayState.instance.debugNotification("Set songPos to: " + time);
+		}
+		
+
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.isGamePaused){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			//vocals.time = time;
+			if (Conductor.instance().songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.isGamePaused){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.instance.songPosition = time;
+		
+		PlayState.instance.handleSkippedNotes();
+
+		
+		Conductor.instance.update();		
+		
+		//Reset score to prevent cheating!
+		 PlayState.instance.health = Constants.HEALTH_STARTING;
+		  PlayState.instance.songScore = 0;
+		  Highscore.tallies.combo = 0;
+		
+		//if (currentStage != null) currentStage.resetStage(); //?
+		
+		SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);
+	}
+	
+		
+	function updatePraticeState(newVal:Bool){
+		PlayState.instance.isPracticeMode = newVal;
+		
+		var subState = FlxG.state.subState;
+		if (Std.isOfType(subState, PauseSubState)) {
+			subState.updateMetadataText();
+		}
+	}
+	
+	function updateBotplayState(newVal:Bool){
+		PlayState.instance.isBotPlayMode = newVal;
+		PlayState.instance.updateScoreText();
+	}
+
+	
+	
+	function onUpdate(callback)
+	{
+		if(PlayState.instance == null){ 
+			return;
+		}
+
+		if (PlayState.instance.isGamePaused)
+		{	
+			//MAKE SURE WE'RE IN PAUSE SUBSTATE
+			var subState; 
+			if(PlayState.instance != null){
+				subState = PlayState.instance.subState;
+			}else{
+				subState = FlxG.state.subState;
+			}
+			
+			if (Std.isOfType(subState, PauseSubState)) {
+				if (FlxG.keys.justPressed.FIVE){ 
+					updatePraticeState(!PlayState.instance.isPracticeMode);
+					FunkinSound.playOnce(Paths.sound(PlayState.instance.isPracticeMode ? "pauseEnable" : "pauseDisable"), 0.6);
+				}
+				if (FlxG.keys.justPressed.FOUR){ 
+					updateBotplayState(!PlayState.instance.isBotPlayMode);
+					FunkinSound.playOnce(Paths.sound(PlayState.instance.isBotPlayMode ? "pauseEnable" : "pauseDisable"), 0.6);
+				}
+			}			
+		}
+
+		//TIME SKIP LOGIC
+		if((PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) && enableTimeManipulation && Conductor.instance.songPosition > 0) { 
+
+			if (FlxG.keys.justPressed.FOUR && !PlayState.instance.isGamePaused){ 
+				setSongTime(0);
+			}
+			
+			if (FlxG.keys.justPressed.FIVE && !PlayState.instance.isGamePaused){ 
+				setSongTime(PlayState.instance.currentSongLengthMs - skipToEndOffset);
+			}
+		
+			if(FlxG.keys.justPressed.TWO){
+			
+				var gotoPos = Conductor.instance.songPosition;
+				var posChange = 0;
+				
+				if(timeManipulateInBeats){
+					var beatTime = Conductor.instance.get_beatLengthMs();
+					posChange = beatTime * (FlxG.keys.pressed.SHIFT ? beatOffsetAmount*beatOffsetShiftMult : beatOffsetAmount); 
+				}else{
+					posChange = FlxG.keys.pressed.SHIFT ? 10000 : 5000;
+				}
+				
+				if(FlxG.keys.pressed.CONTROL){
+					posChange *= -1;
+				}
+				
+				setSongTime(gotoPos + posChange);
+			}
+		}
+		
+		
+		
+	}
+
+}

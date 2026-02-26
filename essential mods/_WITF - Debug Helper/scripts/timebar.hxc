@@ -1,0 +1,254 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import funkin.data.event.SongEventRegistry;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import flixel.ui.FlxBar;
+import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.play.PauseSubState;
+import funkin.Highscore;
+
+
+
+class ModchartDebug_Timebar extends Module
+{
+	var pauseState = null;
+	var timeTxt: FlxText;
+	var timeBarBG:FunkinSprite;
+	var timeBar:FlxBar;
+	var offsetY:Float = -200;
+	var songPercent:Float = 0;
+	
+	public function new() {
+        super("ModchartDebug_Timebar");	
+    }
+	
+
+	
+	public function onSubStateCloseEnd(event:StateChangeScriptEvent):Void {
+		if(pauseState != null){
+			pauseState.remove(timeBarBG);
+			pauseState.remove(timeBar);
+			pauseState.remove(timeTxt);
+			pauseState = null;			
+			timeBarBG.destroy();
+			timeTxt.destroy();
+			timeBar.destroy();
+			FlxG.mouse.visible = false;
+		}
+        super.onSubStateCloseEnd(event);
+	}
+
+	public function onSubStateOpenEnd(event:StateChangeScriptEvent):Void {
+        super.onSubStateOpenEnd(event);
+		var subState; 
+			if(PlayState.instance != null){
+				subState = PlayState.instance.subState;
+			}else{
+				subState = FlxG.state.subState;
+			}
+		if (Std.isOfType(subState, PauseSubState)) {
+		
+			timeBarBG = new FunkinSprite(0,0);
+			timeBarBG.loadGraphic(Paths.image('modchart_timebar'));
+			timeBarBG.scrollFactor.set();
+			timeBarBG.screenCenter();
+			timeBarBG.updateHitbox();
+		
+			timeBar = new FlxBar(0, 0, "LEFT_TO_RIGHT", 1206, 36, null, '', 0, 100);
+			timeBar.scrollFactor.set();
+			timeBar.createFilledBar(0xFF000000, 0xFFFFFFFF);
+			timeBar.numDivisions = 800; //How much lag this causes?? Should i tone it down to idk, 400 or 200?
+			timeBar.screenCenter();
+		
+			timeTxt = new FlxText(0, 0, 0, "?");
+			timeTxt.setFormat(Paths.font("vcr.ttf"), 32, 0xFFFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+			timeTxt.borderSize = 2;
+			timeTxt.screenCenter();		
+			
+			timeBarBG.y += offsetY;
+			timeBar.y += offsetY;
+			timeTxt.y += offsetY;
+		
+		
+			pauseState = subState;
+			
+			//Place it behind metadata!
+			subState.insert(subState.members.indexOf(subState.metadata), timeBarBG);
+			subState.insert(subState.members.indexOf(subState.metadata), timeBar);
+			subState.insert(subState.members.indexOf(subState.metadata), timeTxt);
+			timeBarBG.camera = subState.camera;
+			timeBar.camera = subState.camera;
+			timeTxt.camera = subState.camera;
+			FlxG.mouse.visible = true;
+			updateTimeText();
+		}
+	}
+
+	
+	
+	public function setSongTime(time:Float)
+	{
+		if(FlxG.sound.music == null) return;
+	
+		if(time < 0) time = 0;
+
+		//updatenoteQuantizationColours();
+
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.get_isGamePaused()){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			if (Conductor.get_instance().songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.get_isGamePaused()){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.instance.songPosition = time;
+
+		PlayState.instance.handleSkippedNotes();
+		
+
+		Conductor.instance.update();
+		
+		//Reset score to prevent cheating!
+		 PlayState.instance.health = Constants.HEALTH_STARTING;
+		  PlayState.instance.songScore = 0;
+		  Highscore.tallies.combo = 0;
+		
+		//if (currentStage != null) currentStage.resetStage(); //? 
+		
+		
+		
+		//Update the 3D meshes! (cuz v0.7.5a makes them no longer updateTris in pause)
+		for (strumLine in PlayState.instance.allStrumLines)
+		{
+			for (note in strumLine.strumlineNotes)
+			{
+				if(note.mesh!=null){
+					note.mesh.updateTris(true);	
+				}
+			}
+			
+			for (note in strumLine.notes)
+			{
+				if(note.mesh!=null){
+					note.mesh.updateTris(true);
+				}
+			}
+		}
+	}
+	
+
+	
+	
+	
+
+	
+	function updateTimeText(){
+		if(timeTxt == null) return;
+		
+		var curTime:Float = Conductor.instance.songPosition;
+		var songLength:Float = PlayState.instance.currentSongLengthMs;
+	
+	
+		//var songCalc:Float = (songLength - curTime);
+		//if(ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
+		var songCalc:Float = curTime;
+		var secondsTotal:Int = Math.floor(songCalc / 1000);
+		if(secondsTotal < 0) secondsTotal = 0;
+
+
+		timeTxt.text = FlxStringUtil.formatTime(secondsTotal, false);
+		
+		songPercent = (curTime / songLength);
+		timeBar.percent = songPercent*100;
+	}
+	
+	
+	
+	function clicked(){
+		if(timeBar==null) return;
+		
+		//var mX:Float = FlxMath.remapToRange(FlxG.mouse.gameX, 0, FlxG.width, timeBar.x, timeBar.x + timeBar.width);
+		
+		var mX:Float = FlxG.mouse.gameX;
+		
+		var percentOfScreen:Float = mX / timeBar.width;
+		//var percentOfScreen:Float = FlxG.mouse.gameX / FlxG.width;
+		
+		
+		var songLength:Float = PlayState.instance.currentSongLengthMs;
+		var curTime:Float = percentOfScreen * songLength;
+		
+		var newTime:Float = FlxMath.bound(curTime, 0, songLength-1); // clamp;
+		setSongTime(newTime);
+		
+		updateTimeText();
+		
+		PlayState.instance.processSongEvents();
+		PlayState.instance.updateHazModchartSystem(0);
+		for (strumline in PlayState.instance.allStrumLines)
+		  {
+			strumline.update(0);
+		  }
+		PlayState.instance.processNotes(0);
+		SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);
+		//PlayState.instance.update(0);
+		
+		
+	}
+	
+	
+	function onUpdate(callback)
+	{
+		if(pauseState == null){
+			return;
+		}
+	
+		if(PlayState.instance == null){ 
+			pauseState = null;
+			return;
+		}
+		if(!PlayState.instance.isGamePaused) return;
+		
+		
+		var game = PlayState.instance;
+		if(timeBarBG!=null && game.mayPauseGame && (game.isPracticeMode || game.isBotPlayMode)){
+			if(FlxG.mouse.pressed){
+				//FunkinSound.playOnce(Paths.sound("pauseEnable"), 1.0);
+				//temp fix for overlap check
+				if(FlxG.mouse.overlaps(timeBarBG) || (FlxG.mouse.gameY < timeBarBG.y+timeBarBG.height && FlxG.mouse.gameY > timeBarBG.y)  ){
+					clicked();
+				}
+			}
+			
+		}
+	}
+
+}
