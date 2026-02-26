@@ -6,7 +6,7 @@
 ### **An experimental fork of FNF dedicated to adding modchart support!**  
 **By Hazard24**  
 
-*If you're looking for the main repository, look here:  *
+*If you're looking for the main repository, look here:*  
 https://github.com/Hazardous2468/What-In-The-Funkin  
 
 
