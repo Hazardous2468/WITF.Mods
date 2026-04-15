@@ -1,5 +1,3 @@
-// EDITED VERSION TO HAVE "CENSOR" OPTIONS FOR SEX MOD
-
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import funkin.ui.AtlasMenuItem;
@@ -69,7 +67,6 @@ class SelectableModifiers_NEW extends Module
 		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
 		playbackRateModule.scriptSet("playbackRate", playbackRate);
 		
-		updateVarsWithNSFW();
     }
 	var modifiers_chart_lowerCase:Array<String> = [];
 	
@@ -223,34 +220,6 @@ class SelectableModifiers_NEW extends Module
 
 	var txt:Array<FlxText> = [];
 	
-	function updateVarsWithNSFW():Bool{
-		var returnVal:Bool = false;
-		if (isNSFWplayer() && !modifiers_misc[0].contains(sexModStringNames[0])){
-			modifiers_misc[0].push(sexModStringNames[0]);
-			modifiers_misc[0].push(sexModStringNames[1]);
-			modifiers_misc[0].push(sexModStringNames[2]);
-			
-			skipTheseMods.push(sexModStringNames[0].toLowerCase());
-			skipTheseMods.push(sexModStringNames[1].toLowerCase());
-			skipTheseMods.push(sexModStringNames[2].toLowerCase());
-			
-			returnVal = true;
-		}
-		
-		if (!isNSFWplayer() && modifiers_misc[0].contains(sexModStringNames[0])){
-			modifiers_misc[0].remove(sexModStringNames[0]);
-			modifiers_misc[0].remove(sexModStringNames[1]);
-			modifiers_misc[0].remove(sexModStringNames[2]);
-			
-			skipTheseMods.remove(sexModStringNames[0].toLowerCase());
-			skipTheseMods.remove(sexModStringNames[1].toLowerCase());
-			skipTheseMods.remove(sexModStringNames[2].toLowerCase());
-			
-			returnVal = true;
-		}
-		return returnVal;
-	}
-	
 	var theStateWeWereAddedTo;
 	function createMenu(){
 	
@@ -264,10 +233,6 @@ class SelectableModifiers_NEW extends Module
 		var sillyTextNeedsGenerating:Bool = false;
 		
 		trace("Created Meta Mods Menu!");
-		
-		if (updateVarsWithNSFW()){
-			sillyTextNeedsGenerating = true;
-		}
 
 		if(blackBG == null){
 			blackBG = new FlxSprite();
@@ -1203,46 +1168,16 @@ class SelectableModifiers_NEW extends Module
 		}	
 		//FunkinSound.playOnce(Paths.sound("ANGRY_TEXT_BOX"), 1);
 	}
-	
-	function isNSFWplayer():Bool{
-		var curFreeplayChar = "?";
-		if (FlxG.state.subState!=null && Std.isOfType(FlxG.state.subState, FreeplayState) ) {
-			curFreeplayChar = FlxG.state.subState.currentCharacterId;
-		}else{
-			curFreeplayChar = FreeplayState.rememberedCharacterId;
-		}
-		curFreeplayChar = curFreeplayChar.toLowerCase();
 		
-		trace(curFreeplayChar);
-		
-		return curFreeplayChar == "nsfw";
-	}
-	
-	var sexModStringNames:Array<String> = ["SexMod - Censor", "SexMod - Silhouette", "SexMod - BlackOut"];
-	//Censor handling!
-	function setCensorVars(){
-		if(isNSFWplayer()){
-			PlayState.instance.variables.set("meta_censor_set", true);
-			//PlayState.instance.modDebugNotif("meta_censor_set");
-			//if(modifiersEnabled.contains(sexModStringNames[0].toLowerCase())){
-			//	PlayState.instance.modDebugNotif("censor!");
-			//}
-			PlayState.instance.variables.set("censorEnabled", modifiersEnabled.contains(sexModStringNames[0].toLowerCase()));
-			PlayState.instance.variables.set("blackOutCharacters", modifiersEnabled.contains(sexModStringNames[1].toLowerCase()));
-			PlayState.instance.variables.set("backgroundDim", (modifiersEnabled.contains(sexModStringNames[2].toLowerCase()) ? 1.0 : 0.0));
-		}
-	}
-	
 	
 	override function onModchartReset(event) {
 		super.onModchartReset(event);
 	}
 	
 	override function onModchartSetup(event) {
-		if(!addedAlready){ 
-			setCensorVars();
+		//if(!addedAlready){ 
 			//PlayState.instance.modDebugNotif("yo");
-		}
+		//}
 		super.onModchartSetup(event);
 	}
 	
