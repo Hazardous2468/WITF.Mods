@@ -18,7 +18,7 @@ class InhumanPauseModule extends Module {
 
 	var validSongs:Array<String> = 
 	[
-	"emergency-reset", "emergency reset", "argos", "operator", "too-many-trumpets", "too many trumpets", "her", "her - 2025"
+	"emergency-reset", "emergency reset", "argos","argo↑↓s", "operator", "too-many-trumpets", "too many trumpets", "her", "her - 2025"
 	];
 
 	var isWITF:Bool = false;
@@ -48,8 +48,10 @@ class InhumanPauseModule extends Module {
 	
 		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
 		
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		//PlayState.instance.modDebugNotif(songName, 0xFFFF00FF);		
 		//first check if the song is valid ?
-		if( !validSongs.contains( PlayState.instance.currentChart.songName.toLowerCase() ) ){
+		if( !validSongs.contains( songName ) ){
 			return;		
 		}	
 		

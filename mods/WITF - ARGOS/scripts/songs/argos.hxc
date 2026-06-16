@@ -1,0 +1,18 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+class argos_noGhostTap extends Song {
+	public function new() {
+		super('argos');
+	}
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+	}
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+}

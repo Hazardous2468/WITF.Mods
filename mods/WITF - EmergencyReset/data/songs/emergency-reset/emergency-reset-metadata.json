@@ -1,0 +1,50 @@
+{
+  "version": "2.2.3",
+  "songName": "Emergency Reset",
+  "artist": "AnbyFox",
+  "divisions": 96,
+  "looped": false,
+  "offsets": {
+    "instrumental": 0,
+    "altInstrumentals": {    },
+    "vocals": {    }
+  },
+  "playData": {
+    "songVariations": [    ],
+    "difficulties": [
+      "hard"
+    ],
+    "characters": {
+      "player": "nobody",
+      "girlfriend": "nobody",
+      "opponent": "kb_dark",
+      "instrumental": "",
+      "altInstrumentals": [      ]
+    },
+	"album": "WITF",
+    "stage": "emptyStage",
+    "noteStyle": "inhuman",
+    "ratings": {
+      "hard": 14
+    },
+    "previewStart": 25600,
+    "previewEnd": 42100
+  },
+  "generatedBy": "Friday Night Funkin' - v0.4.1",
+  "timeFormat": "ms",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 215,
+      "n": 4,
+      "d": 4,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

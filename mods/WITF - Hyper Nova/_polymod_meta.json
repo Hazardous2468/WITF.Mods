@@ -1,0 +1,17 @@
+{
+    "title": "Hyper Nova",
+    "description": "Song made for DreamiAmi.",
+	"contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "1.0.3",
+	"dependencies": {
+		"_WITF - Essentials": "*",
+		"_WITF - Examples": "*"
+	},
+    "license": "CC BY-NC-SA 4.0"
+}

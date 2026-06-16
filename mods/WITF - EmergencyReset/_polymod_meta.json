@@ -1,0 +1,24 @@
+{
+    "title": "Emergency Reset",
+    "description": "Original song by AnbyFox!",
+	"contributors": [
+		{
+			"name": "AnbyFox",
+			"role": "Composer"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Everything else"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "1.0.0",
+	"dependencies": {
+		"_WITF - Essentials": "*",
+		"_WITF - Examples": "*"
+	},
+	"optionalDependencies": {
+		"Hazard24 Stuff": "2.0.0"
+	 },
+    "license": "CC BY-NC-ND 4.0"
+}

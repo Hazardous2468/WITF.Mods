@@ -1,0 +1,37 @@
+
+function modsTimeline()
+
+	addHaxeLibrary("FunkinSprite", "funkin.graphics")
+	addHaxeLibrary("HazardAFT", "funkin.play.modchartSystem")
+	runHaxeCode(
+	[[
+		var target1 = PlayState.instance.playerStrumline.mods;
+		
+		var notesAFT:HazardAFT = new HazardAFT(game.camNotes);
+		notesAFT.recursive=true;
+		notesAFT.updateAFT();	
+		setVar("notesAFT",notesAFT);
+		
+		notesAFT.targetFps(0);
+		
+		//game.camGame.angle = 45;
+		
+		addResetEvent(function(){
+			notesAFT.clearAFT();
+		});
+		
+		addUpdate(function(elapsed){
+			notesAFT.update(elapsed);	
+		});	
+		
+		
+		var aftSprite = createSpr("aftSprite");
+		aftSprite.loadGraphic(getVar("notesAFT").bitmap);
+		aftSprite.camera = game.camAFT;
+		aftSprite.visible = true;
+	]])
+
+
+end
+
+

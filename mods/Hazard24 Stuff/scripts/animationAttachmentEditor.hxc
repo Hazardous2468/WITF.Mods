@@ -1,38 +1,13 @@
-import funkin.modding.module.Module;
-import funkin.play.PlayState;
-import funkin.ui.AtlasMenuItem;
-import flixel.FlxG;
-import funkin.util.Constants;
-import funkin.Preferences;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
-import funkin.Conductor;
-import funkin.play.notes.Strumline;
-import flixel.math.FlxMath;
-import flixel.util.FlxStringUtil;
-import flixel.FlxSprite;
-import funkin.graphics.adobeanimate.FlxAtlasSprite;
-
-import flixel.text.FlxText;
-import flixel.text.FlxTextBorderStyle;
-import funkin.Paths;
-
-import funkin.audio.FunkinSound;
-
-import funkin.ui.freeplay.FreeplayState;
-import funkin.ui.mainmenu.MainMenuState;
-import funkin.ui.debug.charting.ChartEditorState;
-import funkin.ui.debug.DebugMenuSubState;
-import flixel.addons.transition.FlxTransitionableState;
-import lime.system.Clipboard;
-
-import lime.math.Vector2;
-
-import StringTools;
-
 
 
 /*
+
+An editor made by Hazard24 to allow you to create an array of Vector2 positions that sync to each frame of animation for a sprite.
+This way, you can have a sprite play an animation while another sprite follows it as it moves around.
+The default demo of this is a bouncing ball that bounces up and down, and the target sprite follows it as it bounces.
+
+Was made for a personal project but left it here in case anybody wants to use it for whatever reason.
+
 
 //CONTROLS:
 
@@ -65,13 +40,49 @@ H - Toggle text visiblity
 */
 
 
-//
+
+
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.ui.AtlasMenuItem;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+//import flixel.FlxSprite;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.adobeanimate.FlxAtlasSprite;
+
+//import flixel.text.FlxText;
+import flixel.text.FlxBitmapText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+
+import funkin.audio.FunkinSound;
+
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.ui.debug.DebugMenuSubState;
+import flixel.addons.transition.FlxTransitionableState;
+import lime.system.Clipboard;
+
+import lime.math.Vector2;
+
+import StringTools;
 
 
 
 class AnimationAttachmentEditorModule extends Module
 {
 	//CONFIG HERE	
+	
 	var isAtlas:Bool = false;
 	var animationGraphicPath = "AnimationPointTestAnim";
 	var animationPrefixes:Array<String> = ["bounce0", "bounceLeft", "bounceRight"];
@@ -80,14 +91,17 @@ class AnimationAttachmentEditorModule extends Module
 	
 	
 	
-	//Just press C to copy the data and then paste the data into this string lol
-	//var initialOffsets:String = "" ;
+	//Just press C to copy the data and then paste the resulting data into this string
+	//var initialOffsets:String = "";
 	var initialOffsets:String = "Attachment Points: 
-[Insert18 => (633.900000000003, 500.225000000006), Insert19 => (633.900000000003, 500.225000000006), OldPump0 => (633.900000000003, 509.600000000006), OldPump1 => (633.900000000003, 516.825000000005), OldPump2 => (633.900000000003, 516.100000000005), OldPump3 => (633.900000000003, 513.550000000006), OldPump4 => (633.900000000003, 508.000000000006), OldPump5 => (633.900000000003, 506.825000000006), OldPump6 => (633.900000000003, 501.075000000007), OldPump7 => (633.900000000003, 501.075000000007), lite_cum10 => (633.900000000003, 518.225000000005), OldPump8 => (633.900000000003, 495.700000000007), lite_cum11 => (633.900000000003, 518.225000000005), OldPump9 => (633.900000000003, 495.700000000007), lite_cum12 => (633.900000000003, 514.825000000005), lite_cum13 => (633.900000000003, 514.825000000005), lite_cum14 => (633.900000000003, 510.975000000006), lite_cum15 => (633.900000000003, 510.975000000006), lite_cum16 => (633.900000000003, 507.400000000006), lite_cum17 => (633.900000000003, 507.400000000006), lite_cum18 => (633.900000000003, 507.400000000006), lite_cum19 => (633.900000000003, 503.800000000006), OldPump-113 => (0, 0), OldPump-114 => (0, 0), OldPump-115 => (0, 0), OldPump-116 => (0, 0), OldPump-117 => (0, 0), OldPump-118 => (0, 0), OldPump-119 => (0, 0), IntensePump0 => (633.900000000003, 521.125000000004), IntensePump1 => (633.900000000003, 524.275000000004), IntensePump2 => (633.900000000003, 523.325000000004), IntensePump3 => (633.900000000003, 517.725000000005), Idle_Inserted20 => (633.900000000003, 489.775000000006), IntensePump4 => (633.900000000003, 508.000000000006), Idle_Inserted21 => (633.900000000003, 489.775000000006), IntensePump5 => (633.900000000003, 505.500000000006), Idle_Inserted22 => (633.900000000003, 489.775000000006), IntensePump6 => (633.900000000003, 496.125000000006), Idle_Inserted23 => (633.900000000003, 489.775000000006), IntensePump7 => (633.900000000003, 496.125000000006), Idle_Inserted24 => (633.900000000003, 489.775000000006), IntensePump8 => (633.900000000003, 496.125000000006), RestEnd10 => (633.900000000003, 494.325000000007), Idle_Inserted25 => (633.900000000003, 489.775000000006), IntensePump9 => (633.900000000003, 496.125000000006), Idle_Inserted26 => (633.900000000003, 489.775000000006), Pump10 => (633.900000000003, 490.900000000006), Idle_Inserted27 => (633.900000000003, 489.775000000006), Idle_Inserted28 => (633.900000000003, 489.775000000006), Idle_Inserted29 => (633.900000000003, 489.775000000006), OldPump-140 => (0, 0), OldPump-141 => (0, 0), OldPump-142 => (0, 0), IntensePump10 => (633.900000000003, 496.125000000006), OldPump-143 => (0, 0), OldPump-144 => (0, 0), OldPump-145 => (0, 0), OldPump-146 => (0, 0), Insert0 => (633.900000000003, 488.350000000007), Insert1 => (633.900000000003, 483.475000000007), Insert2 => (633.900000000003, 483.475000000007), Insert3 => (633.900000000003, 475.925000000007), Insert4 => (633.900000000003, 475.925000000007), Insert5 => (633.900000000003, 486.475000000007), Insert6 => (633.900000000003, 513.050000000006), Insert7 => (633.900000000003, 516.925000000005), Insert8 => (633.900000000003, 516.925000000005), Insert9 => (633.900000000003, 515.475000000005), Idle_Inserted10 => (633.900000000003, 513.350000000005), Idle_Inserted11 => (633.900000000003, 513.500000000005), Idle_Inserted12 => (633.900000000003, 513.500000000005), Idle_Inserted13 => (633.900000000003, 513.500000000005), lite_cum0 => (633.900000000003, 512.775000000006), Idle_Inserted14 => (633.900000000003, 512.650000000006), Idle_Inserted15 => (633.900000000003, 512.650000000006), lite_cum1 => (633.900000000003, 513.775000000006), Idle_Inserted16 => (633.900000000003, 512.650000000006), lite_cum2 => (633.900000000003, 521.675000000004), RestEnd0 => (633.900000000003, 517.600000000005), Idle_Inserted17 => (633.900000000003, 512.650000000006), lite_cum3 => (633.900000000003, 525.200000000004), Idle_Inserted18 => (633.900000000003, 512.650000000006), RestEnd1 => (633.900000000003, 519.650000000005), lite_cum4 => (633.900000000003, 523.900000000004), Idle_Inserted19 => (633.900000000003, 512.650000000006), RestEnd2 => (633.900000000003, 516.050000000005), lite_cum5 => (633.900000000003, 522.900000000004), RestEnd3 => (633.900000000003, 516.050000000005), lite_cum6 => (633.900000000003, 522.900000000004), lite_cum7 => (633.900000000003, 521.600000000004), RestEnd4 => (633.900000000003, 505.675000000006), lite_cum8 => (633.900000000003, 521.600000000004), RestEnd5 => (633.900000000003, 504.350000000006), lite_cum9 => (633.900000000003, 518.225000000005), Idle_Came0 => (633.900000000003, 511.400000000006), RestEnd6 => (633.900000000003, 496.250000000007), OldPump-130 => (0, 0), Idle_Came1 => (633.900000000003, 511.400000000006), RestEnd7 => (633.900000000003, 495.000000000007), OldPump-131 => (0, 0), Idle_Came2 => (633.900000000003, 510.700000000006), RestEnd8 => (633.900000000003, 494.325000000007), OldPump-132 => (0, 0), Idle_Came3 => (633.900000000003, 510.700000000006), RestEnd9 => (633.900000000003, 494.325000000007), OldPump-133 => (0, 0), Idle_Came4 => (633.900000000003, 510.700000000006), OldPump-134 => (0, 0), Idle_Came5 => (633.900000000003, 510.700000000006), OldPump-135 => (0, 0), Idle_Came6 => (633.900000000003, 510.700000000006), OldPump-136 => (0, 0), Idle_Came7 => (633.900000000003, 510.700000000006), OldPump-137 => (0, 0), Idle_Came8 => (633.900000000003, 510.700000000006), OldPump-138 => (0, 0), Idle_Came9 => (633.900000000003, 510.700000000006), OldPump-139 => (0, 0), RestStart0 => (633.900000000003, 510.750000000006), RestStart1 => (633.900000000003, 520.275000000004), RestStart2 => (633.900000000003, 524.175000000003), RestStart3 => (633.900000000003, 521.350000000004), Idle_Before0 => (633.900000000003, 488.375000000007), RestStart4 => (633.900000000003, 518.675000000005), Idle_Before1 => (633.900000000003, 488.375000000007), RestStart5 => (633.900000000003, 518.675000000005), lite_cum20 => (633.900000000003, 503.800000000006), Idle_Before2 => (633.900000000003, 488.375000000007), Pump0 => (633.900000000003, 505.675000000006), RestStart6 => (633.900000000003, 516.900000000005), lite_cum21 => (633.900000000003, 503.800000000006), Idle_Before3 => (633.900000000003, 488.375000000007), Pump1 => (633.900000000003, 524.225000000004), RestStart7 => (633.900000000003, 516.900000000005), lite_cum22 => (633.900000000003, 501.750000000006), Idle_Before4 => (633.900000000003, 488.375000000007), Pump2 => (633.900000000003, 527.800000000003), RestStart8 => (633.900000000003, 516.275000000005), lite_cum23 => (633.900000000003, 501.750000000006), Idle_Before5 => (633.900000000003, 488.375000000007), Pump3 => (633.900000000003, 528.375000000003), RestStart9 => (633.900000000003, 516.275000000005), lite_cum24 => (633.900000000003, 501.750000000006), Idle_Before6 => (633.900000000003, 488.375000000007), Pump4 => (633.900000000003, 515.925000000005), lite_cum25 => (633.900000000003, 501.750000000006), Idle_Before7 => (633.900000000003, 488.375000000007), Pump5 => (633.900000000003, 499.575000000006), RestStart10 => (633.900000000003, 516.275000000005), Idle_Before8 => (633.900000000003, 488.375000000007), Pump6 => (633.900000000003, 499.050000000006), OldPump10 => (633.900000000003, 495.700000000007), Pump7 => (633.900000000003, 486.450000000007), Idle_Before9 => (633.900000000003, 488.375000000007), Pump8 => (633.900000000003, 482.950000000007), OldPump-120 => (0, 0), Pump9 => (633.900000000003, 483.000000000007), OldPump-121 => (0, 0), OldPump-122 => (0, 0), OldPump-123 => (0, 0), OldPump-124 => (0, 0), Cum0 => (633.900000000003, 521.175000000004), OldPump-125 => (0, 0), Cum1 => (633.900000000003, 523.050000000004), OldPump-126 => (0, 0), Cum2 => (633.900000000003, 524.350000000004), OldPump-127 => (0, 0), Cum3 => (633.900000000003, 523.825000000004), Insert10 => (633.900000000003, 505.875000000006), OldPump-128 => (0, 0), Cum4 => (633.900000000003, 522.675000000004), Insert11 => (633.900000000003, 506.175000000006), OldPump-129 => (0, 0), Cum10 => (633.900000000003, 515.275000000005), Cum5 => (633.900000000003, 522.675000000004), Insert12 => (633.900000000003, 503.100000000006), Cum11 => (633.900000000003, 515.275000000005), Cum6 => (633.900000000003, 520.125000000005), Insert13 => (633.900000000003, 503.100000000006), Cum12 => (633.900000000003, 513.750000000006), Cum7 => (633.900000000003, 520.125000000005), Insert14 => (633.900000000003, 501.050000000006), Cum13 => (633.900000000003, 513.750000000006), Cum8 => (633.900000000003, 517.275000000005), Insert15 => (633.900000000003, 501.050000000006), Cum14 => (633.900000000003, 513.750000000006), Cum9 => (633.900000000003, 517.275000000005), Insert16 => (633.900000000003, 499.875000000006), Cum15 => (633.900000000003, 513.750000000006), Insert17 => (633.900000000003, 499.875000000006), ]";
+[bounce0010 => (188.250000000002, 163.166666666667), bounce0000 => (188.250000000002, 382.083333333329), bounce0011 => (188.250000000002, 176.166666666667), bounce0001 => (188.250000000002, 416.833333333327), bounce0012 => (188.250000000002, 207.833333333335), bounce0002 => (188.250000000002, 416.833333333327), bounce0013 => (188.250000000002, 251.583333333336), bounce0003 => (188.250000000002, 290.666666666667), bounce0014 => (188.250000000002, 280.250000000001), bounce0004 => (188.250000000002, 218.166666666668), bounce0015 => (188.250000000002, 336.833333333331), bounce0016 => (188.250000000002, 367.916666666663), bounce0005 => (188.250000000002, 195.750000000001), bounceLeft0010 => (346.166666666666, 192.750000000001), bounce0017 => (188.250000000002, 367.916666666663), bounce0006 => (188.250000000002, 184.750000000001), bounceLeft0011 => (297.833333333335, 273.750000000001), bounceLeft0000 => (711.583333333344, 462.666666666658), bounce0007 => (188.250000000002, 172.416666666667), bounce0008 => (188.250000000002, 160.833333333333), bounceLeft0001 => (711.583333333344, 508.249999999988), bounceLeft0012 => (232.16666666667, 351.749999999997), bounce0009 => (188.250000000002, 160.833333333333), bounceLeft0002 => (711.583333333344, 508.249999999988), bounceLeft0013 => (157.166666666668, 444.749999999992), bounceLeft0003 => (695.916666666676, 370.249999999996), bounceRight0010 => (528.416666666656, 205.750000000002), bounceLeft0004 => (597.583333333331, 242.916666666669), bounceRight0011 => (606.666666666664, 267.416666666669), bounceRight0000 => (181.750000000001, 467.583333333325), bounceLeft0005 => (492.666666666656, 195.666666666668), bounceRight0012 => (683.083333333338, 364.916666666664), bounceRight0001 => (185.250000000001, 509.999999999986), bounceLeft0006 => (445.499999999992, 185.666666666667), bounceRight0013 => (740.083333333345, 455.583333333327), bounceRight0002 => (185.250000000001, 509.999999999986), bounceLeft0007 => (403.499999999995, 175.416666666667), bounceRight0003 => (242.583333333336, 338.083333333329), bounceLeft0008 => (370.499999999998, 153.749999999999), bounceRight0004 => (287.083333333334, 249.333333333336), bounceLeft0009 => (370.499999999998, 153.749999999999), bounceRight0005 => (332.749999999999, 219.416666666668), bounceRight0006 => (399.083333333328, 196.750000000001), bounceRight0007 => (448.166666666655, 161.833333333333), bounceRight0008 => (482.249999999986, 150.5), bounceRight0009 => (482.249999999986, 150.5), ]";
 	
 	
 	
-
+	
+	// CONFIG ENDS HERE
+	
+	
 	var animationOffsets_X:Array<Float> = [];
 	var animationOffsets_Y:Array<Float> = [];
 	var animationOffsets:Map<String, Vector2>;
@@ -179,7 +193,7 @@ class AnimationAttachmentEditorModule extends Module
 	var bgSprite;
 	var animationGraphic;
 	var attachmentSprite;
-	var textInfo:FlxText;
+	var textInfo:FlxBitmapText;
 	
 
 	
@@ -196,10 +210,9 @@ class AnimationAttachmentEditorModule extends Module
 		trace("ENTERED ANIMATION ATTACHMENT EDITOR");
 		createdState = true;
 		//FlxTransitionableState.skipNextTransIn = true;
-		//FlxG.switchState(() -> new ChartEditorState());
 		FlxG.state.subState.items.enabled = false;
 
-		bgSprite = new FlxSprite();
+		bgSprite = new FunkinSprite();
 		bgSprite.loadGraphic(Paths.image("menu_attachmenteditorBG"));
 		bgSprite.scrollFactor.set();
 		bgSprite.screenCenter();
@@ -222,7 +235,7 @@ class AnimationAttachmentEditorModule extends Module
 			//play first anim
 			animationGraphic.playAnimation(atlasAnimNames[0], true, false, animationShouldLoop[0]);
 		}else{
-			animationGraphic = new FlxSprite();
+			animationGraphic = new FunkinSprite();
 			animationGraphic.frames = Paths.getSparrowAtlas(animationGraphicPath);	
 			for (i in 0...animationPrefixes.length){
 				animationGraphic.animation.addByPrefix(i, animationPrefixes[i], animationFramerate, animationShouldLoop[i]);	
@@ -262,12 +275,12 @@ class AnimationAttachmentEditorModule extends Module
 			}
 		}
 		
-		//Scans the AttachmentPointsTest.txt file!
+		//If initialOffsets is left empty, scans the AttachmentPointsTest.txt file! (not implemented tho lol)
 		
 		if(initialOffsets != "")
 			pasteFromClipboard(initialOffsets);
 		
-		attachmentSprite = new FlxSprite();
+		attachmentSprite = new FunkinSprite();
 		attachmentSprite.loadGraphic(Paths.image("hazard_debugPoint"));
 		attachmentSprite.scrollFactor.set();
 		attachmentSprite.screenCenter();
@@ -275,11 +288,12 @@ class AnimationAttachmentEditorModule extends Module
 		FlxG.state.subState.add(attachmentSprite);
 
 		
-		textInfo = new FlxText(0, 0, FlxG.width, "eek");
-		textInfo.setFormat(Paths.font("vcr.ttf"), 24, 0xFFFFFFFF, "left", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		textInfo = new FlxBitmapText(0, 0, ". . .", Paths.getFlxBitmapFontFromAngelCode("fonts/vcr", "preload"));
+		textInfo.borderStyle = FlxTextBorderStyle.OUTLINE;
+		textInfo.borderColor = 0xFF000000;
 		textInfo.borderSize = 2;
 		textInfo.scrollFactor.set();
-		textInfo.text = "TESTING 1 2 3 ! \nWE ARE DOING THIS\nAAAAA!";
+		//textInfo.text = "TESTING 1 2 3 ! \nWE ARE DOING THIS\nAAAAA!";
 		FlxG.state.subState.add(textInfo);
 	}
 	  
@@ -498,9 +512,15 @@ class AnimationAttachmentEditorModule extends Module
 			
 			if(FlxG.keys.pressed.LBRACKET){
 				FlxG.camera.zoom += 5 * e.elapsed;
+				if (FlxG.camera.zoom > 10){
+					FlxG.camera.zoom = 10;
+				}
 			}
 			if(FlxG.keys.pressed.RBRACKET){
 				FlxG.camera.zoom -= 5 * e.elapsed;
+				if (FlxG.camera.zoom < 0.1){
+					FlxG.camera.zoom = 0.1;
+				}
 			}
 			if(FlxG.keys.justPressed.R){
 				FlxG.camera.zoom = 1;

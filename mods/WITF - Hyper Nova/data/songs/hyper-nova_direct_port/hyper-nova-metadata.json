@@ -1,0 +1,48 @@
+{
+	"timeFormat": "ms",
+	"artist": "Hazard24",
+	"charter": "Hazard24",
+	"looped": false,
+	  "offsets": {
+		"instrumental": 0,
+		"altInstrumentals": {    },
+		"vocals": {    },
+		"altVocals": {    }
+	  },
+	"playData": {
+		"stage": "emptyStage",
+		"noteStyle": "simple",
+		"ratings": {
+		  "normal": 10
+		},
+		"difficulties": ["normal"],
+		"characters": {
+		  "player": "nobody",
+		  "girlfriend": "nobody",
+		  "opponent": "nobody",
+		  "instrumental": "",
+		  "altInstrumentals": [      ],
+		  "opponentVocals": [
+			"nobody_opponent"
+		  ],
+		  "playerVocals": [
+			"player"
+		  ]
+		},
+		"album": "WITF"
+	},
+	"songName": "Hyper Nova",
+	"timeChanges": [
+		{"t": 0, "bpm": 180},
+		{"t": 288000, "bpm": 180},
+		{"t": 289333.333333334, "bpm": 182},
+		{"t": 290652.014652015, "bpm": 184},
+		{"t": 291956.362478102, "bpm": 186},
+		{"t": 293246.685058747, "bpm": 188},
+		{"t": 294523.280803428, "bpm": 190},
+		{"t": 295786.438698165, "bpm": 195},
+		{"t": 297017.207928934, "bpm": 200}
+	],
+	"generatedBy": "Psych Engine v0.4.5 (DEMO) - Chart Editor V-Slice Exporter",
+	"version": "2.2.3"
+}

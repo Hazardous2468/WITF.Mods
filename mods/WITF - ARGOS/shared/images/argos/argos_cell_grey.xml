@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="argos_cell_grey.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="idle_empty0000" x="796" y="0" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0001" x="1193" y="0" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0002" x="397" y="180" width="398" height="176" frameX="-33" frameY="-1" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0003" x="1195" y="356" width="405" height="167" frameX="-29" frameY="-5" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0004" x="1353" y="798" width="424" height="143" frameX="-17" frameY="-16" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0005" x="0" y="1065" width="443" height="136" frameX="-5" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0006" x="0" y="791" width="450" height="136" frameX="-1" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0007" x="411" y="517" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0008" x="864" y="524" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0009" x="411" y="654" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0010" x="451" y="798" width="450" height="136" frameX="-1" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0011" x="1320" y="942" width="437" height="137" frameX="-9" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0012" x="397" y="357" width="410" height="159" frameX="-25" frameY="-8" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0013" x="1195" y="180" width="399" height="175" frameX="-33" frameY="-1" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0014" x="0" y="0" width="397" height="179" frameX="-34" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_empty0015" x="796" y="0" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0000" x="1590" y="0" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0001" x="0" y="180" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0002" x="796" y="180" width="398" height="176" frameX="-33" frameY="-1" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0003" x="1601" y="356" width="405" height="167" frameX="-29" frameY="-5" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0004" x="451" y="935" width="424" height="143" frameX="-17" frameY="-16" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0005" x="876" y="935" width="443" height="136" frameX="-5" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0006" x="0" y="928" width="450" height="136" frameX="-1" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0007" x="1317" y="524" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0008" x="864" y="661" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0009" x="1317" y="661" width="452" height="136" frameX="0" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0010" x="902" y="798" width="450" height="136" frameX="-1" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0011" x="876" y="1072" width="437" height="137" frameX="-9" frameY="-19" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0012" x="0" y="517" width="410" height="159" frameX="-25" frameY="-8" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0013" x="1595" y="180" width="399" height="175" frameX="-33" frameY="-1" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0014" x="398" y="0" width="397" height="179" frameX="-34" frameY="0" frameWidth="452" frameHeight="179"/>
+	<SubTexture name="idle_filled0015" x="1590" y="0" width="396" height="179" frameX="-35" frameY="0" frameWidth="452" frameHeight="179"/>
+</TextureAtlas>

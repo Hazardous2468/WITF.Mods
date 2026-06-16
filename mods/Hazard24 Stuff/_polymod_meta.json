@@ -1,6 +1,6 @@
 {
   "title": "Hazard Stuff",
-  "description": "Contains some Quality of Life stuff.",
+  "description": "Contains some Quality of Life stuff",
   "contributors": [
 		{
 			"name": "Hazard24",
@@ -16,6 +16,6 @@
 		}
 	],
   "api_version": "0.8.0",
-  "mod_version": "2.1.0",
+  "mod_version": "2.1.1",
   "license": "Apache-2.0"
 }

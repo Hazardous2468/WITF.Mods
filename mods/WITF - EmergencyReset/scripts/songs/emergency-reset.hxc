@@ -1,0 +1,126 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.FlxTypedEmitter;
+import flixel.effects.particles.FlxEmitterMode;
+
+class EmergencyReset_SongScript extends Song {
+	public function new() {
+		super('emergency-reset');
+	}
+	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	//override function onNoteGhostMiss(event) {
+	//	event.cancelEvent();
+	//}
+	
+	var particlesEmitter_left:FlxTypedEmitter;
+	
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+		
+		
+		particlesEmitter_left = new FlxTypedEmitter(20,20, 14);
+		particlesEmitter_left.launchMode = FlxEmitterMode.SQUARE;
+		particlesEmitter_left.width = 1;
+		particlesEmitter_left.height = 1;
+		particlesEmitter_left.x = FlxG.width * 0.1;
+		particlesEmitter_left.y = FlxG.height + 64+24;
+		particlesEmitter_left.lifespan.set(0.69, 1);
+		//particlesEmitter_left.velocity.set(-80, -880, 80, -900);
+		particlesEmitter_left.velocity.set(-122, -400, 122, -900);
+		particlesEmitter_left.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter_left.launchAngle.set(-180, 180);
+		particlesEmitter_left.alpha.set(0.46, 0.45, 0, 0);
+		particlesEmitter_left.scale.set(1.5, 1.4, 0.8, 0);
+		particlesEmitter_left.angle.set(-90, 90);
+		particlesEmitter_left.keepScaleRatio = true;
+		var particle:FlxParticle;
+		for (i in 0...14)
+		{
+			particle = new FlxParticle();
+			particle.scrollFactor.set();
+			particle.x -= 5000;
+			particle.loadGraphic(Paths.image("emergency_reset/smoke_particles"));
+			particlesEmitter_left.add(particle);
+			
+			particle.scale.x = 1.45;
+			particle.scale.y = 1.45;	
+		}
+		PlayState.instance.add(particlesEmitter_left);
+		PlayState.instance.variables.set("particlesEmitter_left", particlesEmitter_left);
+		
+		
+		
+		
+		particlesEmitter_right = new FlxTypedEmitter(20,20, 14);
+		particlesEmitter_right.launchMode = particlesEmitter_left.launchMode;
+		particlesEmitter_right.width = particlesEmitter_left.width;
+		particlesEmitter_right.height = particlesEmitter_left.height;
+		particlesEmitter_right.x = FlxG.width * 0.9;
+		particlesEmitter_right.y = FlxG.height + 64+24;
+		particlesEmitter_right.lifespan.set(0.69, 1);
+		particlesEmitter_right.velocity.set(-122, -400, 122, -900);
+		particlesEmitter_right.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter_right.launchAngle.set(-180, 180);
+		particlesEmitter_right.alpha.set(0.46, 0.45, 0, 0);
+		particlesEmitter_right.scale.set(1.5, 1.4, 0.8, 0);
+		particlesEmitter_right.angle.set(-90, 90);
+		particlesEmitter_right.keepScaleRatio = true;
+		var particle:FlxParticle;
+		for (i in 0...14)
+		{
+			particle = new FlxParticle();
+			particle.scrollFactor.set();
+			particle.x -= 5000;
+			particle.loadGraphic(Paths.image("emergency_reset/smoke_particles"));
+			particlesEmitter_right.add(particle);
+			
+			particle.scale.x = 1.45;
+			particle.scale.y = 1.45;	
+		}
+		PlayState.instance.add(particlesEmitter_right);
+		PlayState.instance.variables.set("particlesEmitter_right", particlesEmitter_right);
+	}
+	
+	function doGas(beat:Float){
+	
+		PlayState.instance.modchartEventHandler.funcModEvent(PlayState.instance.playerStrumline.mods, beat, function() {
+			particlesEmitter_left.start(true);
+			particlesEmitter_right.start(true);
+		}, "gas", false);
+		
+	}
+	
+	//USE THIS TO SET EVENTS ONTO THE TIMELINE!
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);		
+		doGas(132);
+		doGas(140);
+		doGas(164);
+		doGas(172);
+		doGas(260);
+		doGas(268);
+		doGas(292);
+		doGas(300);
+		doGas(328);
+		doGas(344);
+		doGas(360);
+		doGas(376);
+		doGas(392);
+		doGas(408);
+		doGas(424);
+		doGas(440);
+		doGas(516);
+		doGas(524);
+		doGas(548);
+		doGas(556);
+		
+		//doGas(576);
+	}
+
+}

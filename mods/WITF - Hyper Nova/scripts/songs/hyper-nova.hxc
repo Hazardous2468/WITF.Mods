@@ -1,0 +1,54 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.play.modchartSystem.ModConstants;
+class hyperNova_SongScript extends Song {
+	public function new() {
+		super('hyper-nova');
+	}
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+	
+	
+	function onNoteIncoming(callback)
+	{
+		var note = callback.note;
+		//var isPlayer1 = note.noteData.getMustHitNote();
+		var isPlayer1:Bool = note.weBelongTo == PlayState.instance.playerStrumline;
+		
+		if(isPlayer1){
+			if(note.noteData.kind == "invis"){
+				var alphaMod = ModConstants.createNewMod("alpha");
+				alphaMod.currentValue = 1;
+				alphaMod.baseValue = 1;
+				alphaMod.strumOwner = PlayState.instance.playerStrumline;
+				
+				if(note.noteModData.noteMods != null){
+					note.noteModData.noteMods.push(alphaMod);
+					
+					if(note.holdNoteSprite != null){
+						note.holdNoteSprite.noteModData.noteMods.push(alphaMod);
+					}
+				}
+			}
+		}else{
+			if(note.noteData.kind != "invis" && ( (note.strumTime >= 108098 && note.strumTime < 127712) || (note.strumTime >= 245520 && note.strumTime < 265250)  ) ){
+				var alphaMod = ModConstants.createNewMod("alpha");
+				alphaMod.currentValue = 1;
+				alphaMod.baseValue = 1;
+				alphaMod.strumOwner = PlayState.instance.playerStrumline;
+				
+				if(note.noteModData.noteMods != null){
+					note.noteModData.noteMods.push(alphaMod);
+					
+					if(note.holdNoteSprite != null){
+						note.holdNoteSprite.noteModData.noteMods.push(alphaMod);
+					}
+				}
+			}
+		}
+	}
+	
+}

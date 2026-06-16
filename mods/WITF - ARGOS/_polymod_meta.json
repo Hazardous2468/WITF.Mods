@@ -1,0 +1,28 @@
+{
+    "title": "ARGO↑↓S",
+    "description": "Ported from Inhuman. ORIGINAL: https://youtu.be/9op9lZ8Ehms",
+	"contributors": [
+		{
+			"name": "出前 (demaescape)",
+			"role": "Original movie visuals"
+		},
+		{
+			"name": "iKlar ( ikaruga_nex vs Klavistr )",
+			"role": "Music"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Modchart and code"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "1.1.0",
+	"dependencies": {
+		"_WITF - Essentials": "*",
+		"_WITF - Examples": "*"
+	},
+	"optionalDependencies": {
+		"Hazard24 Stuff": "2.1.1"
+	 },
+    "license": "CC BY-NC-ND 4.0"
+}

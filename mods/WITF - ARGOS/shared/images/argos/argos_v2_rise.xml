@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="argos_v2_rise.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="animation_armlift0000" x="7236" y="0" width="933" height="963" frameX="-147" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0001" x="7235" y="964" width="950" height="963" frameX="-138" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0002" x="7229" y="1928" width="962" height="963" frameX="-132" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0003" x="5083" y="5784" width="978" height="963" frameX="-124" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0004" x="4092" y="5784" width="990" height="963" frameX="-118" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0005" x="3086" y="5784" width="1005" height="963" frameX="-110" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0006" x="2068" y="5784" width="1017" height="963" frameX="-104" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0007" x="1039" y="5784" width="1028" height="963" frameX="-98" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0008" x="0" y="5784" width="1038" height="963" frameX="-93" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0009" x="6505" y="4820" width="1050" height="963" frameX="-87" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0010" x="5444" y="4820" width="1060" height="963" frameX="-82" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0011" x="4372" y="4820" width="1071" height="963" frameX="-76" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0012" x="3292" y="4820" width="1079" height="963" frameX="-72" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0013" x="2203" y="4820" width="1088" height="963" frameX="-67" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0014" x="1105" y="4820" width="1097" height="963" frameX="-63" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0015" x="0" y="4820" width="1104" height="963" frameX="-59" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0016" x="6821" y="3856" width="1113" height="963" frameX="-54" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0017" x="5700" y="3856" width="1120" height="963" frameX="-51" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0018" x="4572" y="3856" width="1127" height="963" frameX="-47" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0019" x="3438" y="3856" width="1133" height="963" frameX="-44" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0020" x="2298" y="3856" width="1139" height="963" frameX="-41" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0021" x="1152" y="3856" width="1145" height="963" frameX="-38" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0022" x="0" y="3856" width="1151" height="963" frameX="-35" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0023" x="7035" y="2892" width="1157" height="963" frameX="-32" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0024" x="5874" y="2892" width="1160" height="963" frameX="-30" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0025" x="4707" y="2892" width="1166" height="963" frameX="-27" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0026" x="3536" y="2892" width="1170" height="963" frameX="-25" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0027" x="2361" y="2892" width="1174" height="963" frameX="-23" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0028" x="1182" y="2892" width="1178" height="963" frameX="-21" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0029" x="0" y="2892" width="1181" height="963" frameX="-19" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0030" x="6050" y="0" width="1185" height="963" frameX="-17" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0031" x="6045" y="964" width="1189" height="963" frameX="-15" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0032" x="6037" y="1928" width="1191" height="963" frameX="-14" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0033" x="4849" y="964" width="1195" height="963" frameX="-12" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0034" x="4852" y="0" width="1197" height="963" frameX="-11" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0035" x="4837" y="1928" width="1199" height="963" frameX="-10" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0036" x="3647" y="964" width="1201" height="963" frameX="-9" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0037" x="3647" y="0" width="1204" height="963" frameX="-7" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0038" x="3630" y="1928" width="1206" height="963" frameX="-6" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0039" x="2421" y="1928" width="1208" height="963" frameX="-5" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0040" x="1211" y="1928" width="1209" height="963" frameX="-5" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0041" x="0" y="1928" width="1210" height="963" frameX="-4" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0042" x="2434" y="964" width="1212" height="963" frameX="-3" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0043" x="2433" y="0" width="1213" height="963" frameX="-3" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0044" x="1218" y="0" width="1214" height="963" frameX="-2" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0045" x="0" y="964" width="1216" height="963" frameX="-1" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0046" x="1217" y="964" width="1216" height="963" frameX="-1" frameY="0" frameWidth="1217" frameHeight="963"/>
+	<SubTexture name="animation_armlift0047" x="0" y="0" width="1217" height="963"/>
+</TextureAtlas>
