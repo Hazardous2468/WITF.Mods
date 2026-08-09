@@ -6,7 +6,7 @@
   "assets": {
     "note": {
 	  "animated": true,
-      "assetPath": "shared:inhuman_noteskins/groovin/NOTE_assets-inhumanGroovin_ANIMATED_padding_fix",
+      "assetPath": "shared:NoteSkins/Groovin/groovin_notes",
       "scale": 0.7,
 	  "offsets": [0, 0],
       "data": {
@@ -17,9 +17,8 @@
       }
     },
     "noteStrumline": {
-		"assetPath": "shared:inhuman_noteskins/groovin/NOTE_assets-inhumanGroovin_ANIMATED_padding_fix",
+		"assetPath": "shared:NoteSkins/Groovin/groovin_strums",
       "scale": 0.7,
-	  
       "offsets": [23, 27],
       "data": {
         "leftStatic": { "prefix": "arrowLEFT" },
@@ -42,14 +41,14 @@
     },
     "holdNote": {
 	  "scale": 0.7,
-	  "offsets": [2, 0],
-      "assetPath": "inhuman_noteskins/groovin/holds",
+	  "offsets": [1, 0],
+      "assetPath": "NoteSkins/Groovin/holds",
 	   "data": {
         "behindStrums": true
       }
     },
     "noteSplash": {
-      "assetPath": "shared:inhuman_noteskins/splashes-glow",
+      "assetPath": "shared:NoteSkins/splashes-glow",
       "alpha": 0.8,
 	  "offsets": [0, -18],
       "data": {
@@ -83,25 +82,25 @@
         "enabled": true,
         "scaleX": 1.275,
         "left": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "right": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "up": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "down": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
@@ -112,7 +111,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/digital_alt/intro3"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/ready",
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/ready",
 	  "scale": 1.0,
       "isPixel": false
     },
@@ -120,7 +119,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/digital_alt/intro2"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/2",
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/2",
       "scale": 1.0,
       "isPixel": false
     },
@@ -128,7 +127,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/digital_alt/intro1"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/1",
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/1",
       "scale": 1.0,
       "isPixel": false
     },
@@ -136,77 +135,77 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/digital_alt/introGo"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/digital/go",
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/go",
       "scale": 1.0,
       "isPixel": false
     },
     "judgementSick": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_perfect",
+      "assetPath": "shared:NoteSkins/Groovin/UI/rating_perfect",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementGood": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_good",
+      "assetPath": "shared:NoteSkins/Groovin/UI/rating_good",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementBad": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_bad",
+      "assetPath": "shared:NoteSkins/Groovin/UI/rating_bad",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementShit": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_shit",
+      "assetPath": "shared:NoteSkins/Groovin/UI/rating_shit",
       "scale": 0.65,
       "isPixel": false
     },
     "comboNumber0": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num0",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num0",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber1": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num1",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num1",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber2": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num2",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num2",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber3": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num3",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num3",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber4": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num4",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num4",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber5": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num5",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num5",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber6": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num6",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num6",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber7": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num7",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num7",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber8": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num8",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num8",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber9": {
-      "assetPath": "shared:inhuman_noteskins/UI/altNumbers/num9",
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num9",
       "isPixel": false,
       "scale": 0.45
     }

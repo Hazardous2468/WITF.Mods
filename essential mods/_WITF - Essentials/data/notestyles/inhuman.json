@@ -5,7 +5,7 @@
   "fallback": "funkin",
   "assets": {
     "note": {
-      "assetPath": "shared:inhuman_noteskins/notes-inhuman",
+      "assetPath": "shared:NoteSkins/Inhuman/notes-inhuman",
       "scale": 0.7,
       "data": {
         "left": { "prefix": "purple0" },
@@ -15,7 +15,7 @@
       }
     },
     "noteStrumline": {
-      "assetPath": "shared:inhuman_noteskins/notes-inhuman",
+      "assetPath": "shared:NoteSkins/Inhuman/notes-inhuman",
       "scale": 0.7,
       "offsets": [22, 30],
       "data": {
@@ -40,13 +40,13 @@
     "holdNote": {
 	  "offsets": [2, 0],
 	  "scale": 0.7,
-      "assetPath": "inhuman_noteskins/holds",
+      "assetPath": "NoteSkins/Inhuman/holds",
 	  "data": {
         "behindStrums": true
       }
     },
 	"noteSplash": {
-      "assetPath": "shared:inhuman_noteskins/noteSplashes_inhumanVSlice",
+      "assetPath": "shared:NoteSkins/Inhuman/noteSplashes_inhumanVSlice",
       "alpha": 0.8,
       "data": {
         "enabled": true,
@@ -78,7 +78,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/inhuman/intro3"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/3",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/CountDown/3",
 	  "scale": 1.0,
       "isPixel": false
     },
@@ -86,7 +86,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/inhuman/intro2"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/2",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/CountDown/2",
       "scale": 1.0,
       "isPixel": false
     },
@@ -94,7 +94,7 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/inhuman/intro1"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/1",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/CountDown/1",
       "scale": 1.0,
       "isPixel": false
     },
@@ -102,77 +102,77 @@
       "data": {
         "audioPath": "shared:gameplay/countdown/inhuman/introGo"
       },
-      "assetPath": "shared:inhuman_noteskins/UI/countdowns/inhuman/go",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/CountDown/go",
       "scale": 1.0,
       "isPixel": false
     },
     "judgementSick": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_perfect",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/rating_perfect",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementGood": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_good",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/rating_good",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementBad": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_bad",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/rating_bad",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementShit": {
-      "assetPath": "shared:inhuman_noteskins/UI/rating_shit",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/rating_shit",
       "scale": 0.65,
       "isPixel": false
     },
     "comboNumber0": {
-      "assetPath": "shared:inhuman_noteskins/UI/num0",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num0",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber1": {
-      "assetPath": "shared:inhuman_noteskins/UI/num1",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num1",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber2": {
-      "assetPath": "shared:inhuman_noteskins/UI/num2",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num2",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber3": {
-      "assetPath": "shared:inhuman_noteskins/UI/num3",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num3",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber4": {
-      "assetPath": "shared:inhuman_noteskins/UI/num4",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num4",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber5": {
-      "assetPath": "shared:inhuman_noteskins/UI/num5",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num5",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber6": {
-      "assetPath": "shared:inhuman_noteskins/UI/num6",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num6",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber7": {
-      "assetPath": "shared:inhuman_noteskins/UI/num7",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num7",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber8": {
-      "assetPath": "shared:inhuman_noteskins/UI/num8",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num8",
       "isPixel": false,
       "scale": 0.45
     },
     "comboNumber9": {
-      "assetPath": "shared:inhuman_noteskins/UI/num9",
+      "assetPath": "shared:NoteSkins/Inhuman/UI/num9",
       "isPixel": false,
       "scale": 0.45
     }

@@ -69,10 +69,14 @@ class LoopingSongs extends Module
 			return;
 		}
 
+		if(PlayState.instance.needsReset) return;
+
 		if(Conductor.instance.songPosition >= PlayState.instance.currentSongLengthMs-repeatOffset){
 			//PlayState.instance.modDebugNotif(PlayState.instance.currentSongLengthMs, 0xFFFFFF00);
 			//PlayState.instance.modDebugNotif(Conductor.instance.songPosition, 0xFFFF00FF);
 			PlayState.instance.modDebugNotif("Looped song!", 0xFFFFFF00);
+			PlayState.instance.needsReset = true;
+			return;
 			setSongTime(0);
 			SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);			
 		}

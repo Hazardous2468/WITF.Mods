@@ -30,9 +30,11 @@ class ChaosMode extends Module
 	var allPossibleEffects:Array<String> = [
 		"slow down", "speed up", "dizzy camera",
 	
-		"drunk", "tipsy", "tornado", 
-		"invert", "flip", "videogames", 
-		"bumpy", "bounce", "zigzag","hourglass",
+		"drunk", "tipsy",
+		"tornado",
+		"invert", "flip", "videogames",
+		"hourglass",
+		"bumpy", "bounce", "zigzag",
 		"confusion", "big", "pulse", "tiny", "reverse", "blacksphere",
 		"hidden", "vanish"
 	];

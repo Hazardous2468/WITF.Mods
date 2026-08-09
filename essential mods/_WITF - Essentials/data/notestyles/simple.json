@@ -5,7 +5,7 @@
   "fallback": "funkin",
   "assets": {
     "note": {
-      "assetPath": "shared:inhuman_noteskins/simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/notes-simple",
       "scale": 0.7,
       "data": {
         "left": { "prefix": "purple0" },
@@ -15,7 +15,7 @@
       }
     },
     "noteStrumline": {
-      "assetPath": "shared:inhuman_noteskins/simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/notes-simple",
       "scale": 0.7,
       "offsets": [25, 26],
       "data": {
@@ -74,7 +74,7 @@
       }
     },
     "holdNote": {
-      "assetPath": "inhuman_noteskins/simple/holds_wide",
+      "assetPath": "NoteSkins/Simple/holds_wide",
       "scale": 0.7,
 	  "offsets": [2, 0],
       "data": {
@@ -82,7 +82,7 @@
       }
     },
     "noteSplash": {
-      "assetPath": "shared:inhuman_noteskins/splashes-glow",
+      "assetPath": "shared:NoteSkins/splashes-glow",
       "alpha": 0.8,
 	  "offsets": [0, -18],
       "data": {
@@ -116,25 +116,25 @@
         "enabled": true,
         "scaleX": 1.2,
         "left": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "right": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "up": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }
         },
         "down": {
-          "assetPath": "shared:inhuman_noteskins/sustain_cover_red",
+          "assetPath": "shared:NoteSkins/sustain_cover_red",
           "start": { "prefix": "sus_cover_start" },
           "hold": { "prefix": "sus_cover_lp" },
           "end": { "prefix": "sus_cover_end" }

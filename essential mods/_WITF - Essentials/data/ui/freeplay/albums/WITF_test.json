@@ -2,6 +2,7 @@
   "version": "1.0.0",
   "name": "What In The FUNKIN?! Example Songs",
   "artists": ["Various artists"],
+  "albumOSTName": "WITF TEST",
   "albumArtAsset": "freeplay/albumRoll/WITF",
   "albumTitleAsset": "freeplay/albumRoll/WITF-text - Copy"
 }

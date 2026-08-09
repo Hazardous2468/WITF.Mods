@@ -1,3 +1,5 @@
+package witf.modules.play.notes;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import funkin.Paths;

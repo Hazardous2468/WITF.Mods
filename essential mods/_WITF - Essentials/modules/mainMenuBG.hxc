@@ -1,0 +1,26 @@
+package witf.modules.options;
+import funkin.modding.module.Module;
+import funkin.ui.mainmenu.MainMenuState;
+import flixel.FlxG;
+
+// A module that exists purely to change the main menu background. Just replacing the menuBG asset isn't good enough as it makes the options unreadable.
+
+class WITF_MainMenuBackgroundChanger extends Module
+{
+  public function new()
+  {
+    super('WITF_MainMenuBackgroundChanger', 1, {state: MainMenuState});
+  }
+
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if (!Std.isOfType(event.targetState, MainMenuState)) return;
+
+    var state = event.targetState;
+
+    state.magenta.loadGraphic(Paths.image('menuBGMagenta_witf'));
+    state.bg.loadGraphic(Paths.image('menuBG_witf'));    
+
+  }
+
+}

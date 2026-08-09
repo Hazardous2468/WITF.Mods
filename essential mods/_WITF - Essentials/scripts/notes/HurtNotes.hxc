@@ -1,3 +1,5 @@
+package witf.modules.play.notes;
+
 import funkin.play.notes.notekind.NoteKind;
 import funkin.audio.FunkinSound;
 import funkin.play.PlayState;
