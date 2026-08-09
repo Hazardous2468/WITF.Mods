@@ -2,6 +2,7 @@
   "version": "1.0.0",
   "name": "Inhuman",
   "artists": ["Hazard24"],
+  "albumOSTName": "INHUMAN OST",
   "albumArtAsset": "freeplay/albumRoll/Inhuman",
   "albumTitleAsset": "freeplay/albumRoll/Inhuman-text"
 }

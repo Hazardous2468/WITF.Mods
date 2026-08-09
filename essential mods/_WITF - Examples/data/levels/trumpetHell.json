@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "name": "Too Many Trumpets",
-  "visible": true,
+  "visible": false,
   "titleAsset": "storymenu/titles/too-many-trumpets",
   "props": [
     {

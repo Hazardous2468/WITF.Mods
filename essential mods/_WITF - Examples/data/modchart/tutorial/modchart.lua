@@ -9,7 +9,9 @@ function setUp()
 end
 
 function modsTimeline()
-	--setasleep(0, "dad", true) --dad doesn't do anything lmao
+
+	--setdefault(1, "showallmods")
+
 
 	set(-16, -1.23, "flip", 2)
 	
@@ -30,7 +32,7 @@ function modsTimeline()
 	
 	
 	
-	setdefault(1, "showallmods")
+	
 	
 	set(-16, 1, "arrowpathred",1)
 	set(-16, 1, "arrowpathgreen",1)
@@ -56,6 +58,7 @@ function modsTimeline()
 	ease(96, 2, "pop",-0.25*tinyMultFix, "tiny",2)
 	
 	ease(102, 2, "sineIn",1*tinyMultFix, "tiny",1)
+	ease(102, 2, "sineIn",0, "arrowpath",1)
 
 	set(5, 35, "arrowpathgrain", 1)
 	set(5, 0, "arrowpathbacklength", 1)
@@ -143,9 +146,13 @@ function modsTimeline()
 	ease(0.78, 0.59, "backOut", 0, "tiny",1)
 
 	for i = 32 , 128 do
-		add(i, 1, "linear", beatLength * 1 * 2.225, "drive2",1)
+		add(i, 1, "linear", beatLength * 1, "drive2",1)
 		add(i, 1, "linear", beatLength * 1 * speedMod *-1, "drive",1)
 	end
+
+	-- Cuz they added a scroll speed change event at the very end which breaks the drive logic so this is here to kind of work-around it sorta lmfao ;-;
+	add(100, 0.1, "instant",-20000, "drive", 1)
+	add(100, 0.1, "instant",-4500, "drive", 1)
 	
 
 end
