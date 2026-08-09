@@ -1,0 +1,2 @@
+Just a simple demo modchart that I made for a friend to break down and look at it's lua script.
+Making it public for anybody else to look at, and because I really like how the motions look.

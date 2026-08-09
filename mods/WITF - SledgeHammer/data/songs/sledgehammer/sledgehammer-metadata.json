@@ -1,0 +1,41 @@
+{
+ "version": "2.2.4",
+ "songName": "Sledgehammer",
+ "artist": "Savant",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "hard"
+  ],
+  "characters": {
+   "player": "nobody",
+   "girlfriend": "nobody",
+   "opponent": "nobody",
+   "opponentVocals": [
+    "nobody"
+   ],
+   "playerVocals": [
+    "nobody"
+   ]
+  },
+  "stage": "emptyStage",
+  "noteStyle": "groovin",
+  "ratings": {
+   "normal": 8,
+   "hard": 13
+  },
+  "album": "WITF",
+  "previewStart": 0.122036627087945,
+  "previewEnd": 0.194389213121352
+ },
+ "generatedBy": "What in the Funkin' (v1.0.4) - v0.8.5",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 100,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

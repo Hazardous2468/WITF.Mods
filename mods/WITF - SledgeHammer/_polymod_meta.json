@@ -1,0 +1,20 @@
+{
+  "title": "Sledgehammer",
+  "description": "its okay!  :)",
+  "contributors": [
+		{
+			"name": "Savant",
+			"role": "Song"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Modchart"
+		}
+	],
+  "api_version": "0.8.0",
+  "mod_version": "1.0.0",
+  "dependencies": {
+		"_WITF - Essentials": "*"	
+	},
+  "license": "CC BY-NC-ND 4.0"
+}
