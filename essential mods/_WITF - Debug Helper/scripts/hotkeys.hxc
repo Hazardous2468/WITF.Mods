@@ -1,3 +1,5 @@
+package witf.modules.play;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
@@ -19,6 +21,7 @@ import funkin.graphics.FunkinSprite;
 import funkin.ui.debug.charting.ChartEditorState;
 import funkin.play.PauseSubState;
 import funkin.Highscore;
+import funkin.modding.module.ModuleHandler;
 
 
 class ModchartDebug_HotKeys extends Module
@@ -38,18 +41,22 @@ class ModchartDebug_HotKeys extends Module
         super("ModchartDebug_HotKeys");	
     }
 	
+	var enabled:Bool = true;
 	override function onCountdownStart(event) {
-		super.onCountdownStart(event);		
-	}
-	override function onStateChangeStart(event) {
-		super.onStateChangeStart(event);
-	}
-	override function onStateChangeEnd(event) {
-		super.onStateChangeEnd(event);
+		super.onCountdownStart(event);
+
+		var optionsModule = ModuleHandler.getModule("ModchartDebug_OptionsCategory");
+		if(optionsModule!=null){
+			enabled = optionsModule.getSaveData_DebugHotkeys();
+		}else{
+			trace("[DEBUG HOTKEYS] Options Module could not be found.");
+		}
 	}
 	
-	public function setSongTime(time:Float)
+	public function setSongTime(time:Float, resetEvents:bool = false)
 	{
+		var game = PlayState.instance;
+		if(game == null) return;
 		if(time < 0) time = 0;
 		
 		
@@ -84,46 +91,57 @@ class ModchartDebug_HotKeys extends Module
 			//PlayState.instance.debugNotification("tb: " + timeToBeatPoint);
 			//PlayState.instance.debugNotification("Set songPos to: " + time);
 		}
-		
+
+		var goingBackwards:bool = Conductor.instance.songPosition > time;
+		trace(goingBackwards);
 
 		FlxG.sound.music.pause();
-		if (PlayState.instance.vocals != null) {
-			PlayState.instance.vocals.pause();
+		if (game.vocals != null) {
+			game.vocals.pause();
 		}
 
 		FlxG.sound.music.time = time;
-		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		FlxG.sound.music.pitch = game.playbackRate;
 		
-		if(!PlayState.instance.isGamePaused){
+		if(!game.isGamePaused){
 			FlxG.sound.music.play();
 		}
 		
-		if (PlayState.instance.vocals != null) {
+		if (game.vocals != null) {
 			//vocals.time = time;
-			if (Conductor.instance().songPosition <= PlayState.instance.vocals.length)
+			if (Conductor.instance().songPosition <= game.vocals.length)
 			{
-				PlayState.instance.vocals.time = time;
-				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+				game.vocals.time = time;
+				game.vocals.pitch = game.playbackRate;
 			}
-			if(!PlayState.instance.isGamePaused){
-				PlayState.instance.vocals.play();
+			if(!game.isGamePaused){
+				game.vocals.play();
 			}
 		}
 		Conductor.instance.songPosition = time;
 		
-		PlayState.instance.handleSkippedNotes();
+		game.handleSkippedNotes();
 
-		
 		Conductor.instance.update();		
 		
 		//Reset score to prevent cheating!
-		 PlayState.instance.health = Constants.HEALTH_STARTING;
-		  PlayState.instance.songScore = 0;
-		  Highscore.tallies.combo = 0;
+		game.health = Constants.HEALTH_STARTING;
+		game.songScore = 0;
+		Highscore.tallies.combo = 0;
 		
-		//if (currentStage != null) currentStage.resetStage(); //?
-		
-		SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);
+		if(goingBackwards){
+			//game.cameraBopIntensity = Constants.DEFAULT_BOP_INTENSITY;
+	      	//game.hudCameraZoomIntensity = (game.cameraBopIntensity - 1.0) * 2.0;
+	      	//game.cameraZoomRate = Constants.DEFAULT_ZOOM_RATE;
+	      	//if (currentStage != null) currentStage.resetStage();
+	      	//game.currentStage?.getBoyfriend()?.initHealthIcon(false);
+      		//game.currentStage?.getDad()?.initHealthIcon(true);
+      		if(resetEvents){
+			    SongEventRegistry.resetEvents(game.songEvents);
+			}
+		}
+
+		SongEventRegistry.handleSkippedEvents(game.songEvents, Conductor.instance.songPosition);
 	}
 	
 		
@@ -145,7 +163,8 @@ class ModchartDebug_HotKeys extends Module
 	
 	function onUpdate(callback)
 	{
-		if(PlayState.instance == null){ 
+		
+		if(PlayState.instance == null || !enabled){ 
 			return;
 		}
 
@@ -175,7 +194,7 @@ class ModchartDebug_HotKeys extends Module
 		if((PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) && enableTimeManipulation && Conductor.instance.songPosition > 0) { 
 
 			if (FlxG.keys.justPressed.FOUR && !PlayState.instance.isGamePaused){ 
-				setSongTime(0);
+				setSongTime(0, true);
 			}
 			
 			if (FlxG.keys.justPressed.FIVE && !PlayState.instance.isGamePaused){ 
@@ -198,7 +217,7 @@ class ModchartDebug_HotKeys extends Module
 					posChange *= -1;
 				}
 				
-				setSongTime(gotoPos + posChange);
+				setSongTime(gotoPos + posChange, FlxG.keys.pressed.SHIFT);
 			}
 		}
 		

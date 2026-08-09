@@ -1,0 +1,54 @@
+package witf.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.Highscore;
+import funkin.modding.module.ModuleHandler;
+
+class ModchartDebug_BotplayShowPopup extends Module
+{
+	public var enabled:bool = true;
+	public function new() {
+        super("ModchartDebug_BotplayShowPopup", 10001, {state:PlayState});	
+    }
+
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);
+		var optionsModule = ModuleHandler.getModule("ModchartDebug_OptionsCategory");
+		if(optionsModule!=null){
+			enabled = optionsModule.getSaveData_BotplayScorePopup();
+		}else{
+			trace("[BOTPLAY POPUP] Options Module could not be found.");
+		}
+	}
+
+
+
+	function onNoteHit(event) {		
+		if(!enabled || PlayState.instance == null || event.eventCanceled){return; }		
+		if (event.judgement == "perfect" && event.note.weBelongTo == PlayState.instance.playerStrumline) {
+			 if (event.note.scoreable && event.note.noteData.getStrumlineIndex()==0){
+				//FunkinSound.playOnce(Paths.sound('notitg_mine'));
+				var judgement = "sick";
+				
+				PlayState.instance.health += event.healthChange;
+				if (event.isComboBreak)
+				{
+				  // Break the combo, but don't increment tallies.misses.
+				  if (Highscore.tallies.combo >= 10) PlayState.instance.comboPopUps.displayCombo(0);
+				  Highscore.tallies.combo = 0;
+				}
+				else
+				{
+				  Highscore.tallies.combo++;
+				}
+				
+				//PlayState.instance.applyScore(0, judgement, event.healthChange, event.isComboBreak);
+				PlayState.instance.popUpScore(judgement);
+			}
+		}
+	}
+}

@@ -1,3 +1,5 @@
+package witf.modules.play;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
@@ -19,6 +21,7 @@ import funkin.graphics.FunkinSprite;
 import funkin.ui.debug.charting.ChartEditorState;
 import funkin.play.PauseSubState;
 import funkin.Highscore;
+import funkin.modding.module.ModuleHandler;
 
 
 
@@ -54,13 +57,24 @@ class ModchartDebug_Timebar extends Module
 	public function onSubStateOpenEnd(event:StateChangeScriptEvent):Void {
         super.onSubStateOpenEnd(event);
 		var subState; 
-			if(PlayState.instance != null){
-				subState = PlayState.instance.subState;
-			}else{
-				subState = FlxG.state.subState;
-			}
+		if(PlayState.instance != null){
+			subState = PlayState.instance.subState;
+		}else{
+			subState = FlxG.state.subState;
+		}
 		if (Std.isOfType(subState, PauseSubState)) {
 		
+			var enabled:Bool = true;
+			var optionsModule = ModuleHandler.getModule("ModchartDebug_OptionsCategory");
+			if(optionsModule!=null){
+				enabled = optionsModule.getSaveData_timeBar();
+				//trace("[TIME BAR] ENABLED: " + enabled);
+				//trace("[TIME BAR] TEST: " + optionsModule.getSaveData_test());
+			}else{
+				trace("[TIME BAR] Couldn't get options module.");
+			}
+			if(!enabled) return;
+
 			timeBarBG = new FunkinSprite(0,0);
 			timeBarBG.loadGraphic(Paths.image('modchart_timebar'));
 			timeBarBG.scrollFactor.set();
@@ -141,7 +155,6 @@ class ModchartDebug_Timebar extends Module
 		  PlayState.instance.songScore = 0;
 		  Highscore.tallies.combo = 0;
 		
-		//if (currentStage != null) currentStage.resetStage(); //? 
 		
 		
 		
@@ -162,6 +175,7 @@ class ModchartDebug_Timebar extends Module
 				}
 			}
 		}
+
 	}
 	
 
@@ -191,7 +205,7 @@ class ModchartDebug_Timebar extends Module
 	}
 	
 	
-	
+	var eventsNeedReset:bool = false;
 	function clicked(){
 		if(timeBar==null) return;
 		
@@ -207,6 +221,12 @@ class ModchartDebug_Timebar extends Module
 		var curTime:Float = percentOfScreen * songLength;
 		
 		var newTime:Float = FlxMath.bound(curTime, 0, songLength-1); // clamp;
+
+		var goingBackwards:bool = Conductor.instance.songPosition > newTime;
+		if(goingBackwards){
+			eventsNeedReset = true;
+		}
+
 		setSongTime(newTime);
 		
 		updateTimeText();
@@ -218,6 +238,21 @@ class ModchartDebug_Timebar extends Module
 			strumline.update(0);
 		  }
 		PlayState.instance.processNotes(0);
+
+
+		if(goingBackwards){
+			//game.cameraBopIntensity = Constants.DEFAULT_BOP_INTENSITY;
+	      	//game.hudCameraZoomIntensity = (game.cameraBopIntensity - 1.0) * 2.0;
+	      	//game.cameraZoomRate = Constants.DEFAULT_ZOOM_RATE;
+	      	//if (currentStage != null) currentStage.resetStage();
+	      	//game.currentStage?.getBoyfriend()?.initHealthIcon(false);
+      		//game.currentStage?.getDad()?.initHealthIcon(true);
+
+		    SongEventRegistry.resetEvents(PlayState.instance.songEvents);
+		    trace("[TIME BAR] RESET EVENTS");
+		}
+
+
 		SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);
 		//PlayState.instance.update(0);
 		

@@ -1,0 +1,239 @@
+package witf.modules.options;
+
+import funkin.modding.module.Module;
+import funkin.ui.options.OptionsState;
+import funkin.modding.events.ScriptEvent;
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.AtlasText;
+import funkin.ui.ButtonStyle;
+import funkin.ui.TextMenuItem;
+import funkin.util.InputUtil;
+import funkin.ui.options.PreferencesMenu;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.ui.FullScreenScaleMode;
+
+class ModchartDebug_OptionsCategory extends Module
+{
+
+
+  public function new()
+  {
+    super('ModchartDebug_OptionsCategory', 1, {state: OptionsState});
+
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT, false);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT, false);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT, false);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED, true);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE, true);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP, true);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_HOTKEYS))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_HOTKEYS, true);
+    }
+  }
+
+  public static var SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT:String =     "witf-debug-showModsByDefault";
+  public static var SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT:String =     "witf-debug-showTimeByDefault";
+  public static var SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT:String =    "witf-debug-showTweensByDefault";
+  public static var SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED:String =          "witf-debug-showTimebar";
+  public static var SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE:String =  "witf-debug-showModsAsPercentages";
+  public static var SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP:String =  "witf-debug-botplayScorePopup";
+  public static var SAVE_KEY_WITF_DEBUG_HOTKEYS:String =  "witf-debug-hotkeys";
+
+  var xOffset:Float = -100;
+  var camZoom:Float = 0.86;
+
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if (!Std.isOfType(event.targetState, OptionsState)) return;
+
+    addCustomCategory(event.targetState);
+    addOptions(event.targetState);
+  }
+
+  function addCustomCategory(state)
+  {
+    var prefs:PreferencesMenu = state.optionsCodex.addPage('witf-debug', new PreferencesMenu());
+    prefs.onExit.add(() ->
+    {
+      FlxG.state.optionsCodex.switchPage('options');
+    });
+    prefs.preferenceDesc = [];
+    prefs.items.clear();
+    prefs.preferenceItems.clear();
+    var optionspage = FlxG.state.optionsCodex.pages.get('options');
+    var exit = optionspage.items.getItem("LAG ADJUSTMENT") ?? null;
+    var option = optionspage.createItem("WITF Debug Options", () -> FlxG.state.optionsCodex.switchPage('witf-debug'));
+    if (exit != null)
+    {
+      optionspage.items.members.remove(option);
+      optionspage.items.members.insert(optionspage.items.members.indexOf(exit), option);
+    }
+    for (i in 0...optionspage.items.length)
+    {
+      var item = optionspage.items.members[i];
+      item.y = 100 + i * 100;
+    }
+    prefs.menuCamera.zoom=camZoom;
+  }
+
+  function addOptions(options:OptionsState)
+  {
+    var preferencesPage = options.optionsCodex.pages.get("witf-debug");
+    if (preferencesPage != null)
+    {
+      preferencesPage.createPrefItemCheckbox("Timebar enabled", "When enabled, a time bar will be visible in the pause menu.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED, value);
+            Save.instance.flush();
+          }, getSaveData_timeBar());
+      
+
+      preferencesPage.createPrefItemCheckbox("Show mods as percentages", "When enabled, modifiers be displayed as a % rather then it's exact value. Some modifiers are exempt from this such as angle modifiers.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE, value);
+            Save.instance.flush();
+          }, getSaveData_modsAsPercentage());
+      
+
+      preferencesPage.createPrefItemCheckbox("Botplay Score Popup", "When enabled, botplay can trigger the score popup on hitting notes.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP, value);
+            Save.instance.flush();
+          }, getSaveData_BotplayScorePopup());
+
+      preferencesPage.createPrefItemCheckbox("Debug Hotkeys", "When enabled, enables the usage of debug hotkeys.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_HOTKEYS, value);
+            Save.instance.flush();
+          }, getSaveData_DebugHotkeys());
+
+
+      preferencesPage.createPrefItemCheckbox("Show mods debug by default", "When enabled, the debug text for modifiers will be visible when entering a song. Visiblity can always be toggled with CTRL+H or CTRL+M",
+        function(value:Bool):Void
+        {
+          Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT, value);
+          Save.instance.flush();
+        }, getSaveData_modsEnabledByDefault());
+    
+
+      preferencesPage.createPrefItemCheckbox("Show time debug by default", "When enabled, the debug text for song time will be visible when entering a song. Visiblity can always be toggled with CTRL+H or CTRL+I",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT, value);
+            Save.instance.flush();
+          }, getSaveData_timeEnabledByDefault());
+      
+
+      preferencesPage.createPrefItemCheckbox("Show tweens debug by default", "When enabled, the debug text for showing tweens will be visible when entering a song. Visiblity can always be toggled with CTRL+T",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT, value);
+            Save.instance.flush();
+          }, getSaveData_tweensEnabledByDefault());
+
+
+
+
+      for(i in preferencesPage.preferenceItems){
+        i.x += xOffset;
+      }
+      preferencesPage.items.forEach(function(daItem:TextMenuItem)
+      {
+        daItem.atlasText.offset.x -= xOffset;
+      });
+
+      var defaultSize = preferencesPage.itemDesc.size;
+      preferencesPage.itemDesc.text = preferencesPage.preferenceDesc[preferencesPage.items.selectedIndex];
+      preferencesPage.items.onChange.add(function(selected)
+      {
+        var n:String = selected.name.toLowerCase();
+        if(n == "timebar enabled" || n == "botplay score popup" || n == "debug hotkeys"){
+          preferencesPage.itemDesc.size = defaultSize;
+        }else{
+          preferencesPage.itemDesc.size = 24;
+        }        
+      });
+
+    }
+  }
+
+
+
+
+  function getSaveData_modsEnabledByDefault():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT);
+  }
+
+  function getSaveData_timeEnabledByDefault():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_SHOW_TIME_BY_DEFAULT);
+  }
+
+  function getSaveData_tweensEnabledByDefault():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_SHOW_TWEEN_BY_DEFAULT);
+  }
+
+  function getSaveData_timeBar():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED);
+  }
+
+  function getSaveData_modsAsPercentage():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE);
+  }
+
+  function getSaveData_BotplayScorePopup():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP);
+  }
+
+  function getSaveData_DebugHotkeys():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_HOTKEYS)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_HOTKEYS);
+  }
+
+  
+
+
+
+  function getSaveData_test():String{
+    trace("WEEEEEE");
+    return "Hello!!!";
+  }
+
+}

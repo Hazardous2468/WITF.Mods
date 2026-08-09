@@ -1,3 +1,5 @@
+package witf.modules.play;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
@@ -5,6 +7,8 @@ import funkin.util.Constants;
 import funkin.Preferences;
 import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
+package witf.modules.play;
+
 import funkin.Conductor;
 import funkin.play.notes.Strumline;
 import flixel.math.FlxMath;

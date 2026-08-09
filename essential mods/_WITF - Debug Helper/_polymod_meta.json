@@ -9,7 +9,7 @@
 		}
 	],
     "api_version": "0.8.0",
-    "mod_version": "2.3.0",
+    "mod_version": "2.4.1",
 	"dependencies": {
 		"_WITF - Essentials": "*"
 	},

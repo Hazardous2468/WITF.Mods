@@ -1,16 +1,14 @@
+package witf.modules.play;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
 import funkin.util.Constants;
 import funkin.Preferences;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
 import funkin.Conductor;
-import funkin.play.notes.Strumline;
 import flixel.math.FlxMath;
 import flixel.util.FlxStringUtil;
-
-import funkin.data.event.SongEventRegistry;
+import funkin.modding.module.ModuleHandler;
 
 import flixel.text.FlxBitmapText;
 //import flixel.text.FlxText;
@@ -22,19 +20,17 @@ import funkin.audio.FunkinSound;
 import funkin.ui.debug.charting.ChartEditorState;
 import flixel.FlxCamera;
 
-import funkin.Highscore;
-
 
 
 
 
 class ModchartDebug_DebugDisplay extends Module
 {
+
+	////// CONFIG
+
 	// If true, shows the current time signature next to the current BPM.
 	var showTimeSignature:Bool = true;
-	
-	// Whether to have the debug text visible by default when entering playState or not.
-	var visibleByDefault:Bool = false;	
 	
 	// If enabled, mod values will be displayed as percentages. (Some mods may not be affected such as rotation mods)
 	var displayAsPercentages:Bool = true;
@@ -48,99 +44,89 @@ class ModchartDebug_DebugDisplay extends Module
 	// Determines whether the CTRL+H hotkey will also include the tween list or not.
 	var hideAllIncludesTweens:Bool = false;
 	
-	
-	
-	// The rest is just code...
-	
-	public function new() {
-        super("ModchartDebug_DebugDisplay");	
-    }
+	////// CONFIG END
+
+
+
+
+
+    public function new()
+	{
+		super('ModchartDebug_DebugDisplay', 1, {state: PlayState});
+	}
+
+
 	var timeInfoTxt:FlxBitmapText;
 	var camDebug:FlxCamera;
-	override function onCountdownStart(event) {
-		super.onCountdownStart(event);
-
-		if(inChartEditor){
-			editorPlay = true;
-		}
-		
-		if(PlayState.instance!=null && displayAsPercentages && PlayState.instance.modchartEventHandler!=null){
-			PlayState.instance.modchartEventHandler.percentageMods = true;
-		}
-		
-		if (!PlayState.instance.members.contains(timeInfoTxt)) {
-			createTimeInfoTXT(PlayState.instance);
-		}
-		
-		if(initialised && !inChartEditor){
-			if(PlayState.instance.opponentStrumline.txtActiveMods != null)
-				PlayState.instance.opponentStrumline.txtActiveMods.visible = showingDebug_mods;
-			if(PlayState.instance.playerStrumline.txtActiveMods != null)
-				PlayState.instance.playerStrumline.txtActiveMods.visible = showingDebug_mods;
-			
-			for (customStrummer in PlayState.instance.customStrumLines){
-				customStrummer.txtActiveMods.visible = showingDebug_mods;
-			}
-			if(PlayState.instance.modchartTweenList != null)
-				PlayState.instance.modchartTweenList.visible = showingDebug_tween;
-			
-			timeInfoTxt.visible = showingDebug_time;
-		}
-		initialised = true;
-	}
-	
-	var dumb = null;
-	var inChartEditor = false;
-	var editorPlay = false;
-	
 	var showingDebug_mods = false;
 	var showingDebug_tween = false;
 	var showingDebug_time = false;
-	
 	var initialised:Bool = false;
-	
-	function createTimeInfoTXT(){
-		if(!initialised){
-			showingDebug_time = visibleByDefault;
+	var playbackRateModule;
+
+	function initialize():Void
+	{
+		var optionsModule = ModuleHandler.getModule("ModchartDebug_OptionsCategory");
+		if(optionsModule!=null){
+			displayAsPercentages = optionsModule.getSaveData_modsAsPercentage();
+			showingDebug_mods = optionsModule.getSaveData_modsEnabledByDefault();
+			showingDebug_time = optionsModule.getSaveData_timeEnabledByDefault();
+			showingDebug_tween = optionsModule.getSaveData_tweensEnabledByDefault();
+		}else{
+			displayAsPercentages = true;
+			showingDebug_mods = false;
+			showingDebug_time = false;
+			showingDebug_tween = false;
 		}
-		
-		if(camDebug != null){
-			FlxG.cameras.remove(camDebug);
+
+		if(PlayState.instance==null) return;
+
+		if(displayAsPercentages && PlayState.instance.modchartEventHandler!=null){
+			PlayState.instance.modchartEventHandler.percentageMods = true;
 		}
+
+		playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+
+		// Showing the built-in txt debug displays for strummers and tweens.
+
+		if(PlayState.instance.opponentStrumline?.txtActiveMods != null)
+			PlayState.instance.opponentStrumline.txtActiveMods.visible = showingDebug_mods;
+		if(PlayState.instance.playerStrumline?.txtActiveMods != null)
+			PlayState.instance.playerStrumline.txtActiveMods.visible = showingDebug_mods;
+
+		for (customStrummer in PlayState.instance.customStrumLines){
+			customStrummer.txtActiveMods.visible = showingDebug_mods;
+		}
+
+		if(PlayState.instance.modchartTweenList != null)
+			PlayState.instance.modchartTweenList.visible = showingDebug_tween;
+
 		
-		//if(camDebug == null){
-			camDebug = new FlxCamera();
-			camDebug.bgColor = 0x00000000;
-			FlxG.cameras.add(camDebug, false);
-		//}
 		
-		if (timeInfoTxt == null) {
-			//FunkinSound.playOnce(Paths.sound("pauseEnable"), 1.0);
-			timeInfoTxt = new FlxBitmapText(0, 0, "songPos: null", Paths.getFlxBitmapFontFromAngelCode("fonts/vcr", "preload"));
-			
-			timeInfoTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
-			timeInfoTxt.borderColor = 0xFF000000;
-			timeInfoTxt.borderSize = 2;
-			
-			//timeInfoTxt.y = Preferences.get_downscroll() ? FlxG.height - 40 : 10;
-			
-			timeInfoTxt.x = 10;
-			timeInfoTxt.y = 20;
-			
-			if(camDebug!=null)	
-				timeInfoTxt.camera = camDebug;
-			else
-				timeInfoTxt.camera = PlayState.instance.camHUD;
+		camDebug = new FlxCamera();
+		camDebug.bgColor = 0x00000000;
+		FlxG.cameras.add(camDebug, false);
+		
+		//FunkinSound.playOnce(Paths.sound("pauseEnable"), 1.0);
+		timeInfoTxt = new FlxBitmapText(0, 0, "...", Paths.getFlxBitmapFontFromAngelCode("fonts/vcr", "preload"));
+		
+		timeInfoTxt.borderStyle = FlxTextBorderStyle.OUTLINE;
+		timeInfoTxt.borderColor = 0xFF000000;
+		timeInfoTxt.borderSize = 2;
 				
-			PlayState.instance.add(timeInfoTxt);
-			
-			timeInfoTxt.visible = (initialised ? showingDebug_time : visibleByDefault);
-			
-			timeInfoTxt.text = "LOL";
-			timeInfoTxt.zIndex = 9999;
-		}
+		timeInfoTxt.x = 10;
+		timeInfoTxt.y = 20;
 		
-		//try and move the debugNotificationTxt to the debugCam -- OLD / LEGACY
+		if(camDebug!=null)	
+			timeInfoTxt.camera = camDebug;
+		else
+			timeInfoTxt.camera = PlayState.instance.camHUD;
+			
+		PlayState.instance.add(timeInfoTxt);
+				
+		timeInfoTxt.zIndex = 9999;
+		
+		//try and move the debugNotificationTxt to the debugCam -- OLD / LEGACY txt
 		if(PlayState.instance.modDebugNotificationTXT != null){
 			PlayState.instance.modDebugNotificationTXT.camera = camDebug;
 		}
@@ -163,48 +149,55 @@ class ModchartDebug_DebugDisplay extends Module
 			}
 		  }
 		*/
-	}
-	
-	function clearTimeInfoTXT_justPlay(state = null){
-		if(timeInfoTxt != null){
-			if(state != null) state.remove(timeInfoTxt);
-			timeInfoTxt.destroy();
-		}
-	}
-	
-	function clearTimeInfoTXT(state = null){
-		if(timeInfoTxt != null){
-			if(state != null) state.remove(timeInfoTxt);
-			//remove(timeInfoTxt);
-			timeInfoTxt.destroy();
-			timeInfoTxt = null;
-		}
-		//FunkinSound.playOnce(Paths.sound("pauseDisable"), 1.0);
-	}
-	
-	function onStateChangeEnd(event:StateChangeScriptEvent)
-	{
-		dumb = null;
-		inChartEditor = false;
-		editorPlay = false;
-		//clearTimeInfoTXT();
-		
-		if (!(Std.isOfType(event.targetState, PlayState)))
-		{
-			clearTimeInfoTXT();
-			initialised = true;
-		}
-		
-		super.onStateChangeEnd(event);
-		inChartEditor = false;
-		editorPlay = false;
-		if ((Std.isOfType(event.targetState, ChartEditorState)))
-		{
-			dumb = event.targetState;
-			inChartEditor = true;
-		}
+
+		timeInfoTxt.visible = showingDebug_time;
+		initialised = true;
 	}
 
+	function cleanUp():Void
+	{
+		if(timeInfoTxt != null){
+	      timeInfoTxt.destroy();
+	      timeInfoTxt = null;
+	    }
+	    if(PlayState.instance != null){
+		    // move cameras back to a default one.
+		    //try and move the debugNotificationTxt to the debugCam -- OLD / LEGACY txt
+			if(PlayState.instance.modDebugNotificationTXT != null){
+				PlayState.instance.modDebugNotificationTXT.camera = PlayState.instance.camHUD;
+			}
+			
+			//Try and move the debug notification text to the debugCam
+			if(PlayState.instance.debugNotifs != null){
+				PlayState.instance.debugNotifs.camera = PlayState.instance.camHUD;
+			}
+			
+			if(PlayState.instance.modchartTweenList != null){
+				PlayState.instance.modchartTweenList.camera = PlayState.instance.camHUD;
+			}
+		}
+
+	    if(camDebug != null){
+			FlxG.cameras.remove(camDebug);
+			camDebug = null;
+		}
+		initialised=false;
+	}
+
+	
+
+	override function onSongLoaded(event):Void
+	{
+		super.onSongLoaded(event);
+		cleanUp();
+		initialize();
+	}
+
+	override function onDestroy(event):Void
+	{
+		cleanUp();
+		super.onDestroy(event);
+	}
 
 	var lastReportedSongPos:Float = 0;
 
@@ -212,52 +205,60 @@ class ModchartDebug_DebugDisplay extends Module
 		return Conductor.instance.songPosition;
 		//return Conductor.instance.songPositionRAW;
 	}
-	
-	function onUpdate(callback)
-	{	
-		if (timeInfoTxt != null) {
-			if(timeInfoTxt.visible && lastReportedSongPos != getSongPosition()){
-				timeInfoTxt.text = "songPos: " + Std.string(Conductor.instance.songPosition);
-				//timeInfoTxt.text += "\nsongPosRAW: " + Std.string(Conductor.instance.songPositionRAW);
-				//timeInfoTxt.text += "\nstopOffset: " + Std.string(Conductor.instance.songPositionStopOffset);
-				timeInfoTxt.text += "\nbeatPos: " + Std.string(Conductor.instance.currentBeatTime);
-				timeInfoTxt.text += "\ncurBeat: " + Std.string(Conductor.instance.currentBeat);
-				timeInfoTxt.text += "\ncurStep: " + Std.string(Conductor.instance.currentStep);
-				timeInfoTxt.text += "\ncurMeasure: " + Std.string(Conductor.instance.currentMeasure);
-				if(showTimeSignature){
-					var n:Float =  Std.string(Conductor.instance.timeSignatureNumerator);
-					var d:Float =  Std.string(Conductor.instance.timeSignatureDenominator);
-					timeInfoTxt.text += "\ncurBPM:  " + Std.string(Conductor.instance.bpm) + " in " +n+"/"+d;
-				}else{
-					timeInfoTxt.text += "\ncurBPM:  " + Std.string(Conductor.instance.bpm);
-				}
-				
-				if(showIfWITF && PlayState.instance != null){
-					if(PlayState.instance.isModchartSong){
-						timeInfoTxt.text += "\nMods active";
-					}else{
-						timeInfoTxt.text += "\nMods inactive";
-					}
-				}
-							
-				lastReportedSongPos = getSongPosition();
+
+	function updateTimeText(){
+		if (timeInfoTxt == null) return;
+		if(timeInfoTxt.visible && lastReportedSongPos != getSongPosition()){
+
+			timeInfoTxt.text = "songPos: " + Std.string(Conductor.instance.songPosition);
+			//timeInfoTxt.text += "\nsongPosRAW: " + Std.string(Conductor.instance.songPositionRAW);
+			//timeInfoTxt.text += "\nstopOffset: " + Std.string(Conductor.instance.songPositionStopOffset);
+			timeInfoTxt.text += "\nbeatPos: " + Std.string(Conductor.instance.currentBeatTime);
+			timeInfoTxt.text += "\ncurBeat: " + Std.string(Conductor.instance.currentBeat);
+			timeInfoTxt.text += "\ncurStep: " + Std.string(Conductor.instance.currentStep);
+			timeInfoTxt.text += "\ncurMeasure: " + Std.string(Conductor.instance.currentMeasure);
+
+
+			var bpm:String = Std.string(Conductor.instance.bpm);
+			var curPlaybackRate:Float = 1.0;
+			if(playbackRateModule!=null){
+				curPlaybackRate = playbackRateModule.scriptGet("playbackRate");
+			}else{
+				curPlaybackRate = PlayState.instance.playbackRate;
 			}
+
+
+			if(curPlaybackRate != 1.0){
+				bpm += " (" +   Std.string(Conductor.instance.bpm*curPlaybackRate)    +  ")";
+			}
+			if(showTimeSignature){
+				var n:Float =  Std.string(Conductor.instance.timeSignatureNumerator);
+				var d:Float =  Std.string(Conductor.instance.timeSignatureDenominator);
+				timeInfoTxt.text += "\ncurBPM:  " + bpm + " in " +n+"/"+d;
+			}else{
+				timeInfoTxt.text += "\ncurBPM:  " + bpm;
+			}
+
 			
-		}
-		
-		
-		
-		if(editorPlay){
-			if(dumb.uiCamera.alive){
-				editorPlay = false;
-				clearTimeInfoTXT_justPlay(PlayState.instance);
-				inChartEditor = true;
-				//createTimeInfoTXT(dumb);
-				//FunkinSound.playOnce(Paths.sound("pauseEnable"), 1.0);
+			if(showIfWITF && PlayState.instance != null){
+				if(PlayState.instance.isModchartSong){
+					timeInfoTxt.text += "\nMods active";
+				}else{
+					timeInfoTxt.text += "\nMods inactive";
+				}
 			}
+						
+			lastReportedSongPos = getSongPosition();
+
 		}
 
+	}
 	
+	override function onUpdate(e):Void
+	{
+		super.onUpdate(e);
+
+		updateTimeText();
 
 		if(FlxG.keys.pressed.CONTROL){
 			if(FlxG.keys.justPressed.P || FlxG.keys.justPressed.H || FlxG.keys.justPressed.I){
@@ -288,21 +289,6 @@ class ModchartDebug_DebugDisplay extends Module
 					}
 				}
 			}
-		}
-		
-
-	
-		if (PlayState.instance == null){
-			return;
-		}
-		
-		//lol?
-		if(PlayState.instance.debugNotifs != null){
-			PlayState.instance.debugNotifs.camera = camDebug;
-		}
-		
-		if(PlayState.instance.modchartTweenList != null && alwaysHideTweenList)
-			PlayState.instance.modchartTweenList.visible = false;
-
+		}	
 	}
 }
