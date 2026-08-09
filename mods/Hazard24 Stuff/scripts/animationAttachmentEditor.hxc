@@ -41,7 +41,7 @@ H - Toggle text visiblity
 
 
 
-
+package hazard24.modules.editor;
 
 import funkin.modding.module.Module;
 import funkin.play.PlayState;

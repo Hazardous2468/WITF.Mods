@@ -1,11 +1,14 @@
+package hazard24.modules.play;
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import funkin.util.Constants;
 import Std;
 import flixel.FlxG;
+import funkin.modding.module.ModuleHandler;
+
 
 class DadSplash extends Module {
-
+	var enabled:Bool = true;
     function new() {
         // Load the mod
 		super("DadSplash", 1, {
@@ -13,9 +16,21 @@ class DadSplash extends Module {
         });
     }
 
+	override function onCountdownStart(event) {
+		super.onCountdownStart(event);
+
+		var optionsModule = ModuleHandler.getModule("DadSplashOption");
+		if(optionsModule!=null){
+			enabled = optionsModule.getSaveData_DadSplashes();
+		}else{
+			trace("[DAD NOTE SPLASHES] Options Module could not be found.");
+		}
+	}
+
     override function onNoteHit(event) {
         super.onNoteHit(event);
 
+        if(!enabled) return;
 		
         // Dad notes are always perfect and give 0 score
         var dadNote = event.score == 0 && event.judgement == 'perfect';

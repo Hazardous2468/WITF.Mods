@@ -1,3 +1,5 @@
+package hazard24.modules.play;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
@@ -50,9 +52,8 @@ class BPMChangeHelper extends Module
 	var startBeat:Float  = 	32;
 	var endBeat:Float  = 	64;
 	var startBPM:Float  = 	120;
-	var endBPM:Float  = 	200;
-	
-	
+	var endBPM:Float  = 	180;
+
 	
 	var numerator:Int = 4;
 	var denominator:Int = 4;
@@ -142,6 +143,7 @@ class BPMChangeHelper extends Module
 			
 			if(copyResultToClipboard)
 				Clipboard.text = outputString;
+			PlayState.instance.modDebugNotif("Curve BPM calc complete", true);
 		}
 		
 	}	

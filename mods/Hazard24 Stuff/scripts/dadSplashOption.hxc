@@ -1,0 +1,58 @@
+package hazard24.modules.options;
+
+import funkin.modding.module.Module;
+import funkin.ui.options.OptionsState;
+import funkin.modding.events.ScriptEvent;
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.AtlasText;
+import funkin.ui.ButtonStyle;
+import funkin.ui.TextMenuItem;
+import funkin.util.InputUtil;
+import funkin.ui.options.PreferencesMenu;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.ui.FullScreenScaleMode;
+
+class DadSplashOption extends Module
+{
+
+  public function new()
+  {
+    super('DadSplashOption', 1, {state: OptionsState});
+    if (!Save.instance.modOptions.exists(DadSplashOption.SAVE_KEY_DAD_NOTE_SPLASH))
+    {
+      Save.instance.modOptions.set(DadSplashOption.SAVE_KEY_DAD_NOTE_SPLASH, true);
+    }
+  }
+
+  public static var SAVE_KEY_DAD_NOTE_SPLASH:String =  "hazard-dadNoteSplash";
+
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if (!Std.isOfType(event.targetState, OptionsState)) return;
+    addOption(event.targetState);
+  }
+
+
+  function addOption(options:OptionsState)
+  {
+    var preferencesPage = options.optionsCodex.pages.get("preferences");
+    if (preferencesPage != null)
+    {
+      preferencesPage.createPrefItemCheckbox("Opponent Note Splashes", "When enabled, the opponent will have note splashes enabled.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_DAD_NOTE_SPLASH, value);
+            Save.instance.flush();
+          }, getSaveData_DadSplashes());
+    }
+  }
+
+  function getSaveData_DadSplashes():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_DAD_NOTE_SPLASH)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_DAD_NOTE_SPLASH);
+  }
+
+}

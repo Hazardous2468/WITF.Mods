@@ -1,3 +1,4 @@
+package hazard24.modules.play;
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
