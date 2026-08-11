@@ -163,9 +163,9 @@ class SelectableModifiers_NEW extends Module
 		}
 		
 		inModMenu = false;
-		
-		var isPlayState:Bool = Std.isOfType(event.targetState, PlayState);
-		if(!isPlayState) addedAlready = false;
+		addedAlready = false;
+		//var isPlayState:Bool = Std.isOfType(event.targetState, PlayState);
+		//if(!isPlayState) addedAlready = false;
 	}
 	
 	var curState:FlxState;
