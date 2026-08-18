@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "IT-NEVER-ENDS",
+  "capsule": {
+    "name": "NEVER ENDS"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/CUSTOM_WEEK",
   "props": [

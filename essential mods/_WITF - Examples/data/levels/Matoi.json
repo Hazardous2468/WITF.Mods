@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "Matoi",
+  "capsule": {
+    "name": "WITF"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/Matoi",
   "props": [

@@ -5,7 +5,7 @@
   "fallback": "simple",
   "assets": {
     "note": {
-      "assetPath": "shared:inhuman_noteskins/simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/notes-simple",
       "scale": 0.7,
       "data": {
         "left": { "prefix": "purple0" },
@@ -15,56 +15,93 @@
       }
     },
     "noteStrumline": {
-      "assetPath": "shared:inhuman_noteskins/simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/notes-simple",
       "scale": 0.7,
-	  "offsets": [25, 26],
+      "offsets": [25, 26],
       "data": {
         "leftStatic": { "prefix": "arrowLEFT" },
         "leftPress": { "prefix": "left press" },
-        "leftConfirm": { "prefix": "left confirm" },
-        "leftConfirmHold": { "prefix": "left confirm" },
+       
+        
         "downStatic": { "prefix": "arrowDOWN" },
         "downPress": { "prefix": "down press" },
-        "downConfirm": { "prefix": "down confirm" },
-        "downConfirmHold": { "prefix": "down confirm" },
+       
+        
         "upStatic": { "prefix": "arrowUP" },
         "upPress": { "prefix": "up press" },
-        "upConfirm": { "prefix": "up confirm" },
-        "upConfirmHold": { "prefix": "up confirm" },
+        
+        
         "rightStatic": { "prefix": "arrowRIGHT" },
         "rightPress": { "prefix": "right press" },
-        "rightConfirm": { "prefix": "right confirm" },
-        "rightConfirmHold": { "prefix": "right confirm" }
+    
+     "leftConfirm": { 
+      "frameIndices": [0,1,2, 3, 4],
+      "prefix": "left confirms" 
+     },
+     
+     "downConfirm": { 
+      "frameIndices": [0,1,2, 3, 4],
+      "prefix": "down confirm"
+    },
+     
+     "upConfirm": { 
+      "frameIndices": [0,1,2, 3, 4],
+      "prefix": "up confirm"
+     },
+     
+         "rightConfirm": { 
+      "frameIndices": [0,1,2, 3, 4],
+      "prefix": "right confirm"
+     },
+    
+    "leftConfirmHold": { 
+      "frameIndices": [3, 4],
+      "prefix": "left confirms"
+    },
+    "downConfirmHold": { 
+      "frameIndices": [3, 4],
+      "prefix": "down confirm"
+    },
+    "upConfirmHold": { 
+      "frameIndices": [3, 4],
+      "prefix": "up confirm"
+    },
+    "rightConfirmHold": { 
+      "frameIndices": [3, 4],
+      "prefix": "right confirm"
+    }
+    
       }
     },
     "holdNote": {
-		"scale": 0.7,
-		 "offsets": [2, 0],
-      "assetPath": "inhuman_noteskins/simple/holds_wide",
-	  "data": {
+      "assetPath": "NoteSkins/Simple/holds_wide",
+      "scale": 0.7,
+    "offsets": [2, 0],
+      "data": {
         "behindStrums": true
       }
     },
     "noteSplash": {
-      "assetPath": "shared:inhuman_noteskins/simple/noteSplashes_simple",
+      "assetPath": "shared:NoteSkins/splashes-glow",
       "alpha": 0.8,
+    "offsets": [0, -18],
       "data": {
         "enabled": true,
+        "copyHSV": true,
+    "framerateDefault": 20,
+        "framerateVariance": 1,
+    "blendMode": "screen",
         "leftSplashes": [
-          { "prefix": "note impact 1 purple0" },
-          { "prefix": "note impact 2 purple0" }
+          { "prefix": "note splash red 1" }
         ],
         "rightSplashes": [
-          { "prefix": "note impact 1 red0" },
-          { "prefix": "note impact 2 red0" }
+          { "prefix": "note splash red 1" }
         ],
         "upSplashes": [
-          { "prefix": "note impact 1 green0" },
-          { "prefix": "note impact 2 green0" }
+          { "prefix": "note splash red 1" }
         ],
         "downSplashes": [
-          { "prefix": "note impact 1  blue0" },
-          { "prefix": "note impact 2 blue0" }
+          { "prefix": "note splash red 1" }
         ]
       }
     },

@@ -25,23 +25,22 @@ class HurtNote extends NoteKind
 	{
 		super("hurt", "Hurt Note", "hurtnotestyle", []);
 		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
-		if(!isWITF) bakedSpin = true;
+		//if(!isWITF) bakedSpin = true;
 		FunkinMemory.permanentCacheSound(Paths.sound("notitg_mine", "shared"));
 		FunkinMemory.permanentCacheTexture(Paths.image("splashes-notitg", "shared"));
-		//this.scoreable = false; //this bugged lol?
+		//this.scoreable = false; 
 	}
 	
-	function onUpdate(event)
+	override function onUpdate(event)
 	{
 		super.onUpdate(event);
 		if(PlayState.instance == null) return;
 
-		for (note in getNotes())
+		for (note in getNotes()) // 'getNotes()' Returns all notes of this kind.
 		{
 			//if(isWITF) note.angleAngularVelocityOffset += event.elapsed * 400;
 			 
 			var holdNote = note.holdNoteSprite;
-			
 			if(holdNote!=null && holdNote.alive){
 				// While the hold note is being hit, and there is length on the hold note...
 				  if (holdNote.hitNote && !holdNote.missedNote && holdNote.sustainLength > 0)
@@ -58,12 +57,11 @@ class HurtNote extends NoteKind
 	}
 
 
-	function onNoteIncoming(event)
+	override function onNoteIncoming(event:NoteScriptEvent)
 	{
 		super.onNoteIncoming(event);
 		if (event.note.kind == "hurt")
-		{
-				
+		{		
 			// Removing this note from the totalNotes tally to ensure they don't affect the final score!
 			if(event.note.noteData.getStrumlineIndex() == 0){ // If player strumline note
 				if(isWITF){
@@ -76,7 +74,7 @@ class HurtNote extends NoteKind
 				}
 				
 			}
-		
+
 			var randomFrameRate:Int = 33 + FlxG.random.int(-2, 3);
 			event.note.animation.curAnim.frameRate = randomFrameRate;
 			if(bakedSpin){
@@ -86,9 +84,9 @@ class HurtNote extends NoteKind
 					event.note.spinVelocity = FlxG.random.float(340, 380) * FlxG.random.sign();
 					//event.note.spinAngle = 360;
 				}
-				else
+				else{
 					event.note.angularVelocity = FlxG.random.float(340, 380) * FlxG.random.sign();
-				
+				}
 			}
 			
 			event.note.active = true;
@@ -97,13 +95,12 @@ class HurtNote extends NoteKind
 			
 			//event.note.offset.x = 45;
 			//event.note.offset.y = !Preferences.downscroll ? 150 : 260;
-		} 
-	}
-	
-	function onNoteHoldDrop(event)
-	{
-		if (event.holdNote.noteData.kind == "hurt") {
-			event.cancelEvent();
+		}else{
+			if(!isWITF){ 
+				// Make sure non-hurt notes aren't spinning as a result of recycling.
+				event.note.angularVelocity = 0; 
+				event.note.angle = 0; 
+			}
 		}
 	}
 }

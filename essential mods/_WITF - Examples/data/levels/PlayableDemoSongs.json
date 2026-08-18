@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "Playable Demo Songs",
+  "capsule": {
+    "name": "WITF"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/testweek",
   "props": [

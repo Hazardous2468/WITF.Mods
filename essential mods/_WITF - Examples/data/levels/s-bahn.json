@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "vs Hazard",
+  "capsule": {
+    "name": "WITF"
+  },
   "titleAsset": "storymenu/titles/hazweek",
   "visible": false,
   "props": [

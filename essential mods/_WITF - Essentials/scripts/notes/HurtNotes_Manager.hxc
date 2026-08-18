@@ -30,7 +30,7 @@ class HurtNotesManager extends Module {
         super("HurtNotesManager");
     }
 	
-	function onCountdownStart(event) {
+	override function onCountdownStart(event) {
 		super.onCountdownStart(event);		
 		
 		noteSplashes = [];
@@ -147,7 +147,8 @@ class HurtNotesManager extends Module {
 		}
 	}
 	
-	function onNoteHit(event) {		
+	override function onNoteHit(event) {	
+		super.onNoteHit(event);	
 		if(PlayState.instance == null){ 	//To stop any potential errors
 			return; 
 		}		
@@ -165,7 +166,6 @@ class HurtNotesManager extends Module {
 		
 			event.cancelEvent();
 
-			//strumLine.killNote(event.note);
 			if(!event.note.hasBeenHit){
 				event.note.hasBeenHit = true;
 				strumLine.hitNote(event.note, true);
@@ -175,21 +175,34 @@ class HurtNotesManager extends Module {
 				  strumLine.playNoteHoldCover(event.note.holdNoteSprite);
 				}
 				
-				//Logic only works for Boyfriend!
+				// make sure hit logic only works for Boyfriend!
 				if(strumLine == PlayState.instance.playerStrumline){
 					hurtNoteHit(event);
 				}
 			}
 		}else{
-			super.onNoteHit(event);
 			return;
 		}
 	}
 		
 	// Handle miss here to prevent character miss animations from playing!
-	function onNoteMiss(event) {
+	override function onNoteMiss(event:NoteScriptEvent) 
+	{
+		super.onNoteMiss(event);
 		if (event.note.noteData.kind == hurtNoteName) {
 			event.note.handledMiss = true;
+
+			trace("Is this note scorable? " + event.note.scoreable);
+
+			event.cancelEvent();
+		}
+	}
+
+	override function onNoteHoldDrop(event:HoldNoteScriptEvent)
+	{
+		super.onNoteHoldDrop(event);
+		if (event.holdNote.noteData.kind == hurtNoteName) {
+			event.holdNote.handledMiss = true;
 			event.cancelEvent();
 		}
 	}

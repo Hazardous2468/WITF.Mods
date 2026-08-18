@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "What In the Funkin' - Test Song",
+  "capsule": {
+    "name": "WITF TEST"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/testweek",
   "props": [

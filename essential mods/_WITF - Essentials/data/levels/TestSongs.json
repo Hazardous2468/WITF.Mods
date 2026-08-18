@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "Test",
+  "capsule": {
+    "name": "WITF TEST"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/testweek",
   "props": [

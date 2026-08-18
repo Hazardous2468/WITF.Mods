@@ -1,0 +1,36 @@
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+
+import funkin.util.FileUtil;
+import funkin.util.FileWriteMode;
+
+class DefaultFreeplayCharacterModule extends Module
+{
+	var targetCharacter:String = "bf";
+	function new() {
+        // Load the mod
+        super('DefaultFreeplayCharacterModule', 1);
+		scriptLogic(true);
+    }
+	
+	var daSavePath:String = "mods/defaultToPlayerScript/memory.txt";
+	function scriptLogic(load:Bool = false){
+		if(load && FileUtil.pathExists(daSavePath)){
+			targetCharacter = FileUtil.readStringFromPath(daSavePath);
+			FreeplayState.rememberedCharacterId = targetCharacter;
+		}
+
+		FileUtil.writeStringToPath(daSavePath, FreeplayState.rememberedCharacterId, FileWriteMode.Force);
+	}
+	
+	
+	override function onStateChangeEnd(event) {
+		super.onStateChangeEnd(event);
+		scriptLogic(false);
+	}
+}

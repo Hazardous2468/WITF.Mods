@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "-[OPERATOR]-",
+  "capsule": {
+    "name": "Inhuman"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/OPERATOR",
   "props": [
