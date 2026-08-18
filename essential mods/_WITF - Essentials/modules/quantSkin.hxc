@@ -24,7 +24,7 @@ class QuantSkinModule extends Module
 
 	//IF YOU WANT YOUR SKIN TO USE QUANT LOGIC, ADD IT TO THIS ARRAY HERE!!!!
 	public var quantSkinNames:Array<String> = [
-		"simple", "simple_holdcovers", "groovin", "halvedhalvedhalved", "simple_simple", "memory", "doodle", "triangulate"
+		"simple", "simple_holdcovers", "groovin", "halvedhalvedhalved", "simple_simple", "memory", "doodle", "triangulate", "funkin-quant"
 	];
 	  
 	  
