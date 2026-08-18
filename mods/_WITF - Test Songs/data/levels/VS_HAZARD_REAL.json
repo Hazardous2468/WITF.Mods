@@ -2,6 +2,9 @@
   "version": "1.0.0",
   "name": "VS HAZARD (REAL)",
   "visible": false,
+  "capsule": {
+    "name": "WITF TEST"
+  },
   "titleAsset": "storymenu/titles/HAZARD_REAL",
   "props": [
     {

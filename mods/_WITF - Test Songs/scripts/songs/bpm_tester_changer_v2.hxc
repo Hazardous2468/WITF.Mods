@@ -1,0 +1,24 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.song.Song;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.StrumlineNote;
+import flixel.FlxG;
+
+
+class Bpm_tester_changer_v2Script extends Song
+{	
+	public function new() {
+		super('bpm_tester_changer_v2');
+	}
+	
+	function onUpdate(callback)
+	{
+		if((PlayState.instance?.opponentStrumline ?? null) == null) return;
+		
+		PlayState.instance.opponentStrumline.strumlineNotes.forEach(function(note:StrumlineNote):Void
+		{
+		  note.alpha = 0.0;
+		});
+	}
+}

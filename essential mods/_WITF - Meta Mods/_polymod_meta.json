@@ -8,7 +8,7 @@
 			"role": "Everything"
 		}
 	],
-  "api_version": "0.8.1",
+  "api_version": "0.8.6",
   "dependencies": {
 		"_WITF - Essentials": "*"
 	},

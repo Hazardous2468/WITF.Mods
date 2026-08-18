@@ -2,6 +2,9 @@
   "version": "1.0.0",
   "name": "BPM CHANGE TEST SONG",
   "visible": false,
+  "capsule": {
+    "name": "BPM TEST"
+  },
   "titleAsset": "storymenu/titles/BPM_TESTER",
   "props": [
     {
