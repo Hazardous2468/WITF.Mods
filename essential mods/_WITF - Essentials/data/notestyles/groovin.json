@@ -54,9 +54,9 @@
       "data": {
         "enabled": true,
         "copyHSV": true,
-		"framerateDefault": 20,
+		    "framerateDefault": 20,
         "framerateVariance": 1,
-		"blendMode": "screen",
+		    "blendMode": "screen",
         "leftSplashes": [
           { "prefix": "note splash red 1" }
         ],
@@ -75,10 +75,10 @@
       "assetPath": "",
       "offsets": [4, 0],
       "data": {
-		"copyHSV": true,
+		    "copyHSV": true,
         "behindStrums": true,
         "holdPositioned": true,
-		"zCalcMult": [0.0, 0.0],
+		    "zCalcMult": [0.0, 0.0],
         "enabled": true,
         "scaleX": 1.275,
         "left": {

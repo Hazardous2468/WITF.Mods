@@ -1,0 +1,68 @@
+package hazard24.modules.options;
+
+import funkin.modding.module.Module;
+import funkin.ui.options.OptionsState;
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.TextMenuItem;
+import funkin.ui.options.PreferencesMenu;
+
+class BreakTimeOptions extends Module
+{
+
+  public function new()
+  {
+    super('BreakTimeOptions', 1, {state: OptionsState});
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_ENABLED))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_ENABLED, true);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SHADER))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SHADER, true);
+    }
+  }
+
+  public static var SAVE_KEY_BREAKTIME_SHADER:String =  "hazard-breakTime-shader";
+  public static var SAVE_KEY_BREAKTIME_ENABLED:String =  "hazard-breakTime-enabled";
+
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if (!Std.isOfType(event.targetState, OptionsState)) return;
+    addOption(event.targetState);
+  }
+
+
+  function addOption(options:OptionsState)
+  {
+    var preferencesPage = options.optionsCodex.pages.get("preferences");
+    if (preferencesPage != null)
+    {
+      preferencesPage.createPrefItemCheckbox("Breaktime enabled", "When enabled, a stopwatch will appear when a break is detected in a song.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_ENABLED, value);
+            Save.instance.flush();
+          }, getSaveData_enabled());
+
+      preferencesPage.createPrefItemCheckbox("Breaktime uses Shader", "When enabled, the stopwatch will use a shader for the radial fill instead of FlxPieDial.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SHADER, value);
+            Save.instance.flush();
+          }, getSaveData_shader());
+    }
+  }
+
+  function getSaveData_enabled():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_ENABLED)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_ENABLED);
+  }
+  function getSaveData_shader():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SHADER)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_SHADER);
+  }
+
+}

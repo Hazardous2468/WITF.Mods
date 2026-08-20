@@ -1,6 +1,7 @@
 package witf.modules.play;
 
 import funkin.modding.module.Module;
+import funkin.modding.module.ModuleHandler;
 import funkin.play.PlayState;
 import flixel.FlxG;
 import funkin.util.Constants;
@@ -18,10 +19,9 @@ import funkin.Paths;
 import flixel.ui.FlxBar;
 import funkin.audio.FunkinSound;
 import funkin.graphics.FunkinSprite;
-import funkin.ui.debug.charting.ChartEditorState;
 import funkin.play.PauseSubState;
 import funkin.Highscore;
-import funkin.modding.module.ModuleHandler;
+
 
 
 

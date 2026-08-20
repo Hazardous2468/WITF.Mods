@@ -1,18 +1,23 @@
 {
-    "title": "Hazard's Modchart System Examples",
-    "description": "Some useful scripts and demos of how to use the modchart system!",
+    "title": "What in the Funkin'?! - Examples",
+    "description": "Some useful scripts and demo songs showcasing how to use the modchart system!",
+    "homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+    "author": "Hazard24",
 	"contributors": [
 		{
 			"name": "Hazard24",
-			"role": "Made all the charts and modcharts and stuff"
+			"role": "Made all the charts and modcharts and stuff",
+			"url": "https://linktr.ee/Hazard24"
 		},
 		{
 			"name": "Hazard24",
-			"role": "Blissful Chaos"
+			"role": "Blissful Chaos",
+			"url": "https://linktr.ee/Hazard24"
 		},
 		{
 			"name": "Hazard24",
-			"role": "ITNEVERENDSITNEVERENDSITNEVERENDS"
+			"role": "ITNEVERENDSITNEVERENDSITNEVERENDS",
+			"url": "https://linktr.ee/Hazard24"
 		},
 		{
 			"name": "Aden Mayo",
@@ -55,7 +60,6 @@
 			"role": "Gypsy In My Mind (Sad Cat Dance meme song)"
 		}
 	],
-	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
     "api_version": "0.8.6",
     "mod_version": "3.0.2",
 	"dependencies": {

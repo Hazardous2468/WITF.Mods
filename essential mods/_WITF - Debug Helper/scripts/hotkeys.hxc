@@ -138,6 +138,12 @@ class ModchartDebug_HotKeys extends Module
       		//game.currentStage?.getDad()?.initHealthIcon(true);
       		if(resetEvents){
 			    SongEventRegistry.resetEvents(game.songEvents);
+
+			    // Fix for HazWired Sawblades 
+			    var sawbladeDodgeModule = ModuleHandler.getModule("SawbladeAndDodgeModule_HazardVersion");
+				if(sawbladeDodgeModule!=null){
+					sawbladeDodgeModule.resetState();
+				}
 			}
 		}
 

@@ -1,15 +1,17 @@
 {
-    "title": "Hazard's Modchart System - Helpful debug scripts",
+    "title": "What in the Funkin'?! - Helpful debug scripts",
     "description": "Some useful scripts to help with modchart creation!",
 	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+	"author": "Hazard24",
     "contributors": [
 		{
 			"name": "Hazard24",
-			"role": "Everything"
+			"role": "Everything",
+			"url": "https://linktr.ee/Hazard24"
 		}
 	],
     "api_version": "0.8.6",
-    "mod_version": "2.4.1",
+    "mod_version": "2.4.2",
 	"dependencies": {
 		"_WITF - Essentials": "*"
 	},

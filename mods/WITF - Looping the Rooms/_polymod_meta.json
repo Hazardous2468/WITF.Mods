@@ -8,10 +8,16 @@
 		},
 		{
 			"name": "Hazard24",
-			"role": "Everything else"
+			"role": "Art Assets, Chart, Modchart",
+      		"url": "https://linktr.ee/Hazard24"
+		},
+		{
+			"name": "unsplash.com",
+			"role": "Background images. See credits.txt for more information in shared/images/looping_rooms",
+      		"url": "https://unsplash.com/"
 		}
 	],
-    "api_version": "0.8.0",
+    "api_version": "0.8.6",
     "mod_version": "1.0.0",
 	"dependencies": {
 		"_WITF - Essentials": "*",

@@ -1,18 +1,20 @@
 {
-    "title": "What in the Funkin'?! Essentials",
+    "title": "What in the Funkin'?! - Essentials",
     "description": "Essentials for What in the Funkin'?!",
+    "homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+    "author": "Hazard24",
     "contributors": [
 		{
 			"name": "Hazard24",
-			"role": "Everything"
+			"role": "Everything",
+			"url": "https://linktr.ee/Hazard24"
 		},
 		{
 			"name": "?",
 			"role": "Mirin Template song and chart."
 		}
 	],
-	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
     "api_version": "0.8.6",
-    "mod_version": "1.1.1",
+    "mod_version": "1.1.2",
     "license": "CC BY-NC-SA 4.0"
 }

@@ -8,10 +8,11 @@
 		},
 		{
 			"name": "Hazard24",
-			"role": "Modchart"
+			"role": "Modchart and chart",
+  		"url": "https://linktr.ee/Hazard24"
 		}
 	],
-  "api_version": "0.8.0",
+  "api_version": "0.8.6",
   "mod_version": "1.0.0",
   "dependencies": {
 		"_WITF - Essentials": "*"	

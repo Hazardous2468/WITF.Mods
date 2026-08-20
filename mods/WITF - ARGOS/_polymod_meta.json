@@ -4,7 +4,8 @@
 	"contributors": [
 		{
 			"name": "出前 (demaescape)",
-			"role": "Original movie visuals"
+			"role": "Original movie visuals",
+      		"url": "https://youtu.be/9op9lZ8Ehms"
 		},
 		{
 			"name": "iKlar ( ikaruga_nex vs Klavistr )",
@@ -12,7 +13,8 @@
 		},
 		{
 			"name": "Hazard24",
-			"role": "Modchart and code"
+			"role": "Modchart and code",
+      		"url": "https://linktr.ee/Hazard24"
 		}
 	],
     "api_version": "0.8.0",
