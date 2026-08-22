@@ -13,56 +13,191 @@ class BreakTimeOptions extends Module
   public function new()
   {
     super('BreakTimeOptions', 1, {state: OptionsState});
-    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_ENABLED))
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_MODE))
     {
-      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_ENABLED, true);
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_MODE, "default");
     }
-    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SHADER))
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_THRESHOLD))
     {
-      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SHADER, true);
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_THRESHOLD, 4000);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SCREENCENTER))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SCREENCENTER, false);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_OPACITY))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_OPACITY, 60);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_WARNINGOPACITY))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_WARNINGOPACITY, 100);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SCALE))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SCALE, 75);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_WARNINGSCALE))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_WARNINGSCALE, 90);
     }
   }
 
-  public static var SAVE_KEY_BREAKTIME_SHADER:String =  "hazard-breakTime-shader";
-  public static var SAVE_KEY_BREAKTIME_ENABLED:String =  "hazard-breakTime-enabled";
+  public static var SAVE_KEY_BREAKTIME_MODE:String =  "hazard-breakTime-mode";
+  public static var SAVE_KEY_BREAKTIME_THRESHOLD:String =  "hazard-breakTime-threshold";
+  public static var SAVE_KEY_BREAKTIME_SCREENCENTER:String =  "hazard-breakTime-screencenter";
+  public static var SAVE_KEY_BREAKTIME_OPACITY:String =  "hazard-breakTime-opacity";
+  public static var SAVE_KEY_BREAKTIME_WARNINGOPACITY:String =  "hazard-breakTime-warningopacity";
+  public static var SAVE_KEY_BREAKTIME_SCALE:String =  "hazard-breakTime-scale";
+  public static var SAVE_KEY_BREAKTIME_WARNINGSCALE:String =  "hazard-breakTime-warningscale";
 
   override function onStateChangeEnd(event:StateChangeScriptEvent)
   {
     if (!Std.isOfType(event.targetState, OptionsState)) return;
+    addCustomCategory(event.targetState);
     addOption(event.targetState);
+  }
+
+  function addCustomCategory(state)
+  {
+    var prefs:PreferencesMenu = state.optionsCodex.addPage('breaktime_options', new PreferencesMenu());
+    prefs.onExit.add(() ->
+    {
+      FlxG.state.optionsCodex.switchPage('options');
+    });
+    prefs.preferenceDesc = [];
+    prefs.items.clear();
+    prefs.preferenceItems.clear();
+    var optionspage = FlxG.state.optionsCodex.pages.get('options');
+    var exit = optionspage.items.getItem("LAG ADJUSTMENT") ?? null;
+    var option = optionspage.createItem("Breaktime Options", () -> FlxG.state.optionsCodex.switchPage('breaktime_options'));
+    if (exit != null)
+    {
+      optionspage.items.members.remove(option);
+      optionspage.items.members.insert(optionspage.items.members.indexOf(exit), option);
+    }
+    for (i in 0...optionspage.items.length)
+    {
+      var item = optionspage.items.members[i];
+      item.y = 100 + i * 100;
+    }
   }
 
 
   function addOption(options:OptionsState)
   {
-    var preferencesPage = options.optionsCodex.pages.get("preferences");
+    var preferencesPage = options.optionsCodex.pages.get("breaktime_options");
     if (preferencesPage != null)
     {
-      preferencesPage.createPrefItemCheckbox("Breaktime enabled", "When enabled, a stopwatch will appear when a break is detected in a song.",
-          function(value:Bool):Void
-          {
-            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_ENABLED, value);
-            Save.instance.flush();
-          }, getSaveData_enabled());
+      preferencesPage.createPrefItemEnum('Mode', "Determines how the break timer should appear.",
+        ["Disabled"=>"disabled","Default" => "default","FlxPieDial" => "flxpiedial", "Bar" => "bar"], function(value:String, oValue:String):Void
+      {
+        Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_MODE, oValue);
+        Save.instance.flush();
+      },
+        getModeDisplay(Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_MODE)));
 
-      preferencesPage.createPrefItemCheckbox("Breaktime uses Shader", "When enabled, the stopwatch will use a shader for the radial fill instead of FlxPieDial.",
+
+      preferencesPage.createPrefItemCheckbox("Screen Centered", "When enabled, will center the break time indicator to the center of the screen. Otherwise will be centered on the player's strumline.",
           function(value:Bool):Void
           {
-            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SHADER, value);
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SCREENCENTER, value);
             Save.instance.flush();
-          }, getSaveData_shader());
+          }, getShouldCenter());
+
+
+      preferencesPage.createPrefItemNumber('Threshold', 'The time between notes (in MS) before a break can trigger. (Default is 4000)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_THRESHOLD, value);
+            Save.instance.flush();
+          }, null, getThreshold(), 1000, 10000, 100, 0);
+
+      preferencesPage.createPrefItemPercentage('Opacity', 'The opacity of the break timer. (Default is 60%)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_OPACITY, value);
+            Save.instance.flush();
+          }, getTargetOpacity());
+
+      preferencesPage.createPrefItemPercentage('Opacity when warning', 'The opacity of the break timer when nearly done. (Default is 100%)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_WARNINGOPACITY, value);
+            Save.instance.flush();
+          }, getTargetOpacityForWarn());
+
+      preferencesPage.createPrefItemPercentage('Size', 'The size of the break timer. (Default is 75%)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_SCALE, value);
+            Save.instance.flush();
+          }, getTargetScale(), 0, 200);
+
+      preferencesPage.createPrefItemPercentage('Size when warning', 'The size of the break timer when nearly done. (Default is 90%)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_WARNINGSCALE, value);
+            Save.instance.flush();
+          }, getTargetScaleForWarn(), 0, 200);
+
     }
   }
 
-  function getSaveData_enabled():Bool
+  function getModeDisplay(value:String):String
   {
-    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_ENABLED)) return true;
-    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_ENABLED);
+    return switch (value)
+    {
+      case "default":
+        "Default";
+      case "disabled":
+        "Disabled";
+      case "flxpiedial":
+        "FlxPieDial";
+      case "bar":
+        "Bar";
+      default:
+        "?";
+    }
   }
-  function getSaveData_shader():Bool
+
+  function getMode():Float
   {
-    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SHADER)) return true;
-    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_SHADER);
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_MODE)) return "default";
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_MODE);
+  }
+
+  function getThreshold():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_THRESHOLD)) return 4000;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_THRESHOLD);
+  }
+
+  function getTargetOpacity():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_OPACITY)) return 60;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_OPACITY);
+  }
+  function getTargetOpacityForWarn():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_WARNINGOPACITY)) return 100;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_WARNINGOPACITY);
+  }
+  function getTargetScale():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SCALE)) return 75;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_SCALE);
+  }
+  function getTargetScaleForWarn():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_WARNINGSCALE)) return 90;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_WARNINGSCALE);
+  }
+
+  function getShouldCenter():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SCREENCENTER)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_SCREENCENTER);
   }
 
 }

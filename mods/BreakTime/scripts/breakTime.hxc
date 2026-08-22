@@ -8,19 +8,18 @@ import flixel.tweens.FlxTween;
 import flixel.tweens.FlxEase;
 import funkin.util.Constants;
 import flixel.math.FlxMath;
-import funkin.data.event.SongEventRegistry;
-import flixel.text.FlxText;
-import flixel.text.FlxTextBorderStyle;
+//import funkin.data.event.SongEventRegistry;
+//import flixel.text.FlxText;
+//import flixel.text.FlxTextBorderStyle;
 import funkin.Paths;
 import flixel.ui.FlxBar;
 import flixel.addons.display.FlxPieDial;
-import funkin.audio.FunkinSound;
+//import funkin.audio.FunkinSound;
 import funkin.graphics.FunkinSprite;
 import flixel.util.FlxColor;
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.BitmapFilter;
 import openfl.utils.Assets;
-import openfl.filters.ShaderFilter;
 import funkin.data.freeplay.player.PlayerRegistry;
 
 
@@ -31,53 +30,58 @@ import funkin.data.freeplay.player.PlayerRegistry;
 
 class BreakTime extends Module {
 	// Needs a priority value that makes this script load LAST in PlayState to ensure the chart data it pulls from the onSongLoaded event is accurate.
-    function new() {super("BreakTime", 99, {state: PlayState});}
+  function new() {super("BreakTime", 99, {state: PlayState});}
 
-    // Whether this script is enabled.
-    var enabled:Bool = true;
+  // Whether this script is enabled.
+  var enabled:Bool = true;
 
-    // in MS, the time between notes that will trigger a break to appear.
-    var gapSizeThreshold:Float = 4060;
+  // in MS, the time between notes that will trigger a break to appear.
+  var gapSizeThreshold:Float = 4000;
 
-    // Time in MS that the gap will end BEFORE the note reaches the strumline. If set to 0, the break will end at the exact same time the note needs to be pressed. 
-    var gapEndOffset:Float = 750;
+  // Time in MS that the gap will end BEFORE the note reaches the strumline. If set to 0, the break will end at the exact same time the note needs to be pressed. 
+  var gapEndOffset:Float = 750;
 
-    // Whether to use a shader for the radial fill, or use FlxPieDial.
-    var useShader:Bool = true;
+  // Whether to use a shader for the radial fill, or use FlxPieDial.
+  var useShader:Bool = true;
 
-    // If true, then the position of the stopWatch will update every frame to match the playerStrumline position, for songs that modify the strumline position mid-song.
-    var tieToStrumPosition:Bool = true;
+  // Whether to use a simple FlxBar instead of a stopWatch.
+  var useBar:Bool = false;
 
-    // If true, the stopWatch will appear in the center of the screen instead of the center of the playerStrumline.
-    var stopWatchCentered:Bool = false;
+  // If true, then the position of the stopWatch will update every frame to match the playerStrumline position, for songs that modify the strumline position mid-song.
+  var tieToStrumPosition:Bool = true;
 
-
-    // The scale of the stopwatch when it appears.
-    var targetScale:Float = 0.75;
-
-    // The scale of the stopwatch when it's about to disappear.
-    var targetScaleWarn:Float = 0.9;
+  // If true, the stopWatch will appear in the center of the screen instead of the center of the playerStrumline.
+  var stopWatchCentered:Bool = false;
 
 
-    // Shader fill assets
-    var stopWatchCircleFill:FunkinSprite;
-    var stopWatchCircleFillShader:FlxRuntimeShader;
+  // The scale of the stopwatch when it appears.
+  var targetScale:Float = 0.75;
 
-    // FlxPieDial fill sasets
-    var stopwatchCircle:FlxPieDial;
-    var stopwatchCircle_Outline:FlxPieDial;
+  // The scale of the stopwatch when it's about to disappear.
+  var targetScaleWarn:Float = 0.9;
 
-    // The stopwatch sprite.
+  var timeBar:FlxBar;
+	var timeBarBG:FunkinSprite;
+
+  // Shader fill assets
+  var stopWatchCircleFill:FunkinSprite;
+  var stopWatchCircleFillShader:FlxRuntimeShader;
+
+  // FlxPieDial fill sasets
+  var stopwatchCircle:FlxPieDial;
+  var stopwatchCircle_Outline:FlxPieDial;
+
+  // The stopwatch sprite.
 	var stopWatchSprite:FunkinSprite;
 
 	// If set to true, this module will be forcefully deactivated for WITF songs (characters that belong to the 'nobody' player)
 	var forceDisableForWITF:Bool = false;
 
-    /** An array containing the data defining where breaks start and end.
-     * Format: 
-     * songGaps[0][0] = Time Start in MS.
-     * songGaps[0][1] = Time End in MS.
-     * songGaps[0][2] = strumlineIndex. Should we want breaks to work for other players like the opponent.
+  /** An array containing the data defining where breaks start and end.
+   * Format: 
+   * songGaps[0][0] = Time Start in MS.
+   * songGaps[0][1] = Time End in MS.
+   * songGaps[0][2] = strumlineIndex. Should we want breaks to work for other players like the opponent.
  	*/
     var songGaps:Array<Array<Float>> = [];
 	override function onSongLoaded(e):Void
@@ -86,11 +90,54 @@ class BreakTime extends Module {
 		destroyAssets();
 		var optionsModule = ModuleHandler.getModule("BreakTimeOptions");
 		if(optionsModule!=null){
-			enabled = optionsModule.getSaveData_enabled();
-			useShader = optionsModule.getSaveData_shader();
+			var mode:String = optionsModule.getMode();
+			enabled = true;
+			switch(mode.toLowerCase()){
+				case "disabled":
+					enabled = false;
+				case "bar":
+					useShader = false;
+					useBar = true;
+				case "flxpiedial":
+					useShader = false;
+					useBar = false;
+				default:
+					useBar = false;
+					useShader = true;
+			}
+			gapSizeThreshold = optionsModule.getThreshold();
+			stopWatchCentered = optionsModule.getShouldCenter();
+			targetAlphaForWarning = (optionsModule.getTargetOpacityForWarn()/100);
+			targetAlpha = (optionsModule.getTargetOpacity()/100);
+
+
+			if(useBar){ // When the FlxBar is transparent it kinda looks weird. So we avoid using alpha.
+
+				if(targetAlphaForWarning >= 0 && targetAlphaForWarning < 0.5){
+					targetAlphaForWarning = 0;
+				}else{
+					targetAlphaForWarning = 1;
+				}
+
+				if(targetAlpha >= 0 && targetAlpha < 0.5){
+					targetAlpha = 0;
+				}else{
+					targetAlpha = 1;
+				}
+			}
+
+			targetScale = (optionsModule.getTargetScale()/100);
+			targetScaleWarn = (optionsModule.getTargetScaleForWarn()/100);
 		}else{
 			trace("(BREAK TIME) Options Module could not be found.");
 			enabled = false;
+			useBar=false;
+			useShader=true;
+			targetAlpha=0.6;
+			targetAlphaForWarning=1;
+			targetScaleWarn = 0.9;
+			targetScale = 0.75;
+			gapSizeThreshold = 4000;
 		}
 		if(!enabled) return;
 
@@ -159,67 +206,81 @@ class BreakTime extends Module {
 		}
 		trace("(BREAK TIME) Creating assets!");
 
-		if(useShader){
-			if(stopWatchCircleFillShader==null){
-				stopWatchCircleFillShader = new FlxRuntimeShader(Assets.getText(Paths.frag("PieWipeShader")), null);
-				stopWatchCircleFillShader.setFloat("amount",0.65);
-			}
+		if(useBar){
+			timeBarBG = new FunkinSprite(0,0,Paths.image("ui/breakTimeBar"));
+	    timeBarBG.screenCenter();
+	    timeBarBG.camera = PlayState.instance.camHUD;
+	    PlayState.instance.add(timeBarBG);
 
-			stopWatchCircleFill = new FunkinSprite(0,0,Paths.image("ui/breakTime_StopWatch_Fill"));
+			timeBar = new FlxBar(0, 0, null, 439, 18, null, '', 0, 100);
+			timeBar.scrollFactor.set();
+			timeBar.createFilledBar(0xFFFFFFFF, 0xFF000000);
+			timeBar.numDivisions = 800;
+			timeBar.angle=180;
+			timeBar.screenCenter();
+			timeBar.camera = PlayState.instance.camHUD;
+			PlayState.instance.add(timeBar);
+			timeBar.percent = 34;
+
+			timeBar.scale.set(0,0);
+			timeBarBG.scale.set(0,0);
+			timeBar.alpha=0;
+			timeBarBG.alpha=0;
+
+			timeBarBG.zIndex = 956;
+			timeBar.zIndex = 957;
+			
+
+		}else{
+			if(useShader){
+				if(stopWatchCircleFillShader==null){
+					stopWatchCircleFillShader = new FlxRuntimeShader(Assets.getText(Paths.frag("BreakTime_RadialWipeShader")), null);
+					stopWatchCircleFillShader.setFloat("amount",0.65);
+				}
+
+				stopWatchCircleFill = new FunkinSprite(0,0,Paths.image("ui/breakTime_StopWatch_Fill"));
 		    stopWatchCircleFill.screenCenter();
 		    stopWatchCircleFill.camera = PlayState.instance.camHUD;
 		    PlayState.instance.add(stopWatchCircleFill);
 		    stopWatchCircleFill.shader = stopWatchCircleFillShader;
 		    stopWatchCircleFill.scale.set(0,0);
 		    stopWatchCircleFill.alpha=0;
+		    stopWatchCircleFill.zIndex = 956;
 
-		}else{
-			stopwatchCircle_Outline = new FlxPieDial(0,0, (stopWatchRadius+stopWatchRadiusOutline), FlxColor.BLACK, /*stopWatchRadiusDivisions*/4, null, false, 0);
-			stopwatchCircle_Outline.scrollFactor.set();
-			stopwatchCircle_Outline.screenCenter();
-			stopwatchCircle_Outline.camera = PlayState.instance.camHUD;
-			PlayState.instance.add(stopwatchCircle_Outline);
-			stopwatchCircle_Outline.amount = 1;
+			}else{
+				stopwatchCircle_Outline = new FlxPieDial(0,0, (stopWatchRadius+stopWatchRadiusOutline), FlxColor.BLACK, /*stopWatchRadiusDivisions*/4, null, false, 0);
+				stopwatchCircle_Outline.scrollFactor.set();
+				stopwatchCircle_Outline.screenCenter();
+				stopwatchCircle_Outline.camera = PlayState.instance.camHUD;
+				PlayState.instance.add(stopwatchCircle_Outline);
+				stopwatchCircle_Outline.amount = 1;
 
-			stopwatchCircle = new FlxPieDial(0,0, stopWatchRadius, FlxColor.WHITE, stopWatchRadiusDivisions, null, false, 0);
-			stopwatchCircle.scrollFactor.set();
-			stopwatchCircle.screenCenter();
-			stopwatchCircle.camera = PlayState.instance.camHUD;
-			PlayState.instance.add(stopwatchCircle);
-			stopwatchCircle.amount = 0.5;
+				stopwatchCircle = new FlxPieDial(0,0, stopWatchRadius, FlxColor.WHITE, stopWatchRadiusDivisions, null, false, 0);
+				stopwatchCircle.scrollFactor.set();
+				stopwatchCircle.screenCenter();
+				stopwatchCircle.camera = PlayState.instance.camHUD;
+				PlayState.instance.add(stopwatchCircle);
+				stopwatchCircle.amount = 0.5;
 
-			stopwatchCircle.scale.set(0.0,0.0);
-			stopwatchCircle_Outline.scale.set(0.0,0.0);
-			stopwatchCircle_Outline.alpha=0;
-			stopwatchCircle.alpha=0;
+				stopwatchCircle.scale.set(0.0,0.0);
+				stopwatchCircle_Outline.scale.set(0.0,0.0);
+				stopwatchCircle_Outline.alpha=0;
+				stopwatchCircle.alpha=0;
 
-		}
-	    //stopWatchSprite = new FunkinSprite(0,0,Paths.image(useShader ? "ui/breakTime_StopWatch" : "ui/breakTime_StopWatch_wCenter" ));
+				stopwatchCircle_Outline.zIndex = 956;
+				stopwatchCircle.zIndex = 957;
+			}
+
+			//stopWatchSprite = new FunkinSprite(0,0,Paths.image(useShader ? "ui/breakTime_StopWatch" : "ui/breakTime_StopWatch_wCenter" ));
 	    stopWatchSprite = new FunkinSprite(0,0,Paths.image("ui/breakTime_StopWatch"));
 	    stopWatchSprite.screenCenter();
 	    stopWatchSprite.camera = PlayState.instance.camHUD;
 	    PlayState.instance.add(stopWatchSprite);
-
-		stopWatchSprite.scale.set(0,0);
-		stopWatchSprite.alpha=0;
-
+	    stopWatchSprite.scale.set(0,0);
+			stopWatchSprite.alpha=0;
+			stopWatchSprite.zIndex = 958;
+		}
 		if(!stopWatchCentered) updateStopWatchPosition();
-
-
-		/*
-		timeBar = new FlxBar(0, 0, "LEFT_TO_RIGHT", FlxG.height * 0.75, 12, null, '', 0, 100);
-		timeBar.scrollFactor.set();
-		timeBar.angle = 90;
-		timeBar.createFilledBar(0xFFFFFFFF, 0xFF000000);
-		timeBar.numDivisions = 800;
-		timeBar.screenCenter();
-		timeBar.camera = PlayState.instance.camHUD;
-		timeBar.x += FlxG.width*0.5;
-		timeBar.x -= 112;
-		timeBar.visible = false;
-		PlayState.instance.add(timeBar);
-		timeBar.percent = 50;
-		*/
 	}
 
 	// Moves the stopWatch to be in the middle of the player's strumline.
@@ -248,6 +309,14 @@ class BreakTime extends Module {
 		    	stopwatchCircle.screenCenter();
 		    	stopwatchCircle.x += difference;
 		    } 
+		    if(timeBar!=null){
+		    	timeBar.screenCenter();
+		    	timeBar.x += difference;
+		    }
+		    if(timeBarBG!=null){
+		    	timeBarBG.screenCenter();
+		    	timeBarBG.x += difference;
+		    }
 		}
 	}
 
@@ -259,25 +328,48 @@ class BreakTime extends Module {
 		playedWarningForCurBreak=false;
 
 		if (stopWatchCircleFill != null)
-	    {
-	      stopWatchCircleFill.destroy();
-	      stopWatchCircleFill = null;
-	    }
+    {
+      stopWatchCircleFill.destroy();
+      stopWatchCircleFill = null;
+    }
 		if (stopwatchCircle_Outline != null)
-	    {
-	      stopwatchCircle_Outline.destroy();
-	      stopwatchCircle_Outline = null;
-	    }
+    {
+      stopwatchCircle_Outline.destroy();
+      stopwatchCircle_Outline = null;
+    }
 		if (stopwatchCircle != null)
-	    {
-	      stopwatchCircle.destroy();
-	      stopwatchCircle = null;
-	    }
-	    if (stopWatchSprite != null)
-	    {
-	      stopWatchSprite.destroy();
-	      stopWatchSprite = null;
-	    }
+    {
+      stopwatchCircle.destroy();
+      stopwatchCircle = null;
+    }
+    if (stopWatchSprite != null)
+    {
+      stopWatchSprite.destroy();
+      stopWatchSprite = null;
+    }
+    if (timeBar != null)
+    {
+      timeBar.destroy();
+      timeBar = null;
+    }
+    if (timeBarBG != null)
+    {
+      timeBarBG.destroy();
+      timeBarBG = null;
+    }
+
+    // kill any tweens to be safe
+    var tweens:Array<FlxTween> = [
+	    scaleTween_Sprite, angleTween_Sprite, alphaTween_Sprite, 
+	    scaleTween_Fill, alphaTween_Fill, angleTween_Fill, 
+	    angleTween_FillOutline, scaleTween_FillOutline, alphaTween_FillOutline   
+    ];
+    for(t in tweens){
+    	if(t!=null){
+    		t.cancel();
+    		t = null;
+    	}
+    }
 	}
 
 	
@@ -300,74 +392,95 @@ class BreakTime extends Module {
 		inBreak = true;
 		playedWarningForCurBreak = false;
 
-
-        if(scaleTween_Sprite!=null){
-          scaleTween_Sprite.cancel();
-        }
-        scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
-
-        if(angleTween_Sprite!=null){
-          angleTween_Sprite.cancel();
-        }
-        stopWatchSprite.angle = FlxG.random.float(-45,-30) * FlxG.random.sign();
-        angleTween_Sprite = FlxTween.tween(stopWatchSprite, {angle: 0}, 0.95, {ease: FlxEase.elasticOut});
-
-
-        if(alphaTween_Sprite!=null){
-          alphaTween_Sprite.cancel();
-        }
-        alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
-
-
-        if(useShader){
-
-        	if(alphaTween_Fill!=null){
-	          alphaTween_Fill.cancel();
-	        }
-	        alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
-
-					if(scaleTween_Fill!=null){
-	          scaleTween_Fill.cancel();
-	        }
-	        scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
-	    
-	        if(angleTween_Fill!=null){
-	          angleTween_Fill.cancel();
-	        }
-	        stopWatchCircleFill.angle = stopWatchSprite.angle;
-	        angleTween_Fill = FlxTween.tween(stopWatchCircleFill, {angle: 0}, FlxG.random.float(0.95, 1.1), {ease: FlxEase.elasticOut});
-
-        }else{
-        	if(alphaTween_FillOutline!=null){
-	          alphaTween_FillOutline.cancel();
-	        }
-	        if(alphaTween_Fill!=null){
-	          alphaTween_Fill.cancel();
-	        }
-	        alphaTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
-	        alphaTween_Fill = FlxTween.tween(stopwatchCircle, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
-
+		if(useBar){
 			if(scaleTween_FillOutline!=null){
-	          scaleTween_FillOutline.cancel();
-	        }
-	        if(scaleTween_Fill!=null){
-	          scaleTween_Fill.cancel();
-	        }
-	        scaleTween_Fill = FlxTween.tween(stopwatchCircle.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
-	        scaleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
-	    
-	        if(angleTween_Fill!=null){
-	          angleTween_Fill.cancel();
-	        }
-	        if(angleTween_FillOutline!=null){
-	          angleTween_FillOutline.cancel();
-	        }
-	        stopwatchCircle_Outline.angle = stopWatchSprite.angle;
-	        stopwatchCircle.angle = stopWatchSprite.angle;
-	        var t:Float = FlxG.random.float(0.95, 1.1);
-	        angleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {angle: 0}, t, {ease: FlxEase.elasticOut});
-	        angleTween_Fill = FlxTween.tween(stopwatchCircle, {angle: 0}, t, {ease: FlxEase.elasticOut});
+        scaleTween_FillOutline.cancel();
+      }
+      scaleTween_FillOutline = FlxTween.tween(timeBar.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+      if(scaleTween_Fill!=null){
+        scaleTween_Fill.cancel();
+      }
+      scaleTween_Fill = FlxTween.tween(timeBarBG.scale, {x:targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+
+      if(alphaTween_Fill!=null){
+        alphaTween_Fill.cancel();
+      }
+      alphaTween_Fill = FlxTween.tween(timeBar, {alpha:targetAlpha}, 0.2, {ease: FlxEase.sineInOut});
+
+      if(alphaTween_FillOutline!=null){
+        alphaTween_FillOutline.cancel();
+      }
+      alphaTween_FillOutline = FlxTween.tween(timeBarBG, {alpha:targetAlpha}, 0.2, {ease: FlxEase.sineInOut});
+
+    }else{	
+
+      if(scaleTween_Sprite!=null){
+        scaleTween_Sprite.cancel();
+      }
+      scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+
+      if(angleTween_Sprite!=null){
+        angleTween_Sprite.cancel();
+      }
+      stopWatchSprite.angle = FlxG.random.float(-45,-30) * FlxG.random.sign();
+      angleTween_Sprite = FlxTween.tween(stopWatchSprite, {angle: 0}, 0.95, {ease: FlxEase.elasticOut});
+
+
+      if(alphaTween_Sprite!=null){
+        alphaTween_Sprite.cancel();
+      }
+      alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
+
+
+      if(useShader){
+      	if(alphaTween_Fill!=null){
+          alphaTween_Fill.cancel();
         }
+        alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
+
+				if(scaleTween_Fill!=null){
+          scaleTween_Fill.cancel();
+        }
+        scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+    
+        if(angleTween_Fill!=null){
+          angleTween_Fill.cancel();
+        }
+        stopWatchCircleFill.angle = stopWatchSprite.angle;
+        angleTween_Fill = FlxTween.tween(stopWatchCircleFill, {angle: 0}, FlxG.random.float(0.95, 1.1), {ease: FlxEase.elasticOut});
+
+      }else{
+      	if(alphaTween_FillOutline!=null){
+          alphaTween_FillOutline.cancel();
+        }
+        if(alphaTween_Fill!=null){
+          alphaTween_Fill.cancel();
+        }
+        alphaTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
+        alphaTween_Fill = FlxTween.tween(stopwatchCircle, {alpha:targetAlpha}, 0.35, {ease: FlxEase.sineInOut});
+
+				if(scaleTween_FillOutline!=null){
+          scaleTween_FillOutline.cancel();
+        }
+        if(scaleTween_Fill!=null){
+          scaleTween_Fill.cancel();
+        }
+        scaleTween_Fill = FlxTween.tween(stopwatchCircle.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+        scaleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline.scale, {x: targetScale, y:targetScale}, 0.35, {ease: FlxEase.backOut});
+    
+        if(angleTween_Fill!=null){
+          angleTween_Fill.cancel();
+        }
+        if(angleTween_FillOutline!=null){
+          angleTween_FillOutline.cancel();
+        }
+        stopwatchCircle_Outline.angle = stopWatchSprite.angle;
+        stopwatchCircle.angle = stopWatchSprite.angle;
+        var t:Float = FlxG.random.float(0.95, 1.1);
+        angleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {angle: 0}, t, {ease: FlxEase.elasticOut});
+        angleTween_Fill = FlxTween.tween(stopwatchCircle, {angle: 0}, t, {ease: FlxEase.elasticOut});
+      }
+    }
 	}
 
 	function leaveBreak():Void{
@@ -375,33 +488,53 @@ class BreakTime extends Module {
 		inBreak = false;
 		playedWarningForCurBreak = false;
 
-        if(scaleTween_Sprite!=null){
-          scaleTween_Sprite.cancel();
-        }
-        scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
+		if(useBar){
+			if(scaleTween_FillOutline!=null){
+        scaleTween_FillOutline.cancel();
+      }
+      scaleTween_FillOutline = FlxTween.tween(timeBar.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
+			if(scaleTween_Fill!=null){
+        scaleTween_Fill.cancel();
+      }
+      scaleTween_Fill = FlxTween.tween(timeBarBG.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
 
-        if(alphaTween_Sprite!=null){
-          alphaTween_Sprite.cancel();
-        }
-        alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:0}, 0.35, {ease: FlxEase.sineIn});
+      if(alphaTween_Fill!=null){
+        alphaTween_Fill.cancel();
+      }
+      alphaTween_Fill = FlxTween.tween(timeBar, {alpha:0}, 0.35, {ease: FlxEase.expoIn});
 
-        if(angleTween_Sprite!=null){
-          angleTween_Sprite.cancel();
-        }
-        stopWatchSprite.angle = 0;
-        angleTween_Sprite = FlxTween.tween(stopWatchSprite, {angle: 360*FlxG.random.sign()}, FlxG.random.float(0.4,0.6), {ease: FlxEase.linear});
+      if(alphaTween_FillOutline!=null){
+        alphaTween_FillOutline.cancel();
+      }
+      alphaTween_FillOutline = FlxTween.tween(timeBarBG, {alpha:0}, 0.35, {ease: FlxEase.expoIn});
 
+    }else{	
+	    if(scaleTween_Sprite!=null){
+	      scaleTween_Sprite.cancel();
+	    }
+	    scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
 
-        if(useShader){
-					if(scaleTween_Fill!=null){
-	          scaleTween_Fill.cancel();
-	        }
-	        scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
+	    if(alphaTween_Sprite!=null){
+	      alphaTween_Sprite.cancel();
+	    }
+	    alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:0}, 0.35, {ease: FlxEase.sineIn});
 
-					if(alphaTween_Fill!=null){
-	          alphaTween_Fill.cancel();
-	        }
-	        alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:0}, 0.35, {ease: FlxEase.sineIn});
+	    if(angleTween_Sprite!=null){
+	      angleTween_Sprite.cancel();
+	    }
+	    stopWatchSprite.angle = 0;
+	    angleTween_Sprite = FlxTween.tween(stopWatchSprite, {angle: 360*FlxG.random.sign()}, FlxG.random.float(0.4,0.6), {ease: FlxEase.linear});
+
+	    if(useShader){
+				if(scaleTween_Fill!=null){
+	        scaleTween_Fill.cancel();
+	      }
+	      scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x: 0, y:0}, 0.35, {ease: FlxEase.sineIn});
+
+				if(alphaTween_Fill!=null){
+	        alphaTween_Fill.cancel();
+	      }
+	      alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:0}, 0.35, {ease: FlxEase.sineIn});
 	    }else{
 	    	if(scaleTween_Fill!=null){
 	          scaleTween_Fill.cancel();
@@ -423,6 +556,7 @@ class BreakTime extends Module {
 	        }
 	        alphaTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {alpha:0}, 0.35, {ease: FlxEase.sineIn});
 	    }
+	  }
 	}
 
 
@@ -433,52 +567,77 @@ class BreakTime extends Module {
 		if(playedWarningForCurBreak) return;
 		playedWarningForCurBreak = true;
 
-		if(scaleTween_Sprite!=null){
-      scaleTween_Sprite.cancel();
-    }
-    scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
+
+		if(useBar){
+			if(alphaTween_Fill!=null){
+        alphaTween_Fill.cancel();
+      }
+      alphaTween_Fill = FlxTween.tween(timeBar, {alpha:targetAlphaForWarning}, 0.23, {ease: FlxEase.sineInOut});
+
+      if(alphaTween_FillOutline!=null){
+        alphaTween_FillOutline.cancel();
+      }
+      alphaTween_FillOutline = FlxTween.tween(timeBarBG, {alpha:targetAlphaForWarning}, 0.23, {ease: FlxEase.sineInOut});
+
+      if(scaleTween_FillOutline!=null){
+        scaleTween_FillOutline.cancel();
+      }
+      scaleTween_FillOutline = FlxTween.tween(timeBar.scale, {x: targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
+      if(scaleTween_Fill!=null){
+        scaleTween_Fill.cancel();
+      }
+      scaleTween_Fill = FlxTween.tween(timeBarBG.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
+
+    }else{	
+
+			if(scaleTween_Sprite!=null){
+	      scaleTween_Sprite.cancel();
+	    }
+	    scaleTween_Sprite = FlxTween.tween(stopWatchSprite.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
 
 
-		if(alphaTween_Sprite!=null){
-      alphaTween_Sprite.cancel();
-    }
-    alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
+			if(alphaTween_Sprite!=null){
+	      alphaTween_Sprite.cancel();
+	    }
+	    alphaTween_Sprite = FlxTween.tween(stopWatchSprite, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
 
-		if(useShader){
-				if(alphaTween_Fill!=null){
-          alphaTween_Fill.cancel();
-        }
-        alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
-
-
-        if(scaleTween_Fill!=null){
-          scaleTween_Fill.cancel();
-        }
-        scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
-
-	    }else{
-
-
-	    	if(scaleTween_Fill!=null){
-          scaleTween_Fill.cancel();
-        }
-        scaleTween_Fill = FlxTween.tween(stopwatchCircle.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
-	    	if(scaleTween_FillOutline!=null){
-          scaleTween_FillOutline.cancel();
-        }
-        scaleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
-
-	    	if(alphaTween_Fill!=null){
+    
+			if(useShader){
+					if(alphaTween_Fill!=null){
 	          alphaTween_Fill.cancel();
 	        }
-	        alphaTween_Fill = FlxTween.tween(stopwatchCircle, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
+	        alphaTween_Fill = FlxTween.tween(stopWatchCircleFill, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
 
-	        if(alphaTween_FillOutline!=null){
-	          alphaTween_FillOutline.cancel();
+
+	        if(scaleTween_Fill!=null){
+	          scaleTween_Fill.cancel();
 	        }
-	        alphaTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
+	        scaleTween_Fill = FlxTween.tween(stopWatchCircleFill.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
 
-	    }
+		    }else{
+
+
+		    	if(scaleTween_Fill!=null){
+	          scaleTween_Fill.cancel();
+	        }
+	        scaleTween_Fill = FlxTween.tween(stopwatchCircle.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
+		    	if(scaleTween_FillOutline!=null){
+	          scaleTween_FillOutline.cancel();
+	        }
+	        scaleTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline.scale, {x:targetScaleWarn, y:targetScaleWarn}, 0.35, {ease: FlxEase.quadInOut});
+
+		    	if(alphaTween_Fill!=null){
+		          alphaTween_Fill.cancel();
+		        }
+		        alphaTween_Fill = FlxTween.tween(stopwatchCircle, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
+
+		        if(alphaTween_FillOutline!=null){
+		          alphaTween_FillOutline.cancel();
+		        }
+		        alphaTween_FillOutline = FlxTween.tween(stopwatchCircle_Outline, {alpha:targetAlphaForWarning}, 0.25, {ease: FlxEase.sineInOut});
+
+		    }
+		  }
 
 	}
 
@@ -517,9 +676,9 @@ class BreakTime extends Module {
 			var breakPercentage:Float = (songPos - gapStart) / (gapEnd-gapStart);
 
 			// update the bar
-			//if(timeBar!=null){
-			//	timeBar.percent = breakPercentage*100;
-			//}
+			if(timeBar!=null){
+				timeBar.percent = breakPercentage*100;
+			}
 			if(stopwatchCircle!=null){
 				stopwatchCircle.amount = 1-breakPercentage;
 			}
@@ -539,27 +698,36 @@ class BreakTime extends Module {
 			var lerpValue:Float = (FlxMath.fastCos((redSineTimeBound*5*Math.PI) + Math.PI)+1.0)/2.0;
 			var color = FlxColor.interpolate(FlxColor.WHITE, FlxColor.RED, lerpValue);
 
-			
-			stopWatchSprite.color = color;
-          	if(stopWatchCircleFill!=null){
+			if(stopWatchSprite!=null){
+				stopWatchSprite.color = color;
+			}
+    	if(stopWatchCircleFill!=null){
 				stopWatchCircleFill.color = color;
 			}
 			if(stopwatchCircle!=null){
 				stopwatchCircle.color = color;
 			}
+			if(timeBar!=null){
+				timeBar.color = color;
+			}
+			if(timeBarBG!=null){
+				timeBarBG.color = color;
+			}
 
-			// shake it as it's low also
-			// Make sure there is no angleTween active before trying to modify the angle.
-			if(angleTween_Sprite==null || (angleTween_Sprite!=null && angleTween_Sprite.finished)){  
-				
-	          	redSineTime = Math.max(redSineTime, 0);
-				var angle:Float = ((FlxMath.fastSin((redSineTime*16*2*Math.PI) + Math.PI))/2.0)*-8;
-				stopWatchSprite.angle = angle;
-				if(stopWatchCircleFill!=null){
-					stopWatchCircleFill.angle = angle;
-				}
-				if(stopwatchCircle!=null){
-					stopwatchCircle.angle = angle;
+			if(!useBar){
+				// shake it as it's low also
+				// Make sure there is no angleTween active before trying to modify the angle.
+				if(angleTween_Sprite==null || (angleTween_Sprite!=null && angleTween_Sprite.finished)){  
+					
+	      	redSineTime = Math.max(redSineTime, 0);
+					var angle:Float = ((FlxMath.fastSin((redSineTime*16*2*Math.PI) + Math.PI))/2.0)*-8;
+					stopWatchSprite.angle = angle;
+					if(stopWatchCircleFill!=null){
+						stopWatchCircleFill.angle = angle;
+					}
+					if(stopwatchCircle!=null){
+						stopwatchCircle.angle = angle;
+					}
 				}
 			}
 
