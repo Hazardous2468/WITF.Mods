@@ -2,18 +2,20 @@ package hazard24.modules.play;
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import funkin.util.Constants;
-import Std;
+import StringTools;
 import flixel.FlxG;
 import funkin.modding.module.ModuleHandler;
 
 
 class DadSplash extends Module {
 	var enabled:Bool = true;
+	var isWITF:Bool = false;
     function new() {
         // Load the mod
-		super("DadSplash", 1, {
+		super("DadSplash", 99, {
           state: PlayState
         });
+        isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
     }
 
 	override function onCountdownStart(event) {
@@ -27,34 +29,33 @@ class DadSplash extends Module {
 		}
 	}
 
+	var ignoredNoteKinds:Array<String> = ['hurt', 'fake', 'kb_miss', 'trickyhell', 'trickydeath'];
+
+
     override function onNoteHit(event) {
         super.onNoteHit(event);
-
+        if (event.eventCanceled) return;
         if(!enabled) return;
 		
         // Dad notes are always perfect and give 0 score
-        var dadNote = event.score == 0 && event.judgement == 'perfect';
-        if (!dadNote) return;
-		
+        //var dadNote = event.score == 0 && event.judgement == 'perfect';
+        //if (!dadNote) return;
+
+        // We a BF note, we don't care.
+        //if (event.note.noteData.getMustHitNote()) return;
 
 		var note = event.note;
-		var isPlayerNote = event.note.noteData.getMustHitNote();
-		
 
 		// Play the note splash for the opponent
 		var playState = PlayState.instance;
 		if(playState == null) return;
 		var strumline = playState.opponentStrumline;
-		
-		if(isPlayerNote){
-			strumline = playState.playerStrumline;
-		}
-		if(playState != null && strumline != null && note.noteData.kind != "hurt" && note.noteData.kind != "fake" ){
-			if(note.weBelongTo != null)
+		if (event.note.noteData.getMustHitNote()) strumline = playState.playerStrumline;
+		if(strumline != null && !ignoredNoteKinds.contains(note.noteData.kind)){
+			if(isWITF && note.weBelongTo != null)
 				note.weBelongTo.playNoteSplash(note.direction, note);
 			else
-				strumline.playNoteSplash(note.direction, note);
-			
+				strumline.playNoteSplash(note.direction, note);	
 		}
 		
     }

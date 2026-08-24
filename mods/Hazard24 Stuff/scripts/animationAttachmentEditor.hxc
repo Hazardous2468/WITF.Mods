@@ -98,6 +98,10 @@ class AnimationAttachmentEditorModule extends Module
 	
 	
 	
+	public function new()
+	{
+		super('AnimationAttachmentEditorModule', 24, {state: MainMenuState});
+	}
 	
 	// CONFIG ENDS HERE
 	
@@ -522,7 +526,8 @@ class AnimationAttachmentEditorModule extends Module
 					FlxG.camera.zoom = 0.1;
 				}
 			}
-			if(FlxG.keys.justPressed.R){
+			// Should be something like 'FlxG.subState.controls.BACK_P' lol
+			if(FlxG.keys.justPressed.R || FlxG.keys.justPressed.ESCAPE){
 				FlxG.camera.zoom = 1;
 				animationGraphic.screenCenter();
 			}

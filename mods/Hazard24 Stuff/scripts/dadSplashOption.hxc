@@ -2,17 +2,10 @@ package hazard24.modules.options;
 
 import funkin.modding.module.Module;
 import funkin.ui.options.OptionsState;
-import funkin.modding.events.ScriptEvent;
 import flixel.FlxG;
 import funkin.save.Save;
-import funkin.ui.AtlasText;
-import funkin.ui.ButtonStyle;
 import funkin.ui.TextMenuItem;
-import funkin.util.InputUtil;
 import funkin.ui.options.PreferencesMenu;
-import flixel.text.FlxText;
-import flixel.text.FlxTextBorderStyle;
-import funkin.ui.FullScreenScaleMode;
 
 class DadSplashOption extends Module
 {

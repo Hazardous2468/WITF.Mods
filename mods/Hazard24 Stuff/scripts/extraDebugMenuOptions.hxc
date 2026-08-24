@@ -1,0 +1,51 @@
+package hazard24.modules.options;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.debug.DebugMenuSubState;
+import funkin.ui.debug.results.ResultsDebugSubState;
+import funkin.ui.debug.WaveformTestState;
+import funkin.ui.debug.dialogue.ConversationDebugState;
+
+
+class ResultsDebugStateOption extends Module
+{
+
+  public function new()
+  {
+    super('ResultsDebugStateOption', 7, {state: MainMenuState});
+  }
+  var addedToDebugList:Bool = false;
+  function onUpdate(e) {
+    var inDebug = Std.isOfType(FlxG.state.subState, DebugMenuSubState);
+    
+    if(addedToDebugList && !inDebug){ 
+      addedToDebugList = false;
+    }
+    
+    if(!inDebug) return;
+    
+    if(!addedToDebugList){
+      addedToDebugList = true;
+      FlxG.state.subState.createItem("Results Test State", openTestResultsScreen);
+      FlxG.state.subState.createItem("Conversation Test State", openConversationTestState);
+      FlxG.state.subState.createItem("Waveform Test State", openWaveformTestState);
+    }
+  }
+
+  function openTestResultsScreen():Void
+  {
+    FlxG.switchState(() -> new ResultsDebugSubState());
+  }
+  function openConversationTestState():Void
+  {
+    FlxG.switchState(() -> new ConversationDebugState());
+  }
+  function openWaveformTestState():Void
+  {
+    FlxG.switchState(() -> new WaveformTestState());
+  }
+
+
+}

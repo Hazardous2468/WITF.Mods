@@ -1,0 +1,34 @@
+package hazard24.modules.options;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.debug.WaveformTestState;
+import funkin.audio.waveform.WaveformSprite;
+import flixel.util.FlxColor;
+
+class WaveFormTestStateEdit extends Module
+{
+
+  public function new()
+  {
+    super('WaveFormTestStateEdit', 1, {state: WaveformTestState});
+  }
+
+  var waveformSprite:WaveformSprite;
+
+  var waveFormState:WaveformTestState = null;
+  override function onUpdate(e) {
+    var correctState:Bool = Std.isOfType(FlxG.state, WaveformTestState);
+    if(correctState && waveformSprite==null){
+      //add
+      waveFormState = FlxG.state;
+      waveformSprite = WaveformSprite.buildFromWaveformData(waveFormState.waveformData, "HORIZONTAL", FlxColor.fromString("#FF0000"), 5.0);
+      waveformSprite.width = FlxG.width;
+      waveformSprite.height = FlxG.height / 2;
+      waveformSprite.y = FlxG.height / 2;
+      waveFormState.add(waveformSprite);
+    }
+  }
+
+
+}
