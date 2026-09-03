@@ -50,6 +50,14 @@ class ModchartDebug_OptionsCategory extends Module
     {
       Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_HOTKEYS, true);
     }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN, true);
+    }
+    if (!Save.instance.modOptions.exists(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_NOTIFICATIONS))
+    {
+      Save.instance.modOptions.set(ModchartDebug_OptionsCategory.SAVE_KEY_WITF_DEBUG_NOTIFICATIONS, true);
+    }
   }
 
   public static var SAVE_KEY_WITF_DEBUG_SHOW_MODS_BY_DEFAULT:String =     "witf-debug-showModsByDefault";
@@ -59,6 +67,8 @@ class ModchartDebug_OptionsCategory extends Module
   public static var SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE:String =  "witf-debug-showModsAsPercentages";
   public static var SAVE_KEY_WITF_DEBUG_BOTPLAY_SCORE_POPUP:String =  "witf-debug-botplayScorePopup";
   public static var SAVE_KEY_WITF_DEBUG_HOTKEYS:String =  "witf-debug-hotkeys";
+  public static var SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN:String =  "witf-debug-loopCountdown";
+  public static var SAVE_KEY_WITF_DEBUG_NOTIFICATIONS:String =  "witf-debug-notifications";
 
   var xOffset:Float = -100;
   var camZoom:Float = 0.86;
@@ -108,6 +118,15 @@ class ModchartDebug_OptionsCategory extends Module
             Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_TIMEBAR_ENABLED, value);
             Save.instance.flush();
           }, getSaveData_timeBar());
+
+      /*
+      preferencesPage.createPrefItemCheckbox("Show mod notifications", "When enabled, debug notifications from mod scripts will appear in the corner of the screen.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_NOTIFICATIONS, value);
+            Save.instance.flush();
+          }, getSaveData_notifications());
+      */
       
 
       preferencesPage.createPrefItemCheckbox("Show mods as percentages", "When enabled, modifiers be displayed as a % rather then it's exact value. Some modifiers are exempt from this such as angle modifiers.",
@@ -116,6 +135,13 @@ class ModchartDebug_OptionsCategory extends Module
             Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_SHOW_MODS_AS_PERCENTAGE, value);
             Save.instance.flush();
           }, getSaveData_modsAsPercentage());
+
+      preferencesPage.createPrefItemCheckbox("Looping does Countdown", "When enabled, when a song gets looped, it'll retrigger the countdown.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN, value);
+            Save.instance.flush();
+          }, getSaveData_loopDoesCountdown());
       
 
       preferencesPage.createPrefItemCheckbox("Botplay Score Popup", "When enabled, botplay can trigger the score popup on hitting notes.",
@@ -184,6 +210,18 @@ class ModchartDebug_OptionsCategory extends Module
 
 
 
+
+  function getSaveData_notifications():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_NOTIFICATIONS)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_NOTIFICATIONS);
+  }
+
+  function getSaveData_loopDoesCountdown():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN);
+  }
 
   function getSaveData_modsEnabledByDefault():Bool
   {

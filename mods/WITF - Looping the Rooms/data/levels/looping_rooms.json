@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "Looping the Rooms",
+  "capsule": {
+    "name": "WITF"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/looping_rooms",
   "props": [

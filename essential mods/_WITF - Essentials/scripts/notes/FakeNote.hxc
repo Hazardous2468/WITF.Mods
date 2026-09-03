@@ -22,7 +22,7 @@ class FakeNote extends Module {
 		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
     }
 	
-	function onNoteIncoming(event)
+	override function onNoteIncoming(event)
 	{
 		super.onNoteIncoming(event);
 		if (event.note.kind == hurtNoteName)
@@ -42,7 +42,7 @@ class FakeNote extends Module {
 		} 
 	}
 	
-	function onNoteHit(event) {
+	override function onNoteHit(event) {
 		if(PlayState.instance == null) return;
 		if (event.note.noteData.kind == hurtNoteName) {
 			var strumLine = PlayState.instance.playerStrumline;
@@ -62,7 +62,7 @@ class FakeNote extends Module {
 		}
 	}
 	
-	function onNoteMiss(event) {
+	override function onNoteMiss(event) {
 		if (event.note.noteData.kind == hurtNoteName) {
 			event.cancelEvent();
 			event.note.handledMiss = true;

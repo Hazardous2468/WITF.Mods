@@ -18,11 +18,11 @@ class ResponsiveHoldsModule extends Module
 	var missValue:Float = 0.5;
 
 	var skinNames:Array<String> = [
-		"simple", "triangulate", "groovin", "simple_simple", "simple_holdcovers", "halvedhalvedhalved"
+		"simple", "triangulate", "groovin", "simple_simple", "simple_holdcovers", "halvedhalvedhalved", "memory"
 	];	
 	
 	public function new() {
-        super("ResponsiveHoldsModule");	
+        super("ResponsiveHoldsModule", 100, {state:PlayState});	
     }
 
 	

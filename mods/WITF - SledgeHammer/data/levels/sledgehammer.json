@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "Sledgehammer",
+  "capsule": {
+    "name": "WITF"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/sledgehammer",
   "props": [

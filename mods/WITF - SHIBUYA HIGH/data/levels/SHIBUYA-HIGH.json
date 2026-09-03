@@ -2,6 +2,9 @@
   "version": "1.0.0",
   "name": "SHIBUYA-HIGH",
   "visible": false,
+  "capsule": {
+    "name": "WITF"
+  },
   "titleAsset": "storymenu/titles/SHIBUYA-HIGH",
   "props": [
     {

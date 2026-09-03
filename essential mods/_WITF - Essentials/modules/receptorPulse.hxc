@@ -1,0 +1,101 @@
+package witf.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.StrumlineNote;
+import flixel.math.FlxMath;
+import funkin.play.modchartSystem.ModConstants;
+
+
+// A simple script that makes the receptors pulse to the beat.
+// May also be updated to also make note animations stay synced to the BPM.
+class ReceptorPulseModule extends Module
+{
+	var skinNames:Array<String> = [
+		"triangulate", "groovin", "simple_simple", "halvedhalvedhalved", "memory"
+	];	
+	
+	public function new() {
+        super("ReceptorPulseModule", 100, {state:PlayState});	
+    }
+
+    /*
+    public function onBeatHit(event:SongTimeScriptEvent):Void
+	  {
+	    var ps = PlayState.instance;
+	    if (ps == null) return;
+	    if (Conductor.instance == null) return;
+
+	    for(strum in ps.allStrumLines){
+	    	for(receptor in strum.strumlineNotes){
+	    		if(skinNames.contains(receptor.noteStyleName)){
+	    			pulseReceptorLogic(receptor);
+	    		}
+	    	}
+	    }
+	  }
+	  */
+
+    public function onUpdate(event):Void
+	{	
+		super.onUpdate(event);
+		var ps = PlayState.instance;
+		if (ps == null) return;
+		if (Conductor.instance == null) return;
+
+		for(strum in ps.allStrumLines){
+			for(receptor in strum.strumlineNotes){
+				if(skinNames.contains(receptor.noteStyleName)){
+					pulseReceptorLogic(receptor);
+				}
+			}
+		}
+	}
+	
+	function pulseReceptorLogic(receptor:StrumlineNote) {
+
+		// The NotITG command that makes receptors pulse to the beat.
+		//InitCommand="EffectClock,beat;DiffuseRamp;EffectColor1,0.4,0.4,0.4,1;EffectColor2,1,1,1,1,1;effectperiod,0.5;EffectDelay,0.5;EffectOffset,0.05"
+
+		var beat:Float = Conductor.instance.currentBeatTime;
+		//if(beat < 0) beat = 0;
+		//if(beat < 0) beat = Math.abs(beat);
+
+		if(receptor?.hsvShader == null) return;
+
+		final DIM:Float = 0.5;
+		final BRIGHT:Float = 1.0;
+
+
+		var anim = receptor.animation?.name ?? "";
+  		if (anim.indexOf("confirm") != -1){
+  			receptor.hsvShader.value2 = 1;
+  			return;
+  		}
+
+		//beat = beat % 1;
+		beat = ModConstants.mod(beat, 1);
+
+		var lerpy:Float = 1;
+		if(beat < 0.5){
+			lerpy = beat*2;
+		}
+		FlxMath.bound(lerpy,0,1);
+		var brightness = FlxMath.lerp(BRIGHT, DIM, lerpy);
+		//if (anim.indexOf("press") != -1){
+		//if (anim=="press"){
+  		//	brightness *= 0.775;
+  		//}
+  		FlxMath.bound(brightness,0,1);
+		receptor.hsvShader.value2 = brightness;
+
+		
+
+    }
+
+}

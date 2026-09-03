@@ -1,6 +1,9 @@
 {
   "version": "1.0.0",
   "name": "!A VERY ANGRY ROBOT!",
+  "capsule": {
+    "name": "KB"
+  },
   "visible": false,
   "titleAsset": "storymenu/titles/emergency",
   "props": [

@@ -1,7 +1,10 @@
 {
   "version": "1.0.0",
-  "name": "hyper-nova",
-  "visible": true,
+  "name": "Hyper Nova",
+  "capsule": {
+    "name": "Hyper Nova"
+  },
+  "visible": false,
   "titleAsset": "storymenu/titles/hyper-nova",
   "props": [
     {
