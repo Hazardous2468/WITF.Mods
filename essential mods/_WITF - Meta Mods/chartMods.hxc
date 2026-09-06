@@ -1,3 +1,5 @@
+package witf.modules.play.metamods;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import flixel.FlxG;
@@ -69,6 +71,7 @@ class ChartModifiersModule extends Module
 	"no up", 			// Up notes are randomly re-assigned to either left, down, or right randomly
 	"no right", 		// Right notes are randomly re-assigned to either up, down, or left randomly
 	"hold jacks", 		// All holds are replaced with 1/16th jacks
+	"inverse", 			// Every note becomes a hold which lasts till the next note. LN Inverse basically.
 	"gap", 				// Notes will be randomly deleted from the chart, leaving gaps where there should be a note.
 	"no holds", 		// All notes have 0 length, removing all holds
 	"no hurts" 			// All hurt notes are removed. 
@@ -88,6 +91,7 @@ class ChartModifiersModule extends Module
 		"no holds",
 		"gap",
 		"hold jacks",
+		"inverse",
 		"no right",
 		"no left",
 		"no up",
@@ -125,11 +129,12 @@ class ChartModifiersModule extends Module
 		//Remove the swap chart mod if this song is blacklisted
 		if(activeShuffles.contains("swap")){
 			trace("Swap Blacklist: \n" + swapBlacklist);
-		
+			
+			var bf = PlayState.instance.currentStage.getBoyfriend();
 			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
-			var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+			var curChar:String = bf.characterId;
 			//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
-			if(swapBlacklist.contains(curSongName) || (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+			if(swapBlacklist.contains(curSongName) || (bf != null && modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
 				activeShuffles.remove("swap");
 
 				if(displayNotif)
@@ -610,6 +615,19 @@ class ChartModifiersModule extends Module
 						}
 					}
 					songNote.length = 0;
+
+				case "inverse":
+					if(!isHurtNote(songNote.kind)){
+						var nextNote = getNextNoteForDirection(songNote.data, songNote.time, notes, true);
+						if(nextNote!=null){
+							var timeUntilNextNote:Float = nextNote.time - songNote.time;
+							if(timeUntilNextNote >= 260){
+								songNote.length = timeUntilNextNote-180;
+							}
+						}
+					}
+
+
 				case "no holds":
 					songNote.length = 0;
 				case "no hurts":
@@ -751,6 +769,24 @@ class ChartModifiersModule extends Module
 		//}
 	}
 	
+	// Make sure notes are sorted already!
+	function getNextNoteForDirection(targetDirection:Int, targetTime:Float, notes, hurtNotesAreIgnored:Bool = true){
+		var noteResult = null;
+		for (songNote in notes){
+			if(isHurtNote(songNote.kind) && hurtNotesAreIgnored) continue;
+			if(songNote.time <= targetTime){
+				continue;
+			}
+			if(songNote.data == targetDirection){
+				noteResult = songNote;
+				break;
+				return songNote;
+			}
+		}
+		return noteResult;
+	}
+
+
 	//Port of this silly function from that based fork which fixes time signatures lol:
 	
 	/**
