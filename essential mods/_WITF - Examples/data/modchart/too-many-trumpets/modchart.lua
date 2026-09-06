@@ -84,10 +84,10 @@ function modsTimeline()
 	end
 
 	-- More accurate rotations for groovin notestyle
-	setdefault(-2, "rotatez__holdpoint_offset_x")
 	setdefault(1, "rotatez__notepoint_offset_x")
-	setdefault(-2, "rotatey__holdpoint_offset_x")
+	setdefault(-1, "rotatez__holdpoint_offset_x")
 	setdefault(1, "rotatey__notepoint_offset_x")
+	setdefault(-1, "rotatey__holdpoint_offset_x")
 	
 
 	setdefault(1, "alphaholdcover")

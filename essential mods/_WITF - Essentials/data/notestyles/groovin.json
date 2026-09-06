@@ -19,29 +19,29 @@
     "noteStrumline": {
 		"assetPath": "shared:NoteSkins/Groovin/groovin_strums",
       "scale": 0.7,
-      "offsets": [24, 27],
+      "offsets": [31, 29],
       "data": {
         "leftStatic": { "prefix": "arrowLEFT" },
         "leftPress": { "prefix": "left press" },
-        "leftConfirm": { "prefix": "left confirm_First" },
-        "leftConfirmHold": { "prefix": "left confirm_Hold" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm", "frameIndices": [4,5] },
         "downStatic": { "prefix": "arrowDOWN" },
         "downPress": { "prefix": "down press" },
-        "downConfirm": { "prefix": "down confirm_First" },
-        "downConfirmHold": { "prefix": "down confirm_Hold" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm", "frameIndices": [4,5] },
         "upStatic": { "prefix": "arrowUP" },
         "upPress": { "prefix": "up press" },
-        "upConfirm": { "prefix": "up confirm_First" },
-        "upConfirmHold": { "prefix": "up confirm_Hold" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm", "frameIndices": [4,5] },
         "rightStatic": { "prefix": "arrowRIGHT" },
         "rightPress": { "prefix": "right press" },
-        "rightConfirm": { "prefix": "right confirm_First" },
-        "rightConfirmHold": { "prefix": "right confirm_Hold" }
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm", "frameIndices": [4,5] }
       }
     },
     "holdNote": {
 	  "scale": 0.7,
-	  "offsets": [1, 0],
+	  "offsets": [2, 0],
       "assetPath": "NoteSkins/Groovin/holds",
 	   "data": {
         "behindStrums": true

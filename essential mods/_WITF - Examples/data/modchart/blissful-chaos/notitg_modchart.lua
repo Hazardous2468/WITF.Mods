@@ -12,10 +12,10 @@ local tinyMultFix = 2 --WITF 1.0.0a fix
 function modsTimeline()
 
 	-- More accurate rotations for groovin notestyle
-	setdefault(-2, "rotatez__holdpoint_offset_x")
 	setdefault(1, "rotatez__notepoint_offset_x")
-	setdefault(-2, "rotatey__holdpoint_offset_x")
+	setdefault(-1, "rotatez__holdpoint_offset_x")
 	setdefault(1, "rotatey__notepoint_offset_x")
+	setdefault(-1, "rotatey__holdpoint_offset_x")
 	
 	local r = ((math.pi/180)) --multiply a degree by 'r' to convert degrees it to radians
 
