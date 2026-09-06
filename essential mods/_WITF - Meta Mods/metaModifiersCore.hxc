@@ -1,3 +1,5 @@
+package witf.modules.play.metamods;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
 import funkin.ui.AtlasMenuItem;

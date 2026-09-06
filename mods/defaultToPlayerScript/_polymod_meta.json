@@ -1,9 +1,14 @@
 {
   "title": "Remember ourselves!",
   "description": "Simple mod that allows the game to remember which playable character we had selected between sessions.",
-  "contributors": [{
-    "name": "Hazard24"
-  }],
+  "author": "Hazard24",
+  "contributors": [
+    {
+      "name": "Hazard24",
+      "role": "The Script",
+      "url": "https://linktr.ee/Hazard24"
+    }
+  ],
   "api_version": "0.8.0",
   "mod_version": "2.0.0",
   "license": "Apache-2.0"

@@ -1,6 +1,6 @@
 {
   "title": "Meta Mods",
-  "description": "Allow you to enable a modifier for any song without needing a modchart.lua file",
+  "description": "Allows you to change up how you play songs such as enabling modifiers without a .lua file, modifying the chart, speeding up the song, etc",
   "homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
   "contributors": [
 		{
@@ -13,6 +13,6 @@
   "dependencies": {
 		"_WITF - Essentials": "*"
 	},
-  "mod_version": "2.0.2",
+  "mod_version": "2.1.0",
   "license": "CC BY-NC-SA 4.0"
 }
