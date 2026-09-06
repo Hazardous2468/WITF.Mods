@@ -17,52 +17,33 @@ import funkin.play.modchartSystem.ModConstants;
 class ReceptorPulseModule extends Module
 {
 	var skinNames:Array<String> = [
-		"triangulate", "groovin", "simple_simple", "halvedhalvedhalved", "memory"
+		"triangulate", "groovin", "simple_simple", "halvedhalvedhalved", "memory", "maniac"
 	];	
 	
 	public function new() {
         super("ReceptorPulseModule", 100, {state:PlayState});	
     }
 
-    /*
-    public function onBeatHit(event:SongTimeScriptEvent):Void
-	  {
-	    var ps = PlayState.instance;
-	    if (ps == null) return;
-	    if (Conductor.instance == null) return;
-
-	    for(strum in ps.allStrumLines){
-	    	for(receptor in strum.strumlineNotes){
-	    		if(skinNames.contains(receptor.noteStyleName)){
-	    			pulseReceptorLogic(receptor);
-	    		}
-	    	}
-	    }
-	  }
-	  */
-
     public function onUpdate(event):Void
 	{	
 		super.onUpdate(event);
 		var ps = PlayState.instance;
 		if (ps == null) return;
-		if (Conductor.instance == null) return;
-
 		for(strum in ps.allStrumLines){
 			for(receptor in strum.strumlineNotes){
 				if(skinNames.contains(receptor.noteStyleName)){
-					pulseReceptorLogic(receptor);
+					pulseReceptorLogic(receptor, strum.conductorInUse);
 				}
 			}
 		}
 	}
 	
-	function pulseReceptorLogic(receptor:StrumlineNote) {
+	function pulseReceptorLogic(receptor:StrumlineNote, conductor:Conductor) {
 
 		// The NotITG command that makes receptors pulse to the beat.
 		//InitCommand="EffectClock,beat;DiffuseRamp;EffectColor1,0.4,0.4,0.4,1;EffectColor2,1,1,1,1,1;effectperiod,0.5;EffectDelay,0.5;EffectOffset,0.05"
 
-		var beat:Float = Conductor.instance.currentBeatTime;
+		var beat:Float = conductor.currentBeatTime;
 		//if(beat < 0) beat = 0;
 		//if(beat < 0) beat = Math.abs(beat);
 
@@ -71,15 +52,14 @@ class ReceptorPulseModule extends Module
 		final DIM:Float = 0.5;
 		final BRIGHT:Float = 1.0;
 
-
 		var anim = receptor.animation?.name ?? "";
   		if (anim.indexOf("confirm") != -1){
   			receptor.hsvShader.value2 = 1;
   			return;
   		}
 
-		//beat = beat % 1;
-		beat = ModConstants.mod(beat, 1);
+		//beat = beat % 1; // % doesn't work for negative numbers properly
+		beat = FlxMath.mod(beat, 1);
 
 		var lerpy:Float = 1;
 		if(beat < 0.5){

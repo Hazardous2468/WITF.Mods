@@ -4,7 +4,7 @@ function setUp()
 	--createNewPlayer(true) --True means it's player controlled. False means it's bot (opponent) controlled
 
 	trace("Welcome to the test song!")
-	trace("\ngameVersion: "..gameVersion)
+	trace("gameVersion: "..gameVersion)
 	trace("witfVersion: "..witfVersion)
 end
 

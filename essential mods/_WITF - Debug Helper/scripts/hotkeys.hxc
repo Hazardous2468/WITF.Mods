@@ -55,6 +55,7 @@ class ModchartDebug_HotKeys extends Module
 	
 	public function setSongTime(time:Float, resetEvents:bool = false)
 	{
+		if(FlxG.sound.music == null) return;
 		var game = PlayState.instance;
 		if(game == null) return;
 		if(time < 0) time = 0;

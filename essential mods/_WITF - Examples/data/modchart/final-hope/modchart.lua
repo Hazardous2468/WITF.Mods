@@ -207,6 +207,7 @@ function modsTimeline()
 	add(18, 2 , "backInOut", 360, "angle",1)
 	
 	ease(18, 2, "linear", 0.75, "orient2")
+	ease(34, 2, "linear", 0.0, "orient2")
 	
 	
 	

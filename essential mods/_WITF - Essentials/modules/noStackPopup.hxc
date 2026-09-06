@@ -1,0 +1,34 @@
+package witf.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.modchartSystem.ModConstants;
+
+
+class NoStackPopUp extends Module
+{
+	var skinNames:Array<String> = [
+		"simple", "triangulate", "groovin", "simple_simple", "simple_holdcovers", "halvedhalvedhalved", "memory", "maniac", "inhuman"
+	];	
+	  
+	public function new() {
+        super('NoStackPopUp', 100, {state: PlayState});
+    }
+	
+    override function onCountdownStart(event) {
+		super.onCountdownStart(event);
+		if(PlayState.instance == null) return;
+		var noteStyleId:String = PlayState.instance.currentChart?.noteStyle ?? '';
+		trace(noteStyleId);
+		if(skinNames.contains(noteStyleId)){
+			PlayState.instance.comboPopUps.doStacking = false;
+			PlayState.instance.comboPopUps.doBounce = false;
+			trace("YEP");
+		}
+	}
+
+}

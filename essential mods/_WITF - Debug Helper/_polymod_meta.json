@@ -11,7 +11,7 @@
 		}
 	],
     "api_version": "0.8.6",
-    "mod_version": "2.4.2",
+    "mod_version": "2.4.3",
 	"dependencies": {
 		"_WITF - Essentials": "*"
 	},

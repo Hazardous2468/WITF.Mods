@@ -1,0 +1,110 @@
+package witf.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.NoteSprite;
+import flixel.math.FlxMath;
+import funkin.play.modchartSystem.ModConstants;
+import funkin.graphics.shaders.HSVNotesShader;
+import funkin.graphics.shaders.HSVShader;
+import flixel.addons.display.FlxRuntimeShader;
+import funkin.util.ReflectUtil;
+import openfl.utils.Assets;
+
+//A script which syncs the animation of the notes.
+
+class AnimatedNoteSyncModule extends Module
+{
+	public var skinsToSync:Array<String> = [
+		"groovin", "maniac"
+	];
+
+	public var skinsToSyncToBPM:Array<String> = [
+		"groovin", "maniac"
+	];
+	  
+	  
+	public function new() {
+        super('AnimatedNoteSyncModule', 100, {state: PlayState}); // Make sure this scripts runs AFTER the main module.
+    }
+
+	
+    public function onUpdate(event):Void
+	{	
+		super.onUpdate(event);
+		var ps = PlayState.instance;
+		if (ps == null) return;
+
+		for(strum in ps.allStrumLines){
+			for(note in strum.notes){
+				if(note.noteStyleName == "groovin"){
+        			var beat:Float = strum.conductorInUse.currentBeatTime;
+					beat = FlxMath.mod(beat/2, 1);
+					note.hsvShader.setFloat("_animationProgress", beat);
+        		}
+				else if(skinsToSync.contains(note.noteStyleName)){
+					noteLogic(note, strum.conductorInUse);
+				}
+			}
+		}
+	}
+	
+	override function onNoteIncoming(event)
+	{
+		super.onNoteIncoming(event);
+		//trace(event.note.hsvShader.path);
+		if(event.note.noteStyleName == "groovin"){
+			if(event.note.hsvShader.path != "groovin_note_shader"){
+				event.note.hsvShader = new HSVNotesShader(1,1,1,0,"groovin_note_shader");
+				event.note.hsvShader.path = "groovin_note_shader";
+				event.note.hsvShader.setBool("_active", true);
+				//trace("Overwrote shader!");
+			}
+		}else{
+			if(event.note.hsvShader.path == "groovin_note_shader"){
+				event.note.hsvShader.setBool("_active", false);
+				event.note.hsvShader = new HSVNotesShader();
+				event.note.hsvShader.path = "hsv_WITF";
+				//trace(event.note.hsvShader.path);
+				//trace("Replaced back to normal!");
+			}
+		}
+	}
+	
+
+	function noteLogic(note:NoteSprite, conductor:Conductor) {
+
+		if (!note.active || note.animation == null || note.animation.curAnim == null)
+            return;
+        note.animation.curAnim.paused = true;
+        var howManyFrames:Int = note.animation.curAnim.numFrames;
+        if (howManyFrames <= 0)
+            return;
+       	var progress:Float = 0.0;
+		if(skinsToSyncToBPM.contains(note.noteStyleName)){
+			var beat:Float = conductor.currentBeatTime;
+			progress = FlxMath.mod(beat/2, 1);
+		}else{
+            var fps:Float = note.animation.curAnim.frameRate;
+            if (fps <= 0) fps = 24;
+            var cycleDurationMs:Float = (howManyFrames / fps) * 1000.0;
+            progress = FlxMath.mod(conductor.songPosition, cycleDurationMs) / cycleDurationMs;
+		}
+
+        var frame:Int = Math.floor(progress * howManyFrames);
+        if (frame >= howManyFrames)
+            frame = howManyFrames - 1;
+        if (frame < 0)
+            frame = 0;
+
+        note.animation.curAnim.curFrame = frame;
+
+	}
+		
+
+}

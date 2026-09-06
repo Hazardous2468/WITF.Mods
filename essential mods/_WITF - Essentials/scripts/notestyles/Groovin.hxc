@@ -1,0 +1,34 @@
+package rewired.notestyles;
+
+import funkin.play.notes.notestyle.ScriptedNoteStyle;
+import funkin.play.PlayState;
+import funkin.Preferences;
+
+class GroovinNoteStyle extends ScriptedNoteStyle
+{
+  public function new(id:String)
+  {
+    super("groovin");
+  }
+
+  public override function getNoteAssetPath(raw:Bool = false):Null<String>
+  {
+    var assetPath:Null<String> = _data?.assets?.note?.assetPath;
+    if(PlayState.instance == null){
+      assetPath = "shared:NoteSkins/Groovin/groovin_notes";
+    }
+
+    if (raw)
+    {
+      var rawPath:Null<String> = assetPath;
+      if (rawPath == null) return fallback?.getNoteAssetPath(true);
+      return rawPath;
+    }
+
+    // library:path
+    var parts = getNoteAssetPath(true)?.split(Constants.LIBRARY_SEPARATOR) ?? [];
+    if (parts.length == 0) return null;
+    if (parts.length == 1) return getNoteAssetPath(true);
+    return parts[1];
+  }
+}

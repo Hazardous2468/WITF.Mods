@@ -18,7 +18,7 @@
 		}
 	],
     "api_version": "0.8.6",
-    "mod_version": "1.0.0",
+    "mod_version": "1.0.1",
 	"dependencies": {
 		"_WITF - Essentials": "*",
 		"_WITF - Examples": "*"

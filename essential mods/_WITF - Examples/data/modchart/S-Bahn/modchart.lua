@@ -426,6 +426,12 @@ end
 
 function modsTimeline()
 
+	-- More accurate rotations for simple notestyle
+	--setdefault( -2, "rotatez__notepoint_offset_x")
+	--setdefault(-1, "rotatez__holdpoint_offset_x")
+	setdefault( -2, "rotatey__notepoint_offset_x")
+	setdefault(-1, "rotatey__holdpoint_offset_x")
+
 	runHaxeCode(
 	[[
 	setResetEvent(function(){

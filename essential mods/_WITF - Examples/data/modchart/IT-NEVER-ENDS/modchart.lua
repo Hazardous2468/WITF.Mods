@@ -31,19 +31,17 @@ function haxeShit()
 	runHaxeCode([[
 	
 		var t = game.playerStrumline.mods;
-		
-		var timeBetweenBeats = Conductor.instance.beatLengthMs / Constants.MS_PER_SEC;
-		
+				
 		//For making every other cycle reverse
 		eh.funcModEvent(t, 131, function() {
 			var modValue = 1;
 			if(getVar("cycles") % 2 == 1){
 				modValue = 0;
 			}
-			eh.tweenMod(game.playerStrumline.mods, "reverse", modValue, timeBetweenBeats, ModConstants.getEaseFromString("outSine"), "tween");
+			eh.tweenMod(game.playerStrumline.mods, "reverse", modValue, 1, ModConstants.getEaseFromString("outSine"), "tween");
 			game.playerStrumline.mods.setDefaultModVal("reverse", modValue);
 			
-			eh.tweenMod(game.playerStrumline.mods, "hudreverse", modValue, timeBetweenBeats, ModConstants.getEaseFromString("outSine"), "tween");
+			eh.tweenMod(game.playerStrumline.mods, "hudreverse", modValue, 1, ModConstants.getEaseFromString("outSine"), "tween");
 			game.playerStrumline.mods.setDefaultModVal("hudreverse", modValue);
 		
 		});
@@ -53,8 +51,8 @@ function haxeShit()
 			print("Current Repeat: " + getVar("cycles"));
 			
 			if(getVar("cycles") == 0){
-				eh.tweenMod(game.playerStrumline.mods, "hudreverse", 0, timeBetweenBeats*3, ModConstants.getEaseFromString("inOutSine"), "tween");
-				eh.tweenMod(game.playerStrumline.mods, "reverse", 0, timeBetweenBeats*3, ModConstants.getEaseFromString("inOutSine"), "tween");
+				eh.tweenMod(game.playerStrumline.mods, "hudreverse", 0, 3, ModConstants.getEaseFromString("inOutSine"), "tween");
+				eh.tweenMod(game.playerStrumline.mods, "reverse", 0, 3, ModConstants.getEaseFromString("inOutSine"), "tween");
 			}
 		});
 		
@@ -62,7 +60,7 @@ function haxeShit()
 		for (i in 4...68){
 			eh.funcModEvent(t, i, function() {
 				if(getVar("cycles") >= 2){
-					eh.tweenMod(game.playerStrumline.mods, "alpha", 1, timeBetweenBeats*0.75, ModConstants.getEaseFromString("pop"), "tween");
+					eh.tweenMod(game.playerStrumline.mods, "alpha", 1, 0.75, ModConstants.getEaseFromString("pop"), "tween");
 				}
 			});
 		}
@@ -71,8 +69,9 @@ function haxeShit()
 		//Create AFT to capture notesCameras
 		var notesAFT:HazardAFT = new HazardAFT(game.camNotes);
 		notesAFT.recursive=true;
-		notesAFT.updateAFT();	
+		notesAFT.updateAFT();
 		setVar("notesAFT",notesAFT);
+		notesAFT.targetFps(150);
 		
 		var aftSprite = createSpr("aftSprite");
 		aftSprite.loadGraphic(getVar("notesAFT").bitmap);
@@ -84,7 +83,7 @@ function haxeShit()
 		
 		addUpdate(function(elapsed){
 			if(aftSprite.alpha > 0 && notesAFT!=null)
-				notesAFT.updateAFT();	
+				notesAFT.update(elapsed);	
 		});	
 		
 		
@@ -101,9 +100,11 @@ function haxeShit()
 		aftControl_Width.specialMod = true;
 		eh.addCustomMod("bf", aftControl_Width);
 		aftControl_Width.specialMathFunc = function() {
-			var width:Float = aftControl_Width.currentValue + aftControl_Width.getSubVal("width");
-			var height:Float = aftControl_Width.currentValue + aftControl_Width.getSubVal("height");
-			aftSprite.setGraphicSize(Std.int(notesAFT.w * width),  Std.int(notesAFT.h* height));
+			if(aftSprite!=null){
+				var width:Float = aftControl_Width.currentValue + aftControl_Width.getSubVal("width");
+				var height:Float = aftControl_Width.currentValue + aftControl_Width.getSubVal("height");
+				aftSprite.setGraphicSize(Std.int(notesAFT.w * width),  Std.int(notesAFT.h* height));
+			}
 		};
 		
 		
@@ -132,8 +133,8 @@ function haxeShit()
 				glitch2.setFloat('uTime', totalTime);
 				glitchLines.setFloat('uTime', totalTime);
 				
-				glitchLines.setFloat('amount',glitchLines_base + FlxMath.bound(totalTime/8000, 0, 0.0235) );
-				glitch2.setFloat('amount', glitch2_base  + FlxMath.bound(totalTime/8000, 0, 0.1));
+				glitchLines.setFloat('amount',glitchLines_base + FlxMath.bound(totalTime/8000/2, 0, 0.0235) );
+				glitch2.setFloat('amount', glitch2_base  + FlxMath.bound(totalTime/8000/2, 0, 0.1));
 				
 			}
 		});	
@@ -146,6 +147,8 @@ function haxeShit()
 		game.camHUD.filters=(cameffects);
 		game.camNotes.filters=(cameffects);
 		game.camGame.filters=(cameffects);
+
+		var pineapple:Bool = false;
 			
 		
 	]])
@@ -154,7 +157,7 @@ end
 
 
 function rBeat(i)
-	add(i,1.1, "impulse", 0.8, "arrowpath","bf")
+	add(i,1.1, "impulse", 0.24, "arrowpath","bf")
 	add(i,1, "impulse", 0.5, "arrowpathwidth","bf")
 	add(i,0.25, "impulse", 0.2, "arrowpathwidth","bf")
 	

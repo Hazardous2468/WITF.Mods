@@ -1,0 +1,226 @@
+{
+  "version": "1.1.0",
+  "name": "maniac",
+  "author": "Hazard24",
+  "fallback": "groovin",
+  "assets": {
+    "note": {
+	  "animated": true,
+      "assetPath": "shared:NoteSkins/Maniac/notes",
+      "scale": 0.7,
+	    "offsets": [0, 0],
+      "data": {
+        "left": { "prefix": "purple0", "looped": true },
+        "down": { "prefix": "blue0", "looped": true },
+        "up": { "prefix": "green0", "looped": true },
+        "right": { "prefix": "red0", "looped": true }
+      }
+    },
+    "noteStrumline": {
+		"assetPath": "shared:NoteSkins/Maniac/strums",
+      "scale": 0.7,
+      "offsets": [12, 20],
+      "data": {
+        "leftStatic": { "prefix": "left static" },
+        "leftPress": { "prefix": "left press" },
+        "leftConfirm": { "prefix": "left confirm" },
+        "leftConfirmHold": { "prefix": "left confirm", "frameIndices": [3, 4] },
+        "downStatic": { "prefix": "down static" },
+        "downPress": { "prefix": "down press" },
+        "downConfirm": { "prefix": "down confirm" },
+        "downConfirmHold": { "prefix": "down confirm", "frameIndices": [3, 4] },
+        "upStatic": { "prefix": "up static" },
+        "upPress": { "prefix": "up press" },
+        "upConfirm": { "prefix": "up confirm" },
+        "upConfirmHold": { "prefix": "up confirm", "frameIndices": [3, 4] },
+        "rightStatic": { "prefix": "right static" },
+        "rightPress": { "prefix": "right press" },
+        "rightConfirm": { "prefix": "right confirm" },
+        "rightConfirmHold": { "prefix": "right confirm", "frameIndices": [3, 4] }
+      }
+    },
+    "holdNote": {
+	  "scale": 0.7,
+	  "offsets": [1, 0],
+      "assetPath": "NoteSkins/Maniac/holds",
+	   "data": {
+        "behindStrums": true
+      }
+    },
+    "noteSplash": {
+      "assetPath": "shared:NoteSkins/splashes-glow",
+      "alpha": 0.8,
+	    "offsets": [0, -18],
+      "data": {
+        "enabled": true,
+        "copyHSV": true,
+		    "framerateDefault": 20,
+        "framerateVariance": 1,
+		    "blendMode": "screen",
+        "leftSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "rightSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "upSplashes": [
+          { "prefix": "note splash red 1" }
+        ],
+        "downSplashes": [
+          { "prefix": "note splash red 1" }
+        ]
+      }
+    },
+   "holdNoteCover": {
+      "assetPath": "",
+      "offsets": [-62.5, -51],
+      "data": {
+        "behindStrums": true,
+        "holdPositioned": true,
+		    "zCalcMult": [0.0, 0.0],
+        "enabled": true,
+        "scaleX": 0.7,
+        "left": {
+          "assetPath": "shared:NoteSkins/Maniac/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
+        },
+        "right": {
+          "assetPath": "shared:NoteSkins/Maniac/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
+        },
+        "up": {
+          "assetPath": "shared:NoteSkins/Maniac/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
+        },
+        "down": {
+          "assetPath": "shared:NoteSkins/Maniac/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
+        }
+      }
+    },
+    "countdownThree": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro3"
+      },
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/ready",
+	  "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownTwo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro2"
+      },
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/2",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownOne": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/intro1"
+      },
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/1",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "countdownGo": {
+      "data": {
+        "audioPath": "shared:gameplay/countdown/digital_alt/introGo"
+      },
+      "assetPath": "shared:NoteSkins/Groovin/UI/CountDown/go",
+      "scale": 1.0,
+      "isPixel": false
+    },
+    "judgementSick": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/sick",
+      "scale": 0.65,
+      "isPixel": false,
+      "offsets": [0, 0]
+    },
+    "judgementGood": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/good",
+      "scale": 0.65,
+      "isPixel": false,
+      "offsets": [0, 0]
+    },
+    "judgementBad": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/bad",
+      "scale": 0.65,
+      "isPixel": false,
+      "offsets": [0, 0]
+    },
+    "judgementShit": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/shit",
+      "scale": 0.65,
+      "isPixel": false,
+      "offsets": [0, 0]
+    },
+    "comboNumber0": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num0",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber1": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num1",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber2": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num2",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber3": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num3",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber4": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num4",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber5": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num5",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber6": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num6",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber7": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num7",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber8": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num8",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    },
+    "comboNumber9": {
+      "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num9",
+      "isPixel": false,
+      "scale": 0.45,
+      "offsets": [66, -10]
+    }
+  }
+}

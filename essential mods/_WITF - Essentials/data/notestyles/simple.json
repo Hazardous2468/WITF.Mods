@@ -5,78 +5,45 @@
   "fallback": "funkin",
   "assets": {
     "note": {
-      "assetPath": "shared:NoteSkins/Simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/notes",
       "scale": 0.7,
       "data": {
-        "left": { "prefix": "purple0" },
-        "down": { "prefix": "blue0" },
-        "up": { "prefix": "green0" },
-        "right": { "prefix": "red0" }
+        "left": { "prefix": "left0" },
+        "down": { "prefix": "down0" },
+        "up": { "prefix": "up0" },
+        "right": { "prefix": "right0" }
       }
     },
     "noteStrumline": {
-      "assetPath": "shared:NoteSkins/Simple/notes-simple",
+      "assetPath": "shared:NoteSkins/Simple/receptors",
       "scale": 0.7,
-      "offsets": [25, 26],
+      "offsets": [15, 19],
       "data": {
-        "leftStatic": { "prefix": "arrowLEFT" },
-        "leftPress": { "prefix": "left press" },
+        "leftStatic": { "prefix": "receptor left static" },
+        "leftPress": { "prefix": "receptor left press" },
+        "leftConfirm": { "prefix": "receptor left confirm full" },
+        "leftConfirmHold": { "prefix": "receptor left confirm hold" },
        
-        
-        "downStatic": { "prefix": "arrowDOWN" },
-        "downPress": { "prefix": "down press" },
+        "downStatic": { "prefix": "receptor down static" },
+        "downPress": { "prefix": "receptor down press" },
+        "downConfirm": { "prefix": "receptor down confirm full" },
+        "downConfirmHold": { "prefix": "receptor down confirm hold" },
        
+        "upStatic": { "prefix": "receptor up static" },
+        "upPress": { "prefix": "receptor up press" },
+        "upConfirm": { "prefix": "receptor up confirm full" },
+        "upConfirmHold": { "prefix": "receptor up confirm hold" },
         
-        "upStatic": { "prefix": "arrowUP" },
-        "upPress": { "prefix": "up press" },
-        
-        
-        "rightStatic": { "prefix": "arrowRIGHT" },
-        "rightPress": { "prefix": "right press" },
-		
-		 "leftConfirm": { 
-			"frameIndices": [0,1,2, 3, 4],
-			"prefix": "left confirms" 
-		 },
-		 
-		 "downConfirm": { 
-			"frameIndices": [0,1,2, 3, 4],
-			"prefix": "down confirm"
-		},
-		 
-		 "upConfirm": { 
-			"frameIndices": [0,1,2, 3, 4],
-			"prefix": "up confirm"
-		 },
-		 
-         "rightConfirm": { 
-			"frameIndices": [0,1,2, 3, 4],
-			"prefix": "right confirm"
-		 },
-		
-		"leftConfirmHold": { 
-			"frameIndices": [3, 4],
-			"prefix": "left confirms"
-		},
-		"downConfirmHold": { 
-			"frameIndices": [3, 4],
-			"prefix": "down confirm"
-		},
-		"upConfirmHold": { 
-			"frameIndices": [3, 4],
-			"prefix": "up confirm"
-		},
-		"rightConfirmHold": { 
-			"frameIndices": [3, 4],
-			"prefix": "right confirm"
-		}
-		
+        "rightStatic": { "prefix": "receptor right static" },
+        "rightPress": { "prefix": "receptor right press" },
+        "rightConfirm": { "prefix": "receptor right confirm full" },
+        "rightConfirmHold": { "prefix": "receptor right confirm hold" }
       }
     },
     "holdNote": {
-      "assetPath": "NoteSkins/Simple/holds_wide",
+      "assetPath": "NoteSkins/Simple/holds",
       "scale": 0.7,
-	  "offsets": [2, 0],
+	    "offsets": [2, 0],
       "data": {
         "behindStrums": true
       }
@@ -84,13 +51,13 @@
     "noteSplash": {
       "assetPath": "shared:NoteSkins/splashes-glow",
       "alpha": 0.8,
-	  "offsets": [0, -18],
+	    "offsets": [0, -18],
       "data": {
         "enabled": true,
         "copyHSV": true,
-		"framerateDefault": 20,
+		    "framerateDefault": 20,
         "framerateVariance": 1,
-		"blendMode": "screen",
+		    "blendMode": "screen",
         "leftSplashes": [
           { "prefix": "note splash red 1" }
         ],
@@ -107,37 +74,36 @@
     },
     "holdNoteCover": {
       "assetPath": "",
-      "offsets": [4, 0],
+      "offsets": [0, 0],
       "data": {
-		"copyHSV": true,
         "behindStrums": true,
         "holdPositioned": true,
-		"zCalcMult": [0.0, 0.0],
+		    "zCalcMult": [0.0, 0.0],
         "enabled": true,
-        "scaleX": 1.2,
+        "scaleX": 0.7,
         "left": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Simple/cover",
+          "start": { "prefix": "idle" },
+          "hold": { "prefix": "idle" },
+          "end": { "prefix": "end" }
         },
         "right": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Simple/cover",
+          "start": { "prefix": "idle" },
+          "hold": { "prefix": "idle" },
+          "end": { "prefix": "end" }
         },
         "up": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Simple/cover",
+          "start": { "prefix": "idle" },
+          "hold": { "prefix": "idle" },
+          "end": { "prefix": "end" }
         },
         "down": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Simple/cover",
+          "start": { "prefix": "idle" },
+          "hold": { "prefix": "idle" },
+          "end": { "prefix": "end" }
         }
       }
     },

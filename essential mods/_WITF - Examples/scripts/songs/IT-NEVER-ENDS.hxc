@@ -143,6 +143,7 @@ class ITNEVERENDS_Song extends Song {
 	var repeatOffset:Float = 1500;
 	public function setSongTime(time:Float)
 	{
+		if(FlxG.sound.music==null) return;
 		if(time < 0) time = 0;
 		FlxG.sound.music.pause();
 		if (PlayState.instance.vocals != null) {
@@ -181,9 +182,13 @@ class ITNEVERENDS_Song extends Song {
 		if(Conductor.instance.songPosition < 0){
 			return;
 		}
-		
+
 		totalTimeElapsed += callback.elapsed;
 		PlayState.instance.variables.set("totalTimeElapsed", totalTimeElapsed);
+
+		if(Conductor.instance.songPosition < 4000){
+			return;
+		}
 
 		if(Conductor.instance.songPosition >= PlayState.instance.currentSongLengthMs-repeatOffset){
 			repeatTheSong();	

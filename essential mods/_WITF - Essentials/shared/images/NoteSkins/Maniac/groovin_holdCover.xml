@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="groovin_holdCover.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="hold_cover_end0000" x="2" y="2" width="0" height="0"/>
+	<SubTexture name="hold_cover_loop0000" x="2" y="112" width="126" height="53"/>
+	<SubTexture name="hold_cover_loop0001" x="2" y="167" width="126" height="53"/>
+	<SubTexture name="hold_cover_start0000" x="2" y="2" width="126" height="53"/>
+	<SubTexture name="hold_cover_start0001" x="2" y="57" width="126" height="53"/>
+</TextureAtlas>

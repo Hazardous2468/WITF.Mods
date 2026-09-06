@@ -16,8 +16,7 @@ function modsTimeline()
 		hurtNoteAlphaMod.specialMod = false;
 		hurtNoteAlphaMod.speedMod = false;
 		hurtNoteAlphaMod.noteMathFunc = function(data) {
-			//data.x += hurtNoteAlphaMod.currentValue;
-			if(data.noteType == "hurt"){
+			if(data.noteKind == "hurt"){
 				data.alpha -= hurtNoteAlphaMod.currentValue;
 			}		
 		};

@@ -1,9 +1,7 @@
 function modsTimeline()	
 	runHaxeCode(
 	[[
-	
-	
-	
+
 	for (customStrummer in PlayState.instance.allStrumLines)
 	{
 		var hurtNoteAlphaMod:CustomModifier = createCustomMod("hurtnotealpha", 0.5);
@@ -15,8 +13,7 @@ function modsTimeline()
 		hurtNoteAlphaMod.specialMod = false;
 		hurtNoteAlphaMod.speedMod = false;
 		hurtNoteAlphaMod.noteMathFunc = function(data) {
-			//data.x += hurtNoteAlphaMod.currentValue;
-			if(data.noteType == "hurt"){
+			if(data.noteKind == "hurt"){
 				data.alpha -= hurtNoteAlphaMod.currentValue;
 			}		
 		};

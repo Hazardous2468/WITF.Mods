@@ -69,7 +69,7 @@
       "assetPath": "",
       "offsets": [0, 0],
       "data": {
-		"origin": [160.5, 150],
+		    "origin": [160.5, 150],
         "enabled": true,
         "left": {
           "assetPath": "shared:holdCoverPurple",

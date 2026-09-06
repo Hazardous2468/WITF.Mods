@@ -1,0 +1,265 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+	createNewPlayer(true, "groovin")
+	centerStrum("1")
+
+end
+
+function hxCode()
+	addHaxeLibrary("Constants", "funkin.util")
+	addHaxeLibrary("Vector2", "lime.math")
+	addHaxeLibrary("Strumline", "funkin.play.notes")
+	runHaxeCode(
+	[[
+		print("yo");
+
+		var pivotPoint:Vector2 = new Vector2(0, 0);
+  		var point:Vector2 = new Vector2(0, 0);
+
+  		var s:Strumline = PlayState.instance.playerStrumline;
+  		var thing:Float = (-Strumline.INITIAL_OFFSET + (Strumline.STRUMLINE_SIZE / 2))/4;
+  		//print(thing);
+
+
+  		var noteWidth:Float = 112;
+
+		function noteRotateFunc_GetPivotX(data:NoteData, strumLine:Strumline):Float
+		  {
+		  	var strumNote = strumLine.getByIndex(data.direction);
+		    var r:Float = strumNote.x;
+		    if (data.noteType == "receptor")
+		    {
+		      r = data.strumPosWasHere.x;
+		    }
+		    //r += Strumline.STRUMLINE_SIZE*0.5;
+		    r += strumNote.width*0.5;
+		    return r;
+		  }
+
+		  function noteRotateFunc_GetPivotY(data:NoteData, strumLine:Strumline):Float
+		  {
+		  	var strumNote = strumLine.getByIndex(data.direction);
+		    var r:Float = strumNote.y;
+		    if (data.noteType == "receptor")
+		    {
+		      r = data.strumPosWasHere.y;
+		    }
+		    else if (data.noteType == "hold" || data.noteType == "path")
+		    {
+		      if (Preferences.downscroll)
+		      {
+		        r += (Strumline.STRUMLINE_SIZE / 2);
+		      }
+		      else
+		      {
+		        r += (Strumline.STRUMLINE_SIZE / 2) - Strumline.INITIAL_OFFSET;
+		      }
+		      r -= strumNote.strumExtraModData.noteStyleOffsetY;
+		    }
+		    else
+		    {
+
+		      r += strumLine.getNoteYOffset();
+		      r -= strumNote.strumExtraModData.noteStyleOffsetY;
+		    }
+		    return r;
+		  }
+
+
+		  function noteRotateFunc_GetPivotZ(data:NoteData, strumLine:Strumline):Float
+		  {
+		    return (data.noteType == "receptor" ? data.strumPosWasHere.z : strumLine.getByIndex(data.direction).z);
+		  }
+
+		function noteRotateFunc(data:NoteData, strumLine:Strumline, variant:String, angle:Float):Void
+		  {
+		    //if (angle == null) angle = this.currentValue;
+		    if (angle % 360 == 0) return;
+		    switch (variant)
+		    {
+		      case "z":
+		        pivotPoint.x = noteRotateFunc_GetPivotX(data, strumLine);
+		        pivotPoint.y = noteRotateFunc_GetPivotY(data, strumLine);
+		        point.x = data.x;
+		        var xOffset:Float = 0;
+		        if (data.noteType == "hold" || data.noteType == "path"){
+				    xOffset += (data.width)/2;
+		        }else{
+		        	xOffset += ((data.width*2) - Strumline.STRUMLINE_SIZE) / 2;
+		        	xOffset += Strumline.NUDGE; // More accurate for groovin but makes funkin inaccurate
+		        }
+		        //xOffset = 0;
+		      	point.x += xOffset;
+		      	//pivotPoint.x = point.x;
+		        point.y = data.y;
+
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.x = output.x;
+		        data.y = output.y;
+		        data.x -= xOffset;
+
+
+		      case "y":
+		        pivotPoint.x = noteRotateFunc_GetPivotX(data, strumLine);
+		        pivotPoint.y = noteRotateFunc_GetPivotZ(data, strumLine);
+		        point.x = data.x;
+		        var xOffset:Float = 0;
+		        if (data.noteType == "hold" || data.noteType == "path"){
+		        	xOffset += (data.width)/2;
+		        }else{
+		        	xOffset += ((data.width*2) - Strumline.STRUMLINE_SIZE) / 2;
+		        }
+		        //xOffset = 0;
+		        point.x += xOffset;
+		        //pivotPoint.x = point.x;
+		        point.y = data.z;
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.x = output.x-xOffset;
+		        data.z = output.y;
+		      case "x":
+		        pivotPoint.x = noteRotateFunc_GetPivotZ(data, strumLine);
+		        pivotPoint.y = noteRotateFunc_GetPivotY(data, strumLine);
+		        point.x = data.z;
+		        point.y = data.y;
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.z = output.x;
+		        data.y = output.y;
+		    }
+		  }
+
+
+		  var offsetX:Float = 0;
+		  var offsetY:Float = 0;
+		  var offsetZ:Float = 0;
+
+		  function strumRotateFunc_GetPivotX(data:NoteData, strumLine:Strumline):Float
+		  {
+		    if (strumLine == null)
+		    {
+		      strumLine = data.whichStrumNote.weBelongTo;
+		    }
+		    var r:Float = 0;
+		    r += strumLine.x + Strumline.INITIAL_OFFSET + (Strumline.NOTE_SPACING * 1.5);
+		    r += strumLine.getByIndex(data.direction % Strumline.KEY_COUNT).strumExtraModData.noteStyleOffsetX;
+		    r += offsetX;
+		    return r;
+		  };
+
+		  function strumRotateFunc_GetPivotY(data:NoteData, strumLine:Strumline):Float
+		  {
+		    return (FlxG.height / 2) - (data.whichStrumNote.height / 2) + offsetY;
+		  };
+
+		  function strumRotateFunc_GetPivotZ(data:NoteData, strumLine:Strumline):Float
+		  {
+		    return 0.0 + offsetZ;
+		  };
+
+		  function strumRotateFunc(data:NoteData, strumLine:Strumline, variant:String, angle:Float):Void
+		  {
+		    if (angle % 360 == 0) return;
+		    switch (variant)
+		    {
+		      case "z":
+		        pivotPoint.x = strumRotateFunc_GetPivotX(data, strumLine);
+		        pivotPoint.y = strumRotateFunc_GetPivotY(data, strumLine);
+		        point.setTo(data.x, data.y);
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.x = output.x;
+		        data.y = output.y;
+		      case "y":
+		        pivotPoint.x = strumRotateFunc_GetPivotX(data, strumLine);
+		        pivotPoint.y = strumRotateFunc_GetPivotZ(data, strumLine);
+		        point.setTo(data.x, data.z);
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.x = output.x;
+		        data.z = output.y;
+		      case "x":
+		        pivotPoint.x = strumRotateFunc_GetPivotZ(data, strumLine);
+		        pivotPoint.y = strumRotateFunc_GetPivotY(data, strumLine);
+		        point.setTo(data.z, data.y);
+		        var output:Vector2 = ModConstants.rotateAround(pivotPoint, point, angle);
+		        data.z = output.x;
+		        data.y = output.y;
+		    }
+		  }
+
+
+		for (strumLine in PlayState.instance.allStrumLines)
+		{	
+			var customMod:CustomModifier = createCustomMod("test", 0.0);
+			customMod.unknown = false;
+			customMod.notesMod = true;
+			customMod.holdsMod = true;
+			customMod.pathMod = true;
+			customMod.strumsMod = true;
+			customMod.modPriority = 23;
+			strumLine.mods.addCustomMod(customMod);	
+			customMod.noteMathFunc = function(data){
+				noteRotateFunc(data, strumLine, "z", customMod.currentValue);
+			}	
+			customMod.strumMathFunc = function(data){
+				return;
+				strumRotateFunc(data, strumLine, "z", customMod.currentValue);
+			}
+		}
+
+		addUpdate(function(elapsed){
+			for (strumLine in PlayState.instance.allStrumLines)
+			{	
+				for (cover in strumLine.noteHoldCovers)
+				{	
+					if(cover == null || !cover.alive) continue;
+					//print("hi");
+					cover.autoOrigin = false;
+					cover.glow.origin.set(126/2,50);
+				}
+			}
+		});	
+
+	]])
+end
+
+function modsTimeline()
+
+	hxCode()
+
+	setdefault(0.8, "stealth", "dad")
+	setdefault(0.8, "strumstealth", "dad")
+	setdefault(1, "alpha", "dad")
+
+	setdefault(1, "center")
+	setdefault(112*2, "x","1")
+	setdefault(112*-2, "x","3")
+
+
+	ease(0,1,"linear",0.2, "arrowpath",{1,3})
+	--ease(2,1,"linear",1, "center")
+	--ease(4,2,"linear",180, "notesrotatez")
+	--ease(4,2,"linear",180, "rotatez")
+	--ease(4,2,"linear",180, "test")
+
+	--ease(0,2,"linear",1, "zigzag")
+
+	--ease(0,64,"linear",360*12, "test")
+	ease(0,64,"linear",360*12, "notesrotatez")
+
+	set(0,-444, "z")
+	set(0,1, "spiralholds")
+	ease(0,1,"linear",0.9, "dark")
+	--ease(0,1,"linear",180, "notesrotatez")
+
+
+	--set(0, 1, "notesrotatez__notepoint_offset_x","3")
+	--set(0,-2, "notesrotatez__holdpoint_offset_x","3")
+	set(0, -2, "notesrotatez__notepoint_offset_x","3")
+	set(0,-1, "notesrotatez__holdpoint_offset_x","3")
+
+	set(0, -2, "notesrotatez__notepoint_offset_x","1")
+	set(0,2, "notesrotatez__holdpoint_offset_x","1")
+
+end
+
+

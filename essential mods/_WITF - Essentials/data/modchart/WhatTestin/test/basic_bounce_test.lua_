@@ -1,0 +1,23 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+end
+
+function modsTimeline()
+
+	ease(-1, 1, "linear", 0.6, "arrowpath")
+
+	for i=0, 64 do
+		add(i, 1, "bounce", 0.1, "centered")
+		if i % 2 == 0 then
+			add(i, 1, "bounce", -0.5, "drunk")
+		else
+			add(i, 1, "bounce", 0.5, "drunk")
+		end
+		add(i, 1, "impulse", -0.15, "tiny")
+	end
+
+end
+
+

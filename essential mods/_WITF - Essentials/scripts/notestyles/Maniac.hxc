@@ -1,0 +1,32 @@
+package rewired.notestyles;
+
+import funkin.play.notes.notestyle.ScriptedNoteStyle;
+import funkin.Preferences;
+
+class ManiacNoteStyle extends ScriptedNoteStyle
+{
+  public function new(id:String)
+  {
+    super("maniac");
+  }
+
+  public override function getHoldNoteAssetPath(raw:Bool = false):Null<String>
+  {
+    var assetPath:Null<String> = _data?.assets?.holdNote?.assetPath;
+    if(Preferences.downscroll && assetPath!=null){
+      assetPath += "-downscroll";
+    }
+
+    if (raw)
+    {
+      var rawPath:Null<String> = assetPath;
+      return rawPath ?? fallback?.getHoldNoteAssetPath(true);
+    }
+
+    // library:path
+    var parts = getHoldNoteAssetPath(true)?.split(Constants.LIBRARY_SEPARATOR) ?? [];
+    if (parts.length == 0) return null;
+    if (parts.length == 1) return Paths.image(parts[0]);
+    return Paths.image(parts[1], parts[0]);
+  }
+}

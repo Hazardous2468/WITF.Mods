@@ -8,18 +8,30 @@ function modsTimeline()
 	addHaxeLibrary("Assets", "openfl.utils")
 	runHaxeCode(
 	[[
-		
+		var target1 = PlayState.instance.playerStrumline.mods;
 		var pixelateShader = new FlxRuntimeShader(Assets.getText(Paths.frag("sledgehammer/pixelate_effect")), null);
 		addResetEvent(function(){
 			pixelateShader.setFloat('xAmount', 16);
 			pixelateShader.setFloat('yAmount', 16);
+			game.camNotes.filters = [];
+			game.camHUD.filters = [];
+			game.camGame.filters = [];
 		});	
 		
 		var newCamEffects:Array<BitmapFilter>=[];
 		newCamEffects.push(new ShaderFilter(pixelateShader));
-		game.camNotes.filters = newCamEffects;
-		game.camHUD.filters = newCamEffects;
-		game.camGame.filters = newCamEffects;
+
+		eh.funcModEvent(target1, 94.5, function() {
+			game.camNotes.filters = newCamEffects;
+			game.camHUD.filters = newCamEffects;
+			game.camGame.filters = newCamEffects;
+		});
+
+		eh.funcModEvent(target1, 96, function() {
+			game.camNotes.filters = [];
+			game.camHUD.filters = [];
+			game.camGame.filters = [];
+		});
 		
 		
 		var pixelShaderModifier:CustomModifier = createCustomMod("pixelshader", 1.0);
@@ -37,6 +49,10 @@ function modsTimeline()
 			pixelateShader.setFloat('xAmount', v);
 			pixelateShader.setFloat('yAmount', v);
 		};
+
+
+
+
 
 	]])
 	

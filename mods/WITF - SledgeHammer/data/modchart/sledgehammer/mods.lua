@@ -11,6 +11,7 @@ function modsTimeline()
 	targetExclude("dad")
 
 	
+	setdefault(1, "alphaholdcover")
 	setdefault(52, "grain")
 	setdefault(1, "3d") -- needed for 3d effects to work properly (anglex for example)
 	
@@ -418,9 +419,15 @@ function modsTimeline()
 
 
 	-- some extra additions
-	add(128, 1, "bounce", -45, "rotatey")
+	if downScroll then
+		add(128, 1, "bounce", -45, "rotatey")
+		add(144, 1, "bounce", 45, "rotatey")
+	else
+		add(128, 1, "bounce", 45, "rotatey")
+		add(144, 1, "bounce", -45, "rotatey")
+	end
 	add(128, 1, "pop", 3.2, "drunkz")
-	add(144, 1, "bounce", 45, "rotatey")
+	
 	add(144, 1, "pop", 3.2, "drunkz")
 
 	add(136-0.12, 1.05, "bell", {0.8, "stealth", 1, "dark"})

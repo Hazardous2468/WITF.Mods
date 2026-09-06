@@ -6,9 +6,9 @@
   "assets": {
     "note": {
 	  "animated": true,
-      "assetPath": "shared:NoteSkins/Groovin/groovin_notes",
+      "assetPath": "shared:NoteSkins/Groovin/groovin_notes_shader",
       "scale": 0.7,
-	  "offsets": [0, 0],
+	    "offsets": [0, 0],
       "data": {
         "left": { "prefix": "purple0", "looped": true },
         "down": { "prefix": "blue0", "looped": true },
@@ -19,24 +19,24 @@
     "noteStrumline": {
 		"assetPath": "shared:NoteSkins/Groovin/groovin_strums",
       "scale": 0.7,
-      "offsets": [23, 27],
+      "offsets": [24, 27],
       "data": {
         "leftStatic": { "prefix": "arrowLEFT" },
         "leftPress": { "prefix": "left press" },
-        "leftConfirm": { "prefix": "left confirm" },
-        "leftConfirmHold": { "prefix": "left confirm" },
+        "leftConfirm": { "prefix": "left confirm_First" },
+        "leftConfirmHold": { "prefix": "left confirm_Hold" },
         "downStatic": { "prefix": "arrowDOWN" },
         "downPress": { "prefix": "down press" },
-        "downConfirm": { "prefix": "down confirm" },
-        "downConfirmHold": { "prefix": "down confirm" },
+        "downConfirm": { "prefix": "down confirm_First" },
+        "downConfirmHold": { "prefix": "down confirm_Hold" },
         "upStatic": { "prefix": "arrowUP" },
         "upPress": { "prefix": "up press" },
-        "upConfirm": { "prefix": "up confirm" },
-        "upConfirmHold": { "prefix": "up confirm" },
+        "upConfirm": { "prefix": "up confirm_First" },
+        "upConfirmHold": { "prefix": "up confirm_Hold" },
         "rightStatic": { "prefix": "arrowRIGHT" },
         "rightPress": { "prefix": "right press" },
-        "rightConfirm": { "prefix": "right confirm" },
-        "rightConfirmHold": { "prefix": "right confirm" }
+        "rightConfirm": { "prefix": "right confirm_First" },
+        "rightConfirmHold": { "prefix": "right confirm_Hold" }
       }
     },
     "holdNote": {
@@ -50,7 +50,7 @@
     "noteSplash": {
       "assetPath": "shared:NoteSkins/splashes-glow",
       "alpha": 0.8,
-	  "offsets": [0, -18],
+	    "offsets": [0, -18],
       "data": {
         "enabled": true,
         "copyHSV": true,
@@ -73,37 +73,37 @@
     },
    "holdNoteCover": {
       "assetPath": "",
-      "offsets": [4, 0],
+      "offsets": [-62.5, -51],
       "data": {
-		    "copyHSV": true,
+        "origin": [160.5, 150],
         "behindStrums": true,
         "holdPositioned": true,
 		    "zCalcMult": [0.0, 0.0],
-        "enabled": true,
-        "scaleX": 1.275,
+        "enabled": false,
+        "scaleX": 0.7,
         "left": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Groovin/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
         },
         "right": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Groovin/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
         },
         "up": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Groovin/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
         },
         "down": {
-          "assetPath": "shared:NoteSkins/sustain_cover_red",
-          "start": { "prefix": "sus_cover_start" },
-          "hold": { "prefix": "sus_cover_lp" },
-          "end": { "prefix": "sus_cover_end" }
+          "assetPath": "shared:NoteSkins/Groovin/groovin_holdCover",
+          "start": { "prefix": "hold_cover_start" },
+          "hold": { "prefix": "hold_cover_loop" },
+          "end": { "prefix": "hold_cover_end" }
         }
       }
     },
@@ -140,74 +140,84 @@
       "isPixel": false
     },
     "judgementSick": {
-      "assetPath": "shared:NoteSkins/Groovin/UI/rating_perfect",
+      "assetPath": "shared:NoteSkins/Groovin/UI/sick",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementGood": {
-      "assetPath": "shared:NoteSkins/Groovin/UI/rating_good",
+      "assetPath": "shared:NoteSkins/Groovin/UI/good",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementBad": {
-      "assetPath": "shared:NoteSkins/Groovin/UI/rating_bad",
+      "assetPath": "shared:NoteSkins/Groovin/UI/bad",
       "scale": 0.65,
       "isPixel": false
     },
     "judgementShit": {
-      "assetPath": "shared:NoteSkins/Groovin/UI/rating_shit",
+      "assetPath": "shared:NoteSkins/Groovin/UI/shit",
       "scale": 0.65,
       "isPixel": false
     },
     "comboNumber0": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num0",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber1": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num1",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber2": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num2",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber3": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num3",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber4": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num4",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber5": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num5",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber6": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num6",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber7": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num7",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber8": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num8",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     },
     "comboNumber9": {
       "assetPath": "shared:NoteSkins/Groovin/UI/altNumbers/num9",
       "isPixel": false,
-      "scale": 0.45
+      "scale": 0.45,
+      "offsets": [66, -10]
     }
   }
 }

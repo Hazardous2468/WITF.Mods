@@ -135,6 +135,12 @@ function modsTimeline()
 	setdefault(1.0, "stealthglowgreen")
 	setdefault(1.0, "stealthglowblue")
 	
+	-- More accurate rotations for simple notestyle
+	setdefault( -2, "rotatez__notepoint_offset_x")
+	setdefault(-1, "rotatez__holdpoint_offset_x")
+	setdefault( -2, "rotatey__notepoint_offset_x")
+	setdefault(-1, "rotatey__holdpoint_offset_x")
+
 	ease(24,32-24, "inOutQuad", 1, "beat" )
 	ease(24,32-24, "inOutQuad",1.6, "bumpy" )
 	ease(59,1, "outQuad", 0, "beat" )
