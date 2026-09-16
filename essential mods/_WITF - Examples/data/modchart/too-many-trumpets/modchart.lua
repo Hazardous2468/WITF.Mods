@@ -82,12 +82,6 @@ function modsTimeline()
 	if not downScroll then
 		upscrollFix = -1
 	end
-
-	-- More accurate rotations for groovin notestyle
-	setdefault(1, "rotatez__notepoint_offset_x")
-	setdefault(-1, "rotatez__holdpoint_offset_x")
-	setdefault(1, "rotatey__notepoint_offset_x")
-	setdefault(-1, "rotatey__holdpoint_offset_x")
 	
 
 	setdefault(1, "alphaholdcover")

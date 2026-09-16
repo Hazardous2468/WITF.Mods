@@ -30,7 +30,7 @@ import funkin.data.freeplay.player.PlayerRegistry;
 
 class BreakTime extends Module {
 	// Needs a priority value that makes this script load LAST in PlayState to ensure the chart data it pulls from the onSongLoaded event is accurate.
-  function new() {super("BreakTime", 99, {state: PlayState});}
+  function new() {super("BreakTime", -9999, {state: PlayState});}
 
   // Whether this script is enabled.
   var enabled:Bool = true;
@@ -52,6 +52,10 @@ class BreakTime extends Module {
 
   // If true, the stopWatch will appear in the center of the screen instead of the center of the playerStrumline.
   var stopWatchCentered:Bool = false;
+
+  // If true, will instead cache all the break times at countDownStart event instead of songLoad event. 
+  // This is because other scripts can modify the song chart and event data AFTER us and we can't really do anything about it (i.e. Obliterated as it's a song script, not a module script, so it'll always go AFTER this script)
+  var cacheOnCountdownStart:Bool = true;
 
 
   // The scale of the stopwatch when it appears.
@@ -75,7 +79,7 @@ class BreakTime extends Module {
 	var stopWatchSprite:FunkinSprite;
 
 	// If set to true, this module will be forcefully deactivated for WITF songs (characters that belong to the 'nobody' player)
-	var forceDisableForWITF:Bool = false;
+	var forceDisableForWITF:Bool = true;
 
   /** An array containing the data defining where breaks start and end.
    * Format: 
@@ -141,23 +145,69 @@ class BreakTime extends Module {
 		}
 		if(!enabled) return;
 
+		if(cacheOnCountdownStart) return;
+
 
 		// If BF is a 'nobody' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
-		var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
-		var bf = PlayState.instance.currentStage.getBoyfriend();
-		if(bf!=null && forceDisableForWITF){
-			var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
-			//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
-			if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
-				//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
-				return;
-			}	
+		if(forceDisableForWITF){
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			if(bf!=null){
+				var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+				//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
+				if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+					//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
+					return;
+				}	
+			}
 		}
 
+		cacheBreakTimes();
+		trace("[BREAK TIME] Gaps: " + songGaps);
+		// If we DON'T detect any gaps big enough to trigger a break, then we don't need to create the assets.
+		if(songGaps.length > 0)
+			createAssets(e.notes);
+	}
+
+
+	override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    super.onCountdownStart(event);
+    if(!cacheOnCountdownStart) return;
+
+    if(forceDisableForWITF){
+	    // If BF is a 'nobody' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
+			var bf = PlayState.instance.currentStage.getBoyfriend();
+			if(bf!=null){
+				var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+				//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
+				if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+					//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
+					return;
+				}	
+			}
+		}
+
+		cacheBreakTimes(PlayState.instance?.currentChart?.notes?? null);
+		trace("[BREAK TIME] Gaps: " + songGaps);
+		// If we DON'T detect any gaps big enough to trigger a break, then we don't need to create the assets.
+		if(songGaps.length > 0)
+			createAssets();
+  }
+
+
+  function cacheBreakTimes(songNotes):Void{
+
+  	songGaps = []; //Ensure we operate on a clean slate.
+
+  	if(songNotes==null){
+  		trace("NULL SONG NOTES! CANNOT GENERATE BREAK TIMES!");
+  	}
 
 		// Look into the event data to look through all the notes, taking note of when there is a gap in the player's notes.
 		var lastNote = null;
-		for (songNote in e.notes){
+		for (songNote in songNotes){
 			var strumTime:Float = songNote.time;
 			var noteKind:Float = songNote.kind;
 			var strumIndex = songNote.getStrumlineIndex();
@@ -182,12 +232,8 @@ class BreakTime extends Module {
 			}
 			lastNote = songNote;
 		}
+  }
 
-		trace("[BREAK TIME] Gaps: " + songGaps);
-		// If we DON'T detect any gaps big enough to trigger a break, then we don't need to create the assets.
-		if(songGaps.length > 0)
-			createAssets();
-	}
 
 	override function onDestroy(event):Void
 	{

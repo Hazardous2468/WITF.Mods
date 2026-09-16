@@ -21,7 +21,7 @@ import funkin.audio.FunkinSound;
 import funkin.graphics.FunkinSprite;
 import funkin.play.PauseSubState;
 import funkin.Highscore;
-
+import funkin.play.Countdown;
 
 
 
@@ -155,8 +155,8 @@ class ModchartDebug_Timebar extends Module
 		  PlayState.instance.songScore = 0;
 		  Highscore.tallies.combo = 0;
 		
-		
-		
+		if(PlayState.instance.vwooshTimer != null)
+			PlayState.instance.vwooshTimer.cancel();
 		
 		//Update the 3D meshes! (cuz v0.7.5a makes them no longer updateTris in pause)
 		for (strumLine in PlayState.instance.allStrumLines)
@@ -271,6 +271,20 @@ class ModchartDebug_Timebar extends Module
 			return;
 		}
 		if(!PlayState.instance.isGamePaused) return;
+
+
+		if(Countdown.countdownTimer != null && !Countdown.countdownTimer.finished){
+			//trace("Cannot time travel with an active countdown!");
+			return;
+		}
+
+		if(PlayState.instance.vwooshTimer != null){
+			if(!PlayState.instance.vwooshTimer.finished && PlayState.instance.vwooshTimer.active){
+				//trace("Cannot time travel with an active vwooshTimer!");
+				return;
+			}
+		}
+
 		
 		
 		var game = PlayState.instance;

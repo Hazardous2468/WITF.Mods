@@ -13,7 +13,7 @@ function comboSetup()
     comboX.specialMod = true;
     comboX.speedMod = false;
     comboX.unknown = false;
-	eh.addCustomMod("bf", comboX);
+	eh.addCustomMod("1", comboX);
 	comboX.specialMathFunc = function() {
 		if(game.comboPopUps != null){
 			game.comboPopUps.offsets[0] = comboX.currentValue;
@@ -29,7 +29,7 @@ function comboSetup()
     comboY.specialMod = true;
     comboY.speedMod = false;
 	comboY.unknown = false;
-	eh.addCustomMod("bf", comboY);
+	eh.addCustomMod("1", comboY);
 	comboY.specialMathFunc = function() {
 		if(game.comboPopUps != null){
 			game.comboPopUps.offsets[1] = comboY.currentValue;

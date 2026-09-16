@@ -1,0 +1,22 @@
+{
+  "title": "I BLEED",
+  "description": "Ported from NotITG",
+  "contributors": [
+		{
+			"name": "SewerSlvt",
+			"role": "Original Song"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Chart and Modchart",
+  		"url": "https://linktr.ee/Hazard24"
+		}
+	],
+  "api_version": "0.8.0",
+  "mod_version": "0.1.0",
+  "dependencies": {
+		"_WITF - Essentials": "*",
+		"_WITF - Examples": "*"
+	},
+  "license": "CC BY-NC-ND 4.0"
+}

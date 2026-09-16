@@ -1,0 +1,64 @@
+package witf.modules.play.notes;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.Preferences;
+import flixel.FlxSprite;
+import flixel.FlxG;
+import funkin.play.notes.SustainTrail;
+import funkin.util.Constants;
+import funkin.Highscore;
+
+// A note that appears but cannot be hit or missed. Trying to hit it will not lead to anything happening.
+class FakeNotesManager extends Module {
+
+	var hurtNoteName:String = "fake";	
+	
+	var isWITF:Bool = true;
+    function new() {
+        super("FakeNotesManager");
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+    }
+	
+	override function onNoteHit(event) {
+		if(PlayState.instance == null) return;
+		if (event.note.noteData.kind == hurtNoteName) {
+			var strumLine = PlayState.instance.playerStrumline;
+			event.cancelEvent();
+			if(!event.note.hasBeenHit){
+				event.note.hasBeenHit = true;
+
+				var sus = event.note.holdNoteSprite;
+				if(sus != null && event.note.noteData.kind == hurtNoteName){
+					strumLine.playNoteHoldCover(sus);
+					sus.hitNote = true;
+				}
+			}	
+		}else{
+			super.onNoteHit(event);
+			return;
+		}
+	}
+	
+
+	// Handle miss here to prevent character miss animations from playing!
+	override function onNoteMiss(event:NoteScriptEvent) 
+	{
+		super.onNoteMiss(event);
+		if (event.note.noteData.kind == hurtNoteName) {
+			event.note.handledMiss = true;
+			event.cancelEvent();
+		}
+	}
+
+	override function onNoteHoldDrop(event:HoldNoteScriptEvent)
+	{
+		super.onNoteHoldDrop(event);
+		if (event.holdNote.noteData.kind == hurtNoteName) {
+			event.holdNote.handledMiss = true;
+			event.cancelEvent();
+		}
+	}
+}

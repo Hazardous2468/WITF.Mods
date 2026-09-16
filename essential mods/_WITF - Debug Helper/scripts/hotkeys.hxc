@@ -22,6 +22,8 @@ import funkin.ui.debug.charting.ChartEditorState;
 import funkin.play.PauseSubState;
 import funkin.Highscore;
 import funkin.modding.module.ModuleHandler;
+import funkin.play.Countdown;
+
 
 
 class ModchartDebug_HotKeys extends Module
@@ -58,43 +60,19 @@ class ModchartDebug_HotKeys extends Module
 		if(FlxG.sound.music == null) return;
 		var game = PlayState.instance;
 		if(game == null) return;
-		if(time < 0) time = 0;
+		//if(time < 0) time = 0;
 		
 		
 		if(snapToBeat){
-			var timeOffset:Float = 0;
-			var noteTime:Float = time;		
-			
-			var currentTimeChange = Conductor.instance.timeChanges[0];
-			if (noteTime > 0.0)
-			{
-			  for (i in 0...Conductor.instance.timeChanges.length)
-			  {
-				if (noteTime >= Conductor.instance.timeChanges[i].timeStamp) currentTimeChange = Conductor.instance.timeChanges[i];
-
-				if (noteTime < Conductor.instance.timeChanges[i].timeStamp) break;
-			  }
-			}
-			
-			//reverse the beatTime back to normalTime!
-			timeOffset = currentTimeChange.timeStamp;
-			var strumTimeCorrection:Float = noteTime-timeOffset;
-			var beatLengthMS:Float = ((Constants.SECS_PER_MIN / currentTimeChange.bpm) * Constants.MS_PER_SEC);
-			var beat:Float = ((strumTimeCorrection % beatLengthMS) / beatLengthMS);
-			
-			beat = FlxMath.roundDecimal(beat, 4);
-			
-			var timeToBeatPoint:Float = beat * beatLengthMS;
-			
-			time = time - timeToBeatPoint;
-			
-			//PlayState.instance.debugNotification("-\nb: " + beat);
-			//PlayState.instance.debugNotification("tb: " + timeToBeatPoint);
-			//PlayState.instance.debugNotification("Set songPos to: " + time);
+			var beatTime:Float = Conductor.instance.getTimeInSteps(time) / Constants.STEPS_PER_BEAT;
+			trace("target beatTime: " + beatTime);
+			beatTime = Math.fround(beatTime);
+			time = Conductor.instance.getBeatTimeInMs(beatTime);
+			trace("target ROUNDED beatTime: " + beatTime);
 		}
 
 		var goingBackwards:bool = Conductor.instance.songPosition > time;
-		trace(goingBackwards);
+		trace("Going Backwards? " + goingBackwards);
 
 		FlxG.sound.music.pause();
 		if (game.vocals != null) {
@@ -198,10 +176,27 @@ class ModchartDebug_HotKeys extends Module
 		}
 
 		//TIME SKIP LOGIC
-		if((PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) && enableTimeManipulation && Conductor.instance.songPosition > 0) { 
+		// Only works if you're in practice or botplay, timeManipulation is enabled, AND we are NOT in a countdown.
+		if((PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode) && enableTimeManipulation) { 
+
+			if(Countdown.countdownTimer != null && !Countdown.countdownTimer.finished){
+				//trace("Cannot time travel with an active countdown!");
+				return;
+			}
+
+			// For some reason, the vwoosh timer will just randomly come alive and prevent us from time warping???
+			// So just... try not to skip around when a vwoosh happens please
+			//if(PlayState.instance.vwooshTimer != null){
+			//	if(!PlayState.instance.vwooshTimer.finished && PlayState.instance.vwooshTimer.active){
+			//		trace("Cannot time travel with an active vwooshTimer!");
+			//		return;
+			//	}
+			//}
+			
+
 
 			if (FlxG.keys.justPressed.FOUR && !PlayState.instance.isGamePaused){ 
-				setSongTime(0, true);
+				setSongTime(PlayState.instance.startTimestamp, true);
 			}
 			
 			if (FlxG.keys.justPressed.FIVE && !PlayState.instance.isGamePaused){ 
@@ -214,7 +209,7 @@ class ModchartDebug_HotKeys extends Module
 				var posChange = 0;
 				
 				if(timeManipulateInBeats){
-					var beatTime = Conductor.instance.get_beatLengthMs();
+					var beatTime = Conductor.instance.beatLengthMs;
 					posChange = beatTime * (FlxG.keys.pressed.SHIFT ? beatOffsetAmount*beatOffsetShiftMult : beatOffsetAmount); 
 				}else{
 					posChange = FlxG.keys.pressed.SHIFT ? 10000 : 5000;

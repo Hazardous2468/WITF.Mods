@@ -1,0 +1,161 @@
+package witf.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.play.notes.Strumline;
+import funkin.play.notes.notestyle.NoteStyle;
+
+
+// A script which automatically changes the submods for rotateZ and rotateY based on NoteStyle to make them rotate more accurately.
+// Hopefully one day, this script won't be needed.
+class RotateModNoteStyleFix extends Module
+{
+	public function new() {
+        super("RotateModNoteStyleFix", -100, {state:PlayState});	
+    }
+
+    var framesDelay:Int = -1;
+    var needsApplying:Bool = false;
+    override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+		//return;
+		framesDelay = 1;
+		needsApplying = true;
+		//trace("HIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII");
+	}
+
+	function scriptLogic():Void
+	{
+		if(PlayState.instance == null || !PlayState.instance.isModchartSong){
+			return;
+		}
+		//trace("XXXXXXXXXXDDDDDDDDDDDDDDDDDDDD");
+
+		for(strum in PlayState.instance.allStrumLines){
+
+
+
+			var noteOffset:Float = 0;
+			var holdOffset:Float = 0;
+
+			var noteStyleID:String = strum.noteStyle.id.toLowerCase();
+
+			switch (noteStyleID)
+		    {
+				case "groovin":
+					noteOffset = 1.5;
+					holdOffset = -2;
+				case "simple" | "halvedhalvedhalved":
+					noteOffset = -2;
+					holdOffset = -2;
+				case "pixel":
+					noteOffset = 0;
+					holdOffset = -1;
+				case "funkin" | "funkin-quant" | "funkin-qt-2021" | "funkin-qt-dodge":
+					noteOffset = -2;
+					holdOffset = 1;
+				case "maniac":
+					noteOffset = -3;
+					holdOffset = -0.5;
+				case "memory":
+					noteOffset = -5.5;
+					holdOffset = -3;
+				case "inhuman":
+					noteOffset = -6;
+					holdOffset = -3;
+				case "triangulate":
+					noteOffset = -3;
+					holdOffset = -2;
+				case "sextion":
+					noteOffset = -4;
+					holdOffset = -2;
+				case "doodle":
+					noteOffset = -4;
+					holdOffset = -2;
+				case "hurtnotestyle":
+					noteOffset = 1;
+					holdOffset = 0;
+		    }
+
+		    // Already at their default values so no need to do anything.
+		    if(holdOffset == 0 && holdOffset == 0) continue;
+
+			if (strum.mods.modifiers.exists("rotatez"))
+		    {
+		      strum.mods.setDefaultModVal("rotatez__notepoint_offset_x", noteOffset);
+		      strum.mods.setModVal("rotatez__notepoint_offset_x", noteOffset);
+		      strum.mods.setDefaultModVal("rotatez__holdpoint_offset_x", holdOffset);
+		      strum.mods.setModVal("rotatez__holdpoint_offset_x", holdOffset);
+
+		      trace("Applied rotateZ notestyle offset fix.");
+		      trace("Note Offset: " + noteOffset);
+		      trace("Hold Offset: " + holdOffset);
+		    }
+
+		    if (strum.mods.modifiers.exists("rotatey"))
+		    {
+		      strum.mods.setDefaultModVal("rotatey__notepoint_offset_x", noteOffset);
+		      strum.mods.setModVal("rotatey__notepoint_offset_x", noteOffset);
+		      strum.mods.setDefaultModVal("rotatey__holdpoint_offset_x", holdOffset);
+		      strum.mods.setModVal("rotatey__holdpoint_offset_x", holdOffset);
+		      trace("Applied rotateY notestyle offset fix.");
+		      trace("Note Offset: " + noteOffset);
+		      trace("Hold Offset: " + holdOffset);
+		    }
+
+
+		    // Don't forget about lane modifiers!
+		    for (i in 0...Strumline.KEY_COUNT)
+		    {
+		    	//trace(i);
+
+		    	if (strum.mods.modifiers.exists("rotatez--"+i))
+			    {
+			      strum.mods.setDefaultModVal("rotatez--"+i+"__notepoint_offset_x", noteOffset);
+			      strum.mods.setModVal("rotatez--"+i+"__notepoint_offset_x", noteOffset);
+			      strum.mods.setDefaultModVal("rotatez--"+i+"__holdpoint_offset_x", holdOffset);
+			      strum.mods.setModVal("rotatez--"+i+"__holdpoint_offset_x", holdOffset);
+
+			      trace("Applied rotateZ--"+i+" notestyle offset fix.");
+			      trace("Note Offset: " + noteOffset);
+			      trace("Hold Offset: " + holdOffset);
+			    }
+
+		    	if (strum.mods.modifiers.exists("rotatey--"+i))
+			    {
+			      strum.mods.setDefaultModVal("rotatey--"+i+"__notepoint_offset_x", noteOffset);
+			      strum.mods.setModVal("rotatey--"+i+"__notepoint_offset_x", noteOffset);
+			      strum.mods.setDefaultModVal("rotatey--"+i+"__holdpoint_offset_x", holdOffset);
+			      strum.mods.setModVal("rotatey--"+i+"__holdpoint_offset_x", holdOffset);
+
+			      trace("Applied rotateY--"+i+" notestyle offset fix.");
+			      trace("Note Offset: " + noteOffset);
+			      trace("Hold Offset: " + holdOffset);
+			    }
+
+
+		    }
+
+
+		}
+	}
+
+	override function onUpdate(event):Void
+	{
+		super.onUpdate(event);
+		if (PlayState.instance == null) return;
+
+		if(needsApplying){
+			if(framesDelay > 0){
+				framesDelay -= 1;
+				return;
+			}
+			scriptLogic();
+			needsApplying = false;
+		}
+	}
+
+}

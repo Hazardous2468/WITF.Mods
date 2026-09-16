@@ -6,10 +6,10 @@ print("=== FNF Chart Offset Tool ===")
 
 
 # === CONFIGURE THESE ===
-input_file = "bloodshed-metadata.json"   # Change if your file has a different name
-output_file = "bloodshed-metadata-modified.json"
-cutoff = 270690
-offset = -914.285714285
+input_file = "song-chart.json"   # Change if your file has a different name
+output_file = "converted-song-chart.json"
+cutoff = 0
+offset = 0
 # ========================
 
 
@@ -18,19 +18,54 @@ try:
         data = json.load(f)
     
     print(f"Loaded {input_file} successfully!")
-    
+
     modified_count = 0
-    for tc in data.get('timeChanges', []):
-        if isinstance(tc, dict) and 't' in tc and tc['t'] > cutoff:
-            original_t = tc['t']
-            tc['t'] = round(original_t + offset, 9)   # high precision
-            modified_count += 1
+    is_chart = False
+    is_metadata = False
+    
+
+    # --- Detect + process chart file (notes) ---
+    if "notes" in data and isinstance(data["notes"], dict):
+        is_chart = True
+        print("Detected: Chart file (notes)")
+        
+        for difficulty, note_list in data["notes"].items():
+            if not isinstance(note_list, list):
+                continue
+                
+            for note in note_list:
+                if isinstance(note, dict) and "t" in note and note["t"] > cutoff:
+                    original_t = note["t"]
+                    note["t"] = round(original_t + offset, 9)
+                    modified_count += 1
+
+    # --- Detect + process metadata file (timeChanges) ---
+    if "timeChanges" in data and isinstance(data["timeChanges"], list):
+        is_metadata = True
+        print("Detected: Metadata file (timeChanges)")
+        
+        for tc in data["timeChanges"]:
+            if isinstance(tc, dict) and "t" in tc and tc["t"] > cutoff:
+                original_t = tc["t"]
+                tc["t"] = round(original_t + offset, 9)
+                modified_count += 1
+
+    # Optional: also offset events if they exist and have a time field
+    if "events" in data and isinstance(data["events"], list):
+        for event in data["events"]:
+            if isinstance(event, dict) and "t" in event and event["t"] > cutoff:
+                original_t = event["t"]
+                event["t"] = round(original_t + offset, 9)
+                modified_count += 1
+
+    if not is_chart and not is_metadata:
+        print("⚠️  Warning: Neither 'notes' nor 'timeChanges' found. Nothing was modified.")
     
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=1)
     
     print(f"\n✅ Success!")
-    print(f"   Modified {modified_count} timeChange entries")
+    print(f"   Modified {modified_count} entries")
     print(f"   Output saved to: {output_file}")
     
 except FileNotFoundError:

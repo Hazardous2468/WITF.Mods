@@ -34,14 +34,7 @@ function modsTimeline()
 	ease(316, 1, "outSine", 2, "drawdistance","3")
 	
 	set(317,1, "sudden","bf")
-	set(317,420, "sudden__offset","bf")
-	
-	-- More accurate rotations for simple notestyle
-	setdefault( -2, "rotatez__notepoint_offset_x")
-	setdefault(-1, "rotatez__holdpoint_offset_x")
-	setdefault( -2, "rotatey__notepoint_offset_x")
-	setdefault(-1, "rotatey__holdpoint_offset_x")
-	
+	set(317,420, "sudden__offset","bf")	
 	
 	set(316,112*-2, "debugx","bf")
 	set(316,112*2, "debugx","3")

@@ -10,22 +10,44 @@ import flixel.FlxG;
 import funkin.play.notes.SustainTrail;
 import funkin.util.Constants;
 import funkin.Highscore;
+import funkin.play.notes.notekind.NoteKind;
 
 // A note that appears but cannot be hit or missed. Trying to hit it will not lead to anything happening.
-class FakeNote extends Module {
-
-	var hurtNoteName:String = "fake";	
-	
+class FakeNote extends NoteKind
+{
 	var isWITF:Bool = true;
     function new() {
-        super("FakeNote");
+        super("fake", "Fake Note");
 		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
     }
+
+    override function onUpdate(event)
+	{
+		super.onUpdate(event);
+		if(PlayState.instance == null) return;
+
+		for (note in getNotes()) // 'getNotes()' Returns all notes of this kind.
+		{			 
+			var holdNote = note.holdNoteSprite;
+			if(holdNote!=null && holdNote.alive){
+				// While the hold note is being hit, and there is length on the hold note...
+				  if (holdNote.hitNote && !holdNote.missedNote && holdNote.sustainLength > 0)
+				  {
+					// UNDO the health gain from holding a hold note!
+					if (!PlayState.instance.isBotPlayMode)
+					{
+					  PlayState.instance.health -= Constants.HEALTH_HOLD_BONUS_PER_SECOND * event.elapsed;
+					  PlayState.instance.songScore -= Std.int(Constants.SCORE_HOLD_BONUS_PER_SECOND * event.elapsed);
+					}
+				  }
+			}
+		}
+	}
 	
 	override function onNoteIncoming(event)
 	{
 		super.onNoteIncoming(event);
-		if (event.note.kind == hurtNoteName)
+		if (event.note.kind == "fake")
 		{
 			// Removing this note from the totalNotes tally to ensure they don't affect the final score!
 			if(event.note.noteData.getStrumlineIndex() == 0){ // If player strumline note
@@ -36,36 +58,12 @@ class FakeNote extends Module {
 					}
 				}else{
 					Highscore.tallies.totalNotes--;
-				}
-				
+				}	
 			}
 		} 
 	}
 	
-	override function onNoteHit(event) {
-		if(PlayState.instance == null) return;
-		if (event.note.noteData.kind == hurtNoteName) {
-			var strumLine = PlayState.instance.playerStrumline;
-			event.cancelEvent();
-			if(!event.note.hasBeenHit){
-				event.note.hasBeenHit = true;
-
-				var sus = event.note.holdNoteSprite;
-				if(sus != null && event.note.noteData.kind == hurtNoteName){
-					strumLine.playNoteHoldCover(sus);
-					sus.hitNote = true;
-				}
-			}	
-		}else{
-			super.onNoteHit(event);
-			return;
-		}
-	}
 	
-	override function onNoteMiss(event) {
-		if (event.note.noteData.kind == hurtNoteName) {
-			event.cancelEvent();
-			event.note.handledMiss = true;
-		}
-	}
+	
+
 }

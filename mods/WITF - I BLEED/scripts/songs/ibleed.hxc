@@ -1,0 +1,12 @@
+import funkin.play.song.Song;
+import flixel.FlxG;
+import funkin.play.PlayState;
+class ibleedSong extends Song {
+	public function new() {
+		super('ibleed');
+	}	
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+}

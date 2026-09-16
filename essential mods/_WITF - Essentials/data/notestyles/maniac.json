@@ -78,7 +78,7 @@
         "behindStrums": true,
         "holdPositioned": true,
 		    "zCalcMult": [0.0, 0.0],
-        "enabled": true,
+        "enabled": false,
         "scaleX": 0.7,
         "left": {
           "assetPath": "shared:NoteSkins/Maniac/groovin_holdCover",

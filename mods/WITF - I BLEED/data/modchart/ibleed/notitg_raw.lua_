@@ -1,0 +1,687 @@
+--[[
+Just a quick modchart doodle.
+Nothing too serious, was just me wanting to see what recreating the OpenHexagon 3D effect would look like in NotITG.
+]]--
+
+--CARDS
+card = require("card")
+card{32,95.675,"Waking up", 7, "#8822BB"}
+card{96,159.5,"Head Spinning", 11, "#FF3388"}
+card{160,223.9,"Falling Over", 14, "#FF0022"}
+card{224,286,"Out of reality", 5, "#AAAAAA"}
+
+
+if not P1 or not P2 then
+	backToSongWheel('Two Player Mode Required')
+	return
+end
+
+-- judgment / combo proxies
+for pn = 1, 2 do
+	setupJudgeProxy(PJ[pn], P[pn]:GetChild('Judgment'), pn)
+	setupJudgeProxy(PC[pn], P[pn]:GetChild('Combo'), pn)
+end
+-- player proxies
+PP[1]:SetTarget(P[1])
+PP[2]:SetTarget(P[2])
+P[1]:hidden(1)
+P[2]:hidden(1)
+
+
+local topPlayer=1
+local backPlayer=2
+
+
+function RealFov(fov)
+    return 360 / math.pi * math.atan(math.tan(math.pi * fov / 360) * sw / sh * 0.75)
+end
+
+
+P[backPlayer]:fov(0)
+aftspritesholder:fov(RealFov(45))
+topholder_outer:fov(RealFov(45))
+ringContainer:fov(RealFov(45))
+P[topPlayer]:fov(RealFov(45))
+
+
+
+
+function transparentaft(self)
+    self:SetWidth(dw)
+    self:SetHeight(dh)
+    self:EnableDepthBuffer(false)
+    self:EnableAlphaBuffer(true)
+    self:EnableFloat(false)
+    self:EnablePreserveTexture(true)
+    self:Create()
+end
+transparentaft(mainaft)
+
+local aftsprites = aftspritesholder:GetChildren()
+local howMany = 28
+local howManyREAL = 32
+
+local zoomAmount = 1.4
+local zoomModAmount = (1+(1-zoomAmount))*100
+setdefault{zoomModAmount, "zoom"}
+
+for i,outer in ipairs(aftsprites) do
+	local ir = howMany-i
+	outer:y(sh*0.5)
+	outer:x(sw*0.5)
+	outer:zoom(zoomAmount)
+	for _,v in ipairs(outer:GetChildren()) do
+		sprite(v)
+		v:SetTexture(mainaft:GetTexture())
+		v:xy(0,0)	
+		local a = i/howManyREAL
+		--print(a)
+		v:diffusealpha(a)
+	end
+end
+
+topholder_outer:zoom(zoomAmount)
+topholder_outer:x(sw*0.5)
+topholder_outer:y(sh*0.5)
+topholder_inner:y(sh*-0.5)
+topholder_inner:x(sw*-0.5)
+
+bottomholder_outer:zoom(zoomAmount)
+bottomholder_outer:x(sw*0.5)
+bottomholder_outer:y(sh*0.5)
+bottomholder_inner:x(sw*-0.5)
+bottomholder_inner:y(sh*-0.5)
+
+
+definemod{'rotx', function(p)
+	for i,outer in ipairs(aftsprites) do
+		outer:rotationx(p*-1)
+	end
+	
+	topholder_outer:rotationx(p*-1)
+	bottomholder_outer:rotationx(p*-1)
+	
+	
+	ring1:rotationx(p*-1)
+	ring2:rotationx(p*-1)
+
+end}
+
+
+definemod{'roty', function(p)
+	for i,outer in ipairs(aftsprites) do
+		outer:rotationy(p*-1)
+	end
+	
+	topholder_outer:rotationy(p*-1)
+	bottomholder_outer:rotationy(p*-1)
+	
+	
+	ring1:rotationy(p*-1)
+	ring2:rotationy(p*-1)
+
+end}
+
+local bottomHoldZoffset = -256
+
+definemod{'spacing', function(p)
+	for i,outer in ipairs(aftsprites) do
+		local ir = howMany-i
+		for _,v in ipairs(outer:GetChildren()) do
+			v:z(ir*-p)
+		end
+		--print("---")
+		--print(i)
+		--print(ir)
+		--print("---")
+	end
+	local ir3 = howMany-33
+	local zPosOfTop = (ir3)*-p
+	topholder_inner:z(ir3*-p)
+	
+	ir3 = howMany/3
+	zPosOfTop = (ir3)*-p
+	bottomholder_inner:z((ir3*-p) + bottomHoldZoffset)
+end}
+
+
+func_ease {93, 3, outQuad, bottomHoldZoffset, 0, function(a)
+	bottomHoldZoffset = a
+end}
+
+setdefault {0, 'spacing'}
+ease{93, 3, outQuad, 4, "spacing"}
+
+local xSpinMult = 0
+local ySpinMult = 0
+
+perframe {92, 286, function(a, poptions)
+	local t = a*-2
+	for i,outer in ipairs(aftsprites) do
+		local ir = howManyREAL-i
+		for _,v in ipairs(outer:GetChildren()) do
+			local m = ir / howManyREAL
+			local x = math.sin(i * math.pi/2 + t)*m
+			local y = math.cos(i * math.pi/2 + t)*m	
+			v:xy(x * xSpinMult, y * ySpinMult)
+		end
+	end
+end}
+
+func_ease {192, 4, outQuint, 0, 64, function(a)
+	xSpinMult=a
+	ySpinMult=a
+end}
+func_ease {199, 1, outCubic, 64, 0, function(a)
+	xSpinMult=a
+	ySpinMult=a
+end}
+
+func_ease {224, 4, outQuint, 0, 32, function(a)
+	xSpinMult=a
+end}
+func_ease {286, 0.1, instant, 0, 0, function(a)
+	xSpinMult=a
+	ySpinMult=a
+end}
+
+
+aux('centerx')
+node {'x','centerx', function (x,centerx, pn) 
+return x + scx * ((pn-1)%2 -0.5)*(1-centerx*0.01)
+end, 'x'}
+func {0, function()
+    for pn=1,2 do
+    local plr = P[pn]
+    --local pos = 0.25
+     --if pn == 2 then pos = 0.75 end
+           if plr then plr:x(SCREEN_CENTER_X) end
+end
+end}
+
+definemod {'dpad', function(a, pn)
+    P[pn]:SetXSpline(1,0,-a,600,-1)
+    P[pn]:SetXSpline(1,3,a,600,-1)
+    P[pn]:SetYSpline(1,1,a,600,-1)
+    P[pn]:SetYSpline(1,2,-a,600,-1)
+end}
+
+
+
+definemod{'glitch2', function(p)
+	glitch2_Spr:GetShader():uniform1f('amount',p/1000) 
+end}
+definemod{'glitch_line', function(p)
+	glitchLine_Spr:GetShader():uniform1f('amount',p/1000) 
+end}
+definemod{'fisheye', function(p)
+	fisheye_Spr:GetShader():uniform1f('amount',p) 
+end}
+
+
+glitch2_Spr:SetTexture(shaderAFT1:GetTexture())
+glitch2_Spr:GetShader():uniform1f('amount',0.00) 
+glitchLine_Spr:SetTexture(shaderAFT2:GetTexture())
+glitchLine_Spr:GetShader():uniform1f('amount',0.00) 
+fisheye_Spr:SetTexture(shaderAFT4:GetTexture())
+fisheye_Spr:GetShader():uniform1f('amount',0.00) 
+
+local aftAlpha = 0.9
+LimitAft(myaft)
+myaft:SetFPS(60)
+
+definemod{'aftzoom', function(p)
+	aft_sprite:zoom(p)
+end}
+definemod{'aftalpha', function(p)
+	aft_sprite:diffusealpha(p)
+end}
+setdefault {0.4, 'aftalpha',0.975, 'aftzoom'}
+ease {189-96, 3, linear, 0.45, 'aftalpha', 1.11, 'aftzoom'}
+
+
+local lazyalternator = false
+local r = ((math.pi/180)*100) --multiply a degree by 'r' to convert degrees it to radians
+
+-- your code goes here here:
+setdefault {100, 'centerx'}
+setdefault {-100, 'drawsizeback'}
+setdefault {2.5, 'xmod'}
+setdefault {100, 'dizzyholds'}
+setdefault {150, 'DrawSize'}
+setdefault {100, 'modtimer'}
+setdefault {630, 'modtimeroffset'}
+setdefault {100, 'spiralholds'}
+setdefault {0, 'arrowpath'}
+setdefault {100, 'stealthpastreceptors'}
+setdefault {100, 'stealthtype'}
+
+
+-- Intro gameplay
+
+set{-16, -77, "drunk"}
+set{-16, -45, "tipsy"}
+ease{92, 2, inOutQuad, 0, "drunk", 0, "tipsy"}
+
+
+add{93, 3, pop, 25, "glitch_line"}
+ease{95, 2, inOutQuad, 2.5, "glitch_line"}
+
+
+ease{63, 2, inOutQuad, 100, "reverse"}
+ease{79, 2, inOutQuad, 0, "reverse"}
+
+set {-16, 4, 'glitch_line'}
+set {-16, 66, 'zoom'}
+
+local function funnybounce(i)
+	--set{i, -300, 'tiny', 100, 'zigzag'}
+	--ease {i, 1, outQuad, 0, 'tiny', 0, 'zigzag'}
+	ease {i, 1, flip(outQuad), -300, 'tiny', 100, 'zigzag'}
+	
+	add {i, 1, flip(outQuad), 36, 'glitch_line'}
+	
+	add {i, 1, outSine, 555, 'drunkoffset'}
+	lazyalternator = not lazyalternator
+	
+	if lazyalternator then
+		ease {i, 1, flip(outQuad), -45, 'noteskewy'}
+		ease {i, 1, flip(outQuad), -45/2, 'skewx'}
+		set{i, 100, 'wireframe'}
+	else
+		ease {i, 1, flip(outQuad), 45, 'noteskewy'}
+		ease {i, 1, flip(outQuad), 45/2, 'skewx'}
+		set{i, 0, 'wireframe'}
+	end
+end
+set{-16, 300, "wave"}
+set{-16, 100, "boost"}
+set{-16, 1.3, "xmod"}
+set{-16, -40, "cubicz"}
+set{32, 300, "beatmult"}
+for i = 32, 96-8, 8 do
+	if i < 96-8 then
+		ease {i+7, 0.5, outQuad, 50, 'flip'}
+		ease {i+8, 0.5, outQuad, 0, 'flip'}
+		ease {i+7, 0.5, outQuad, 100, 'dark'}
+		ease {i+8, 0.5, outQuad, 0, 'dark'}
+		ease {i+7, 0.5, outQuad, 90, 'stealth'}
+		ease {i+8, 0.5, outQuad, 0, 'stealth'}
+	end
+	
+	ease {i, 0.5, outQuad, 100, 'beat'}
+	ease {i+6.5, 0.5, linear, 0, 'beat'}
+	add {i, 7, linear, -360*2*r, 'confusionzoffset0', 360*2*r, 'confusionzoffset1', -360*2*r, 'confusionzoffset2', 360*2*r, 'confusionzoffset3'}
+	
+	funnybounce(i)
+	funnybounce(i+3.5)
+	funnybounce(i+4)
+	funnybounce(i+5.5)
+	funnybounce(i+7)
+end
+
+lazyalternator = false
+
+--for i=32, 96-8-8,8 do
+--	ease{i+7, 0.5, outExpo, 100, "wireframe"}
+--	ease{i+8, 0.5, outExpo, 0, "wireframe"}
+--end
+
+
+-- Dpad transition
+
+ease{93, 2, outQuad, 0, "drunk", 0, "tipsy", 0, "boost", 0, "wave", 0, "cubicz", 2.5, "xmod",zoomModAmount, "zoom"}
+
+
+ease{93, 1, outExpo, 100, "sudden"}
+set{93, 108, "suddenoffset"}
+ease{93, 2, outQuad, 560, "dpad"}
+ease {93, 2, outQuad, 50, 'reverse', 50, 'flip'}
+ease{93, 1, outExpo, 0, "drawsize"}
+
+
+-- DPAD 1
+
+for i = 96, 254-96, 1 do
+	add{i, 1, bounce, 1.5, "spacing"}
+	add {i, 1, pop, 100, 'glitch2'}
+	add {i, 1, bounce, -255, 'tinyZ',plr=topPlayer}
+	add {i, 1, pop, -200, 'tiny'}
+	
+	add {i, 1, popElastic, 100, 'bumpyx1'}
+	add {i, 1, popElastic, 100, 'bumpyx2'}
+	add {i, 1, popElastic, 100, 'bumpyy0'}
+	add {i, 1, popElastic, 100, 'bumpyy3'}
+end
+for i = 192-96, 250-96+4, 4 do
+	ease {i, 2, inQuad, 80, 'rotx'}
+	ease {i+2, 2, outQuad, 49, 'rotx'}
+end
+
+
+for i = 96, 254-8-96, 8 do
+	ease {i+6, 1, outCubic, 100, 'dark'}
+	ease {i+8, 0.5, outQuad, 0, 'dark'}
+	ease {i+6, 1, outCubic, 90, 'stealth'}
+	ease {i+8, 0.5, outQuad, 0, 'stealth'}	
+
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset0'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset1'}
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset2'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset3'}
+end
+
+set {192,  100, 'wireframe'}
+
+set {195.5,  0, 'wireframe'}
+set {196,  100, 'wireframe'}
+set {197.5,  0, 'wireframe'}
+set {199,  100, 'wireframe'}
+
+set {200,  0, 'wireframe'}
+
+
+
+
+add {192-96, 255-192, linear, 360*4, 'rotationz', 360*-4*r, 'ConfusionZOffset'}
+set{188-96, -100, "arrowpathdrawsizeback"}
+ease{188-96,4, outCubic, 60, 'arrowpath',plr=backPlayer}
+ease{188-96,4, outCubic, 20, 'arrowpath',plr=topPlayer}
+
+set{188-96, -100, "arrowpathdrawsize"}
+ease{95,1, outCubic, 0, 'arrowpathdrawsize'}
+
+
+ease {190-96, 1, outCubic, 23, 'brake'}
+ease {255-96, 1, outQuad, 0, 'brake'}
+
+
+
+
+-- DPAD 2
+
+for i = 160, 192-1, 1 do
+	add{i, 1, bounce, 1.5, "spacing"}
+	add {i, 1, pop, 100, 'glitch2'}
+	add {i, 1, bounce, -255, 'tinyZ',plr=topPlayer}
+	add {i, 1, pop, -200, 'tiny'}
+	
+	add {i, 1, popElastic, 100, 'bumpyx1'}
+	add {i, 1, popElastic, 100, 'bumpyx2'}
+	add {i, 1, popElastic, 100, 'bumpyy0'}
+	add {i, 1, popElastic, 100, 'bumpyy3'}
+end
+for i = 200, 224-1, 1 do
+	add{i, 1, bounce, 1.5, "spacing"}
+	add {i, 1, pop, 100, 'glitch2'}
+	add {i, 1, bounce, -255, 'tinyZ',plr=topPlayer}
+	add {i, 1, pop, -200, 'tiny'}
+	
+	add {i, 1, popElastic, 100, 'bumpyx1'}
+	add {i, 1, popElastic, 100, 'bumpyx2'}
+	add {i, 1, popElastic, 100, 'bumpyy0'}
+	add {i, 1, popElastic, 100, 'bumpyy3'}
+end
+
+
+
+for i = 160, 192-1, 1 do
+	if lazyalternator then
+		ease {i, 1, bell, 5, 'roty'}
+	else
+		ease {i, 1, bell, -5, 'roty'}
+	end
+	lazyalternator = not lazyalternator
+end
+for i = 200, 224-1, 1 do
+	if lazyalternator then
+		ease {i, 1, bell, 5, 'roty'}
+	else
+		ease {i, 1, bell, -5, 'roty'}
+	end
+	lazyalternator = not lazyalternator
+end
+
+for i = 160, 192-4, 4 do
+	ease {i, 2, inQuad, 80, 'rotx'}
+	ease {i+2, 2, outQuad, 49, 'rotx'}
+end
+for i = 200, 224-4, 4 do
+	ease {i, 2, inQuad, 80, 'rotx'}
+	ease {i+2, 2, outQuad, 49, 'rotx'}
+end
+
+
+--ease {159, 1, linear, -100, 'dizzy'}
+add {160, 224-160, linear, 360*-4, 'rotationz', -360*-4*r, 'ConfusionZOffset'}
+
+for i = 160, 224-8, 8 do
+	add {i, 8, inOutSine, -90, 'rotationz', 90*r, 'ConfusionZOffset'}
+	add {i, 8, bell, -100, 'dizzy'}
+end
+
+
+for i = 160, 224-1, 1 do
+	if lazyalternator then
+		--add {i, 1, bell, -100, 'dizzy'}
+	else
+		--add {i, 1, bell, 100, 'dizzy'}
+	end
+	lazyalternator = not lazyalternator
+end
+
+
+for i = 160, 192-8, 8 do
+	ease {i+6, 1, outCubic, 100, 'dark'}
+	ease {i+8, 0.5, outQuad, 0, 'dark'}
+	ease {i+6, 1, outCubic, 90, 'stealth'}
+	ease {i+8, 0.5, outQuad, 0, 'stealth'}
+	
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset0'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset1'}
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset2'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset3'}
+end
+
+for i = 200, 224-8, 8 do
+	ease {i+6, 1, outCubic, 100, 'dark'}
+	ease {i+8, 0.5, outQuad, 0, 'dark'}
+	ease {i+6, 1, outCubic, 90, 'stealth'}
+	ease {i+8, 0.5, outQuad, 0, 'stealth'}
+	
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset0'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset1'}
+	add{i+6,2, inOutQuad, -360*r, 'ConfusionZOffset2'}
+	add{i+6,2, inOutQuad, 360*r, 'ConfusionZOffset3'}
+end
+
+ease {199, 0.5, outCubic, 90, 'stealth', 100, 'dark'}
+ease {200, 0.5, outCubic, 0, 'stealth', 0, 'dark', 0, 'dizzy'}
+--ease {199, 1, linear, 200, 'CenteredPath0'}
+--set{200, 0, 'CenteredPath0'}
+
+
+
+-- ENDING
+
+
+ease {224, 0.75, linear, 50, 'tanbumpyy0', -50, 'tanbumpyy3', 50, 'tanbumpyx1', -50, 'tanbumpyx2'}
+
+
+for i=224,286,8 do
+	for k=0,6 do
+		add {i+k, 1, flip(outQuad), 4, 'zoom'}
+		add {i+k, 1, flip(outQuad), 4, 'spacing'}
+		add {i+k, 1, flip(outQuad), 5, 'brake'}
+	end
+end
+
+reset{286}
+
+
+-- Visual stuff:
+
+
+func_ease {256-96, 400, linear, 0.0, 360*11, function(a)
+	ring1:rotationz(a)
+	ring2:rotationz((a*-1)+22)
+end}
+local function rings(i)
+	func_ease {i+1, 6.0, linear, 0.0, 2.0, function(a)
+		ring1:zoom(a)
+	end}
+	func_ease {i+1, 1.0, linear, 0.0, 0.3, function(a)
+		ring1:diffusealpha(a)
+	end}
+	func_ease {i+2, 4.5, linear, 0.3, 0.0, function(a)
+		ring1:diffusealpha(a)
+	end}
+	
+	func_ease {i+1+4, 6.0, linear, 0.0, 2.0, function(a)
+		ring2:zoom(a)
+	end}
+	func_ease {i+1+4, 1.0, linear, 0.0, 0.3, function(a)
+		ring2:diffusealpha(a)
+	end}
+	func_ease {i+2+4, 4.5, linear, 0.3, 0.0, function(a)
+		ring2:diffusealpha(a)
+	end}
+end
+for i = 256-96, 287-96, 8 do	
+	rings(i)
+end
+for i = 296-96, 320-8-96, 8 do	
+	rings(i)
+end
+
+for i = 256-96, 288-2-96, 2 do
+	ease {i, 0.72, pop, 50, 'glitch2'}
+	ease {i+1, 0.72, pop, 200, 'glitch2'}
+end
+for i = 296-96, 320-2-96, 2 do
+	ease {i, 0.72, pop, 50, 'glitch2'}
+	ease {i+1, 0.72, pop, 200, 'glitch2'}
+end
+
+
+
+
+local bgspeed = 0.25
+for i = 256-96, 320-96, (bgspeed*10) do
+	func {i, function(l)
+		--black_cover:diffusealpha(0.5)		
+		bg1:diffusealpha(1.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+bgspeed, function(l)		
+		bg1:diffusealpha(0.1)
+		bg2:diffusealpha(0.1)
+		bg3:diffusealpha(0.1)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.05)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*2), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(1.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*3), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(1.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*4), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(1.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*5), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(1.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*6), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(1.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*7), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(1.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*8), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(1.0)
+		bg9:diffusealpha(0.0)
+	end}
+	func {i+(bgspeed*9), function(l)		
+		bg1:diffusealpha(0.0)
+		bg2:diffusealpha(0.0)
+		bg3:diffusealpha(0.0)
+		bg4:diffusealpha(0.0)
+		bg5:diffusealpha(0.0)
+		bg6:diffusealpha(0.0)
+		bg7:diffusealpha(0.0)
+		bg8:diffusealpha(0.0)
+		bg9:diffusealpha(1.0)
+	end}
+end
+func {320-96, function(l)		
+	bbbbbbb:diffusealpha(1.0)
+end}
+
+

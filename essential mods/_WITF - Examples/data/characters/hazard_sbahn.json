@@ -5,7 +5,7 @@
   "assetPath": "characters/boyfriend-invis",
   "flipX": true,
   "healthIcon": {
-    "id": "Hazard"
+    "id": "hazard_sbhan"
   },
   "singTime": 8.0,
   "animations": [

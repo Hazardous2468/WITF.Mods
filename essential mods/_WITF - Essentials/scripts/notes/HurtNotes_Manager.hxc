@@ -192,7 +192,7 @@ class HurtNotesManager extends Module {
 		if (event.note.noteData.kind == hurtNoteName) {
 			event.note.handledMiss = true;
 
-			trace("Is this note scorable? " + event.note.scoreable);
+			//trace("Is this note scorable? " + event.note.scoreable);
 
 			event.cancelEvent();
 		}
