@@ -41,6 +41,10 @@ class BreakTimeOptions extends Module
     {
       Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_WARNINGSCALE, 90);
     }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_IGNOREHURTS))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_IGNOREHURTS, false);
+    }
   }
 
   public static var SAVE_KEY_BREAKTIME_MODE:String =  "hazard-breakTime-mode";
@@ -50,6 +54,7 @@ class BreakTimeOptions extends Module
   public static var SAVE_KEY_BREAKTIME_WARNINGOPACITY:String =  "hazard-breakTime-warningopacity";
   public static var SAVE_KEY_BREAKTIME_SCALE:String =  "hazard-breakTime-scale";
   public static var SAVE_KEY_BREAKTIME_WARNINGSCALE:String =  "hazard-breakTime-warningscale";
+  public static var SAVE_KEY_BREAKTIME_IGNOREHURTS:String =  "hazard-breakTime-ignoreHurts";
 
   override function onStateChangeEnd(event:StateChangeScriptEvent)
   {
@@ -105,13 +110,19 @@ class BreakTimeOptions extends Module
             Save.instance.flush();
           }, getShouldCenter());
 
-
       preferencesPage.createPrefItemNumber('Threshold', 'The time between notes (in MS) before a break can trigger. (Default is 4000)',
           function(value:Float)
           {
             Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_THRESHOLD, value);
             Save.instance.flush();
           }, null, getThreshold(), 1000, 10000, 100, 0);
+
+      preferencesPage.createPrefItemCheckbox("Ignore Hurt Notes", "When enabled, hurt notes will be ignored for breakTime calculations (hurt notes appear during a break).",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_BREAKTIME_IGNOREHURTS, value);
+            Save.instance.flush();
+          }, getIgnoreHurts());
 
       preferencesPage.createPrefItemPercentage('Opacity', 'The opacity of the break timer. (Default is 60%)',
           function(value:Float)
@@ -198,6 +209,11 @@ class BreakTimeOptions extends Module
   {
     if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_SCREENCENTER)) return false;
     return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_SCREENCENTER);
+  }
+  function getIgnoreHurts():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_BREAKTIME_IGNOREHURTS)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_BREAKTIME_IGNOREHURTS);
   }
 
 }

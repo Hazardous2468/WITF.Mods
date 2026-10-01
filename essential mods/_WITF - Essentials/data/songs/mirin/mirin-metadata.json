@@ -1,9 +1,8 @@
 {
   "version": "2.2.2",
   "songName": "Mirin Template",
-  "artist": "???",
-    "charter": " ???",
-  "divisions": 96,
+  "artist": "Unknown",
+  "charter": "Unknown",
   "looped": false,
   "offsets": {
     "instrumental": 0,
@@ -27,11 +26,11 @@
 	"album": "WITF_test",
     "stage": "mainStage",
     "noteStyle": "groovin",
-	 "ratings": { "easy": 1, "normal": 1, "hard": 1 },
+	  "ratings": { "easy": 1, "normal": 1, "hard": 1 },
     "previewStart": 0,
-    "previewEnd": 9400
+    "previewEnd": 0.41075156981302
   },
-  "generatedBy": "Chart Editor Import (FNF Legacy)",
+  "generatedBy": "Chart Editor Import (FNF Legacy), Edited by Hazard24",
   "timeFormat": "ms",
   "timeChanges": [
     {

@@ -21,9 +21,6 @@ import funkin.ui.debug.charting.ChartEditorState;
 import flixel.FlxCamera;
 
 
-
-
-
 class ModchartDebug_DebugDisplay extends Module
 {
 

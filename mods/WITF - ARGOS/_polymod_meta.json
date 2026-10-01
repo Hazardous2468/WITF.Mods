@@ -1,5 +1,5 @@
 {
-    "title": "ARGO↑↓S",
+    "title": "[WITF] ARGO↑↓S",
     "description": "Ported from Inhuman. ORIGINAL: https://youtu.be/9op9lZ8Ehms",
 	"contributors": [
 		{
@@ -17,8 +17,8 @@
       		"url": "https://linktr.ee/Hazard24"
 		}
 	],
-    "api_version": "0.8.0",
-    "mod_version": "1.1.0",
+    "api_version": "0.8.6",
+    "mod_version": "1.1.1",
 	"dependencies": {
 		"_WITF - Essentials": "*",
 		"_WITF - Examples": "*"

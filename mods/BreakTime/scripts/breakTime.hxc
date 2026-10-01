@@ -21,6 +21,7 @@ import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.BitmapFilter;
 import openfl.utils.Assets;
 import funkin.data.freeplay.player.PlayerRegistry;
+import funkin.play.notes.notekind.NoteKindManager;
 
 
 /**
@@ -78,8 +79,12 @@ class BreakTime extends Module {
   // The stopwatch sprite.
 	var stopWatchSprite:FunkinSprite;
 
-	// If set to true, this module will be forcefully deactivated for WITF songs (characters that belong to the 'nobody' player)
+	// If set to true, this module will be forcefully deactivated for WITF songs (characters that belong to the 'modcharts' player)
 	var forceDisableForWITF:Bool = true;
+
+	// Variables that control whether or not hurt notes or non-scoring notes should be ignored, allowing them to be disregarded in the breaktime logic (they can appear during breaks!)
+	var ignoreHurtNotes:Bool = false;
+	var ignoreNonScorableNotes:Bool = false;
 
   /** An array containing the data defining where breaks start and end.
    * Format: 
@@ -113,6 +118,8 @@ class BreakTime extends Module {
 			stopWatchCentered = optionsModule.getShouldCenter();
 			targetAlphaForWarning = (optionsModule.getTargetOpacityForWarn()/100);
 			targetAlpha = (optionsModule.getTargetOpacity()/100);
+			ignoreHurtNotes = optionsModule.getIgnoreHurts();
+			ignoreNonScorableNotes = ignoreHurtNotes;
 
 
 			if(useBar){ // When the FlxBar is transparent it kinda looks weird. So we avoid using alpha.
@@ -148,17 +155,20 @@ class BreakTime extends Module {
 		if(cacheOnCountdownStart) return;
 
 
-		// If BF is a 'nobody' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
+		// If BF is a 'modcharts' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
 		if(forceDisableForWITF){
-			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
-			var bf = PlayState.instance.currentStage.getBoyfriend();
-			if(bf!=null){
-				var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
-				//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
-				if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
-					//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
-					return;
-				}	
+			var witfCharacter:String = "modcharts"; // Change this to 'nobody' for older versions of WITF (any version before v1.10.0)
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry(witfCharacter);	
+			if(PlayState.instance.currentStage!=null){
+				var bf = PlayState.instance.currentStage.getBoyfriend();
+				if(bf!=null){
+					var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+					//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
+					if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+						//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
+						return;
+					}	
+				}
 			}
 		}
 
@@ -170,22 +180,26 @@ class BreakTime extends Module {
 	}
 
 
+
+
 	override function onCountdownStart(event:CountdownScriptEvent):Void
   {
     super.onCountdownStart(event);
     if(!cacheOnCountdownStart) return;
 
     if(forceDisableForWITF){
-	    // If BF is a 'nobody' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
-			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
-			var bf = PlayState.instance.currentStage.getBoyfriend();
-			if(bf!=null){
-				var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
-				//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
-				if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
-					//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
-					return;
-				}	
+	    // If BF is a 'modcharts' character (for WITF), then this module will be disabled as most of those songs don't have gaps (due to no back and forth).
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("modcharts");	
+			if(PlayState.instance.currentStage!=null){
+				var bf = PlayState.instance.currentStage.getBoyfriend();
+				if(bf!=null){
+					var curChar:String = PlayState.instance.currentStage.getBoyfriend().characterId;
+					//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
+					if( (modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
+						//PlayState.instance.modDebugNotif("breakTime disabled!", 0xFFFF0000, true);
+						return;
+					}	
+				}
 			}
 		}
 
@@ -196,26 +210,43 @@ class BreakTime extends Module {
 			createAssets();
   }
 
+  // 'hurt' for WITF, 
+  // 'hellNote' and 'trickyDeathNote' for TrickyClownedOut
+  // 'hellnotes' and 'deathnotes' for vs Tricky V-Slice Port
+  // Feel free to add other NoteIDs can are considered hurt notes.
+  var hurtNoteIDs:Array<String> = [
+		"hurt", "hellNote", "trickyDeathNote", "hellnotes", "deathnotes"
+	];	
+
+  function isHurtNote(kind:String):Bool{
+		return hurtNoteIDs.contains(kind);
+	}
+
 
   function cacheBreakTimes(songNotes):Void{
 
   	songGaps = []; //Ensure we operate on a clean slate.
 
   	if(songNotes==null){
-  		trace("NULL SONG NOTES! CANNOT GENERATE BREAK TIMES!");
+  		trace("ERROR WHILE TRYING TO CACHE BREAK TIMES!\nNULL SONG NOTES! CANNOT GENERATE BREAK TIMES!");
   	}
 
 		// Look into the event data to look through all the notes, taking note of when there is a gap in the player's notes.
 		var lastNote = null;
 		for (songNote in songNotes){
 			var strumTime:Float = songNote.time;
-			var noteKind:Float = songNote.kind;
+			var noteKindID:String = songNote.kind;
 			var strumIndex = songNote.getStrumlineIndex();
 			// strumIndex: 0 = bf, 1 = dad
-
-			if(noteKind == "hurt") continue;
-
 			if(strumIndex == 1) continue;
+
+			if(ignoreHurtNotes && isHurtNote(noteKindID)) continue;
+			if(ignoreNonScorableNotes){
+				var noteKind:NoteKind = NoteKindManager.getNoteKind(noteKindID);
+				if(noteKind!=null && !noteKind.scorable){
+					continue;
+				}
+			}
 
 			if(lastNote != null){
 				var lastNoteTimeWithSus:Float = lastNote.time + lastNote.length;

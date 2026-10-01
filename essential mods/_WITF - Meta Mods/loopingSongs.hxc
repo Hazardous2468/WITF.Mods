@@ -19,7 +19,6 @@ class LoopingSongs extends Module
 	static var SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN:String =  "witf-debug-loopCountdown";
 	public function new() {
         super("LoopingSongs");	
-        resetToCountdown = 
         if (Save.instance.modOptions.exists(SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN))
 	    {
 	    	resetToCountdown = Save.instance.modOptions.get(SAVE_KEY_WITF_DEBUG_LOOPCOUNTDOWN);

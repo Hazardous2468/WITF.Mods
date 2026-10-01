@@ -930,7 +930,7 @@ class SelectableModifiers_NEW extends Module
 	
 		var mod = ModConstants.createNewMod(nameOfMod);
 		var mmm:Float = 1.0;
-		if (strumLine.mods.isDad && ModConstants.dadInvert.contains(nameOfMod)) mmm = -1;
+		if (strumLine.mods.isDad && mod.invertForDad) mmm = -1;
 		
 		var startingValue:Float = 1.0 * mmm;
 		

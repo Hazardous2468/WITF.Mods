@@ -1,53 +1,43 @@
 {
-  "version": "2.2.3",
-  "songName": "VS HAZARD (REAL)!!!",
-  "artist": "Hazard24",
-  "charter": " Hazard24",
-  "divisions": 96,
-  "looped": false,
-  "offsets": {
-    "instrumental": 0,
-    "altInstrumentals": {    },
-    "vocals": {
-      "bf": 0
-    }
+ "version": "2.2.4",
+ "songName": "VS HAZARD (REAL)!!!",
+ "artist": "Hazard24",
+ "charter": " Hazard24",
+ "offsets": {
+  "instrumental": 0,
+  "vocals": {
+   "bf": 0
+  }
+ },
+ "playData": {
+  "difficulties": ["normal"],
+  "characters": {
+   "player": "hazard_loweffort",
+   "opponent": "nobody_test",
+   "opponentVocals": [
+    "nobody_test"
+   ],
+   "playerVocals": [
+    "hazard_loweffort"
+   ]
   },
-  "playData": {
-    "songVariations": [    ],
-    "difficulties": [
-      "normal"
-    ],
-    "characters": {
-      "player": "hazard_loweffort",
-      "girlfriend": "",
-      "opponent": "nobody_test",
-      "instrumental": "",
-      "altInstrumentals": [      ]
-    },
-    "stage": "emptyStage_hazVoidSillyAAA",
-    "noteStyle": "groovin",
-	"album": "WITF_test",
-    "ratings": {
-      "normal": 4
-    },
-    "previewStart": 10800,
-    "previewEnd": 27200
+  "stage": "emptyStage_hazVoidSillyAAA",
+  "noteStyle": "groovin",
+  "ratings": {
+   "normal": 4
   },
-  "generatedBy": "Friday Night Funkin' - v0.4.0",
-  "timeFormat": "ms",
-  "timeChanges": [
-    {
-      "t": 0,
-      "b": 0,
-      "bpm": 170,
-      "n": 4,
-      "d": 4,
-      "bt": [
-        4,
-        4,
-        4,
-        4
-      ]
-    }
-  ]
+  "album": "WITF_test",
+  "previewStart": 0,
+  "previewEnd": 0.754613012378464
+ },
+ "generatedBy": "What in the Funkin' (v1.1.0) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 170,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
 }
+

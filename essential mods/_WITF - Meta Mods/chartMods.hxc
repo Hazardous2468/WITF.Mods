@@ -131,7 +131,7 @@ class ChartModifiersModule extends Module
 			trace("Swap Blacklist: \n" + swapBlacklist);
 			
 			var bf = PlayState.instance.currentStage.getBoyfriend();
-			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("nobody");	
+			var modchartHellCharacter = PlayerRegistry.instance.fetchEntry("modcharts");	
 			var curChar:String = bf.characterId;
 			//PlayState.instance.modDebugNotif("char: " + curChar, 0xFFFF0000);
 			if(swapBlacklist.contains(curSongName) || (bf != null && modchartHellCharacter != null && modchartHellCharacter.getOwnedCharacterIds().contains(curChar))){
@@ -326,10 +326,18 @@ class ChartModifiersModule extends Module
 		}
 	}
 
-	
-	function isHurtNote(kind:String):Bool{
-		return (kind == "hurt");
+	// 'hurt' for WITF, 
+	// 'hellNote' and 'trickyDeathNote' for TrickyClownedOut
+	// 'hellnotes' and 'deathnotes' for vs Tricky V-Slice Port
+	// Feel free to add other NoteIDs can are considered hurt notes.
+	var hurtNoteIDs:Array<String> = [
+		"hurt", "hellNote", "trickyDeathNote", "hellnotes", "deathnotes"
+	];	
+
+  	function isHurtNote(kind:String):Bool{
+		return hurtNoteIDs.contains(kind);
 	}
+
 	
 	
 	public function shuffleNote(daNote,  daChart, allowedLanes:Array<Int> = [0,1,2,3], smart:Bool = true ):Int{

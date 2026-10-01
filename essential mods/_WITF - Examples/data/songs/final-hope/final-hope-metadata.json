@@ -1,51 +1,39 @@
 {
-  "version": "2.2.3",
-  "songName": "Final Hope",
-  "artist": "Riya",
-  "charter": " Hazard24",
-  "divisions": 96,
-  "looped": false,
-  "offsets": {
-    "instrumental": 0,
-    "altInstrumentals": {    },
-    "vocals": {    }
+ "version": "2.2.4",
+ "songName": "Final Hope",
+ "artist": "Riya",
+ "charter": " Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal"
+  ],
+  "characters": {
+   "player": "nobody",
+   "opponent": "nobody",
+   "opponentVocals": [
+    "nobody"
+   ],
+   "playerVocals": [
+    "nobody"
+   ]
   },
-  "playData": {
-    "songVariations": [    ],
-    "difficulties": [
-      "normal"
-    ],
-    "characters": {
-      "player": "nobody",
-      "girlfriend": "",
-      "opponent": "nobody",
-      "instrumental": "",
-      "altInstrumentals": [      ]
-    },
-    "stage": "emptyStage",
-    "noteStyle": "memory",
-    "ratings": {
-      "normal": 9
-    },
-	"album": "WITF",
-    "previewStart": 0,
-    "previewEnd": 9400
+  "stage": "emptyStage",
+  "noteStyle": "memory",
+  "ratings": {
+   "normal": 9
   },
-  "generatedBy": "Friday Night Funkin' - v0.4.0",
-  "timeFormat": "ms",
-  "timeChanges": [
-    {
-      "t": 0,
-      "b": 0,
-      "bpm": 220,
-      "n": 4,
-      "d": 4,
-      "bt": [
-        4,
-        4,
-        4,
-        4
-      ]
-    }
-  ]
+  "album": "WITF",
+  "previewStart": 0.0861022868594184,
+  "previewEnd": 0.23642608140936
+ },
+ "generatedBy": "What in the Funkin' (v1.1.0) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 220,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
 }

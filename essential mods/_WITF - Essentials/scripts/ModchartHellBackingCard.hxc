@@ -12,59 +12,85 @@ import funkin.data.freeplay.player.PlayerRegistry;
 import flixel.FlxG;
 import funkin.Conductor;
 import funkin.util.Constants;
-import flixel.effects.particles.FlxParticle;
-import flixel.effects.particles.FlxTypedEmitter;
-import flixel.effects.particles.FlxEmitterMode;
-import flixel.addons.effects.FlxTrail;
-
+//import flixel.addons.effects.FlxTrail;
+import funkin.effects.FunkTrail;
+import funkin.graphics.ZProjectSpriteGroup;
 import funkin.Paths;
 import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
 
 
 class ModchartHellBackingCard extends BackingCard
 {
-	//cuz they cause real bad memory problems :(
 	var doTrails:Bool = false;
 	
 	public var pulseParticlesOnBeat:Bool = true;
 	
-	
-	var particleScaleAdd:Float = 0;
-	var particleScaleTween:FlxTween;
+	var arrows:ZProjectSpriteGroup;
+  var beatPulseTween:FlxTween;
+  var targetScale:Float = 1.0;
+
 	var particlesEmitter:FlxTypedEmitter;
 	function pulseParticles(){
-		if(particlesEmitter!=null){
-			if(particleScaleTween!=null){
-				particleScaleTween.cancel();
+		if(arrows!=null){
+
+			if(beatPulseTween!=null){
+				beatPulseTween.cancel();
 			}
 			var secondsBetweenBeats = Conductor.instance.beatLengthMs / Constants.MS_PER_SEC;
-			particleScaleTween = FlxTween.num(0.7, 0, secondsBetweenBeats, {ease: FlxEase.quadIn}, function(v){
-				particleScaleAdd = v;
+			beatPulseTween = FlxTween.num(1.0, 0.75, secondsBetweenBeats, {ease: FlxEase.quadIn}, function(v){
+				targetScale = v;
 			});
 			
 			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome2'));
 		}
 	}
-	
+
+  var particlesActive:Bool = true;
+  final spawnEvery:Float = 0.7;
+  final spawnEveryTimeVariance:Float = 0.15;
+  var timeTillNextSpawn:Float = 0;
+  function trySpawnParticle():Bool{
+    var result = arrows.getFirstAvailable();
+    if(result != null){
+      result.revive();
+      result.spawn(true, doTrails);
+      timeTillNextSpawn = spawnEvery + (FlxG.random.float(-spawnEveryTimeVariance, spawnEveryTimeVariance));
+      return true;
+    }else{
+      return false;
+    }
+  }
+
 	var previousX:Float = 0;
-	function onUpdate(callback)
+	override function onUpdate(event):Void
 	{
-		if(particlesEmitter!=null){
-			var changeFromTargetDestination:Float = orangeBackShit.x - previousX;
-			
-			for (p in particlesEmitter){
-				p.scale.x = 0.75 + particleScaleAdd;
-				p.scale.y = 0.75 + particleScaleAdd;
-			
-				var curX = p.x;
-				p.x = curX + changeFromTargetDestination;
-			}
-			previousX = orangeBackShit.x;	
+    super.onUpdate(event);
+		if(arrows!=null && arrows.visible && arrows.active){
+
+      if(particlesActive){
+        if(timeTillNextSpawn < 0){
+          trySpawnParticle();
+        }else{
+          timeTillNextSpawn -= event.elapsed;
+        }
+      }			
+      arrows.forEachAlive(function(spr:ArrowParticleSprite)
+      {
+        spr.scale.set(targetScale, targetScale);
+        spr.x += spr.velocity_x * event.elapsed;
+        spr.y += spr.velocity_y * event.elapsed;
+        spr.angleZ += spr.velocity_angleZ * event.elapsed;
+        spr.angleY += spr.velocity_angleY * event.elapsed;
+        spr.angleX += spr.velocity_angleX * event.elapsed;
+
+        if(spr.y > (FlxG.height+32)){
+          spr.kill();
+        }
+
+      });
 		}
 	}
-
-
-
 
   public var moreWays:BGScrollingText;
   public var funnyScroll:BGScrollingText;
@@ -80,6 +106,7 @@ class ModchartHellBackingCard extends BackingCard
   {
     super.applyExitMovers(exitMovers, exitMoversCharSel);
     if (exitMovers == null || exitMoversCharSel == null) return;
+
     exitMovers.set([moreWays],
       {
         x: FlxG.width * 2,
@@ -129,12 +156,11 @@ class ModchartHellBackingCard extends BackingCard
     FlxTween.tween(moreWays2, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
     FlxTween.tween(txtNuts, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
     FlxTween.tween(funnyScroll3, {speed: 0}, 0.8, {ease: FlxEase.sineIn});
-	
   }
 
   public override function new()
   {
-    super("nobody");
+    super("modcharts");
 
     var player = PlayerRegistry.instance.fetchEntry(this.currentCharacter);
     funnyScroll = new BGScrollingText(0, 220, player.getFreeplayDJText(1), FlxG.width / 2, false, 60);
@@ -144,6 +170,8 @@ class ModchartHellBackingCard extends BackingCard
     txtNuts = new BGScrollingText(0, 285, player.getFreeplayDJText(3), FlxG.width / 2, true, 43);
     funnyScroll3 = new BGScrollingText(0, orangeBackShit.y + 10, player.getFreeplayDJText(1), FlxG.width / 2, false, 60);
   }
+
+  final howManyArrows:Int = 30;
 
   public override function onCreate(event:ScriptEvent):Void
   {
@@ -206,6 +234,31 @@ class ModchartHellBackingCard extends BackingCard
     funnyScroll3.speed = -3.8;
     add(funnyScroll3);
 
+
+    //var freeplayState = FlxG.state.subState;
+
+    arrows = new ZProjectSpriteGroup();
+    arrows.camera = this.camera;
+    arrows.visible = false;
+    
+    for (i in 0...howManyArrows){ 
+      var arrowSpr:ArrowParticleSprite = new ArrowParticleSprite(-264,0);
+      arrows.add(arrowSpr);
+
+      if(doTrails){
+        var evilTrail = new FunkTrail(arrowSpr, null, 13, 0.04, 0.35, 0.02);
+        evilTrail.camera = arrows.camera;
+        //evilTrail.shader = arrowSpr.shader;
+        for (s in evilTrail.members) if (s != null) s.shader = arrowSpr.shader;
+        add(evilTrail);
+      }
+
+      arrowSpr.kill(); // Start dead!
+    }
+
+    
+    add(arrows);
+
     glowDark = new FlxSprite((FreeplayState.CUTOUT_WIDTH * FreeplayState.DJ_POS_MULTI) + -300, 330).loadGraphic(Paths.image('freeplay/beatglow'));
     glowDark.blend = 9;
     add(glowDark);
@@ -218,70 +271,14 @@ class ModchartHellBackingCard extends BackingCard
     glow.visible = false;
 
     add(cardGlow);
-	
-	
-	
-	
-	
-	
-		particlesEmitter = new FlxTypedEmitter(20,20, 48);
-		particlesEmitter.launchMode = FlxEmitterMode.SQUARE;
-		particlesEmitter.width = 500;
-		particlesEmitter.height = 12;
-		particlesEmitter.x = 0;
-		particlesEmitter.y = -32;
-		particlesEmitter.lifespan.set(3, 4);
-		particlesEmitter.velocity.set(-80, 280, 80, 380);
-		particlesEmitter.angularVelocity.set(-180, 180, -90, 90);
-		particlesEmitter.launchAngle.set(-180, 180);
-		particlesEmitter.angle.set(-90, 90);
-		particlesEmitter.scale.set(0.5, 0.5, 0.65, 0.65, 0.8, 0.8, 1, 1);
-		particlesEmitter.color.set(0xFFFF0000, 0xFFFFC0CB, 0xFF0000FF, 0xFF00FFFF);
-		particlesEmitter.keepScaleRatio = true;
-		//particlesEmitter.camera = card.camera;
-		particlesEmitter.camera = this.camera;
-		//particlesEmitter.loadParticles(Paths.image("hazard/titleScreenNote"), 48);
-
-		var particle:FlxParticle;
-		for (i in 0...48) //Need to keep this high or else null sprites? WHAT?!
-		{
-			particle = new FlxParticle();
-			particle.x -= 5000; //So errrrrrr.... basically... errrrr it... err... stops the trail from loading in the centre of the... err... screen? and because its off screen it... errrrrrrr... doesn't load and cause frame drops? yeah... something like that... i think
-			particle.loadGraphic(Paths.image("freeplay/freeplay-nobody-card/noteParticle" + FlxG.random.int(1, 7)));
-			
-			if(doTrails){
-				var evilTrail = new FlxTrail(particle, null, 10, 6, 0.7, 0.08);
-				evilTrail.camera = particlesEmitter.camera;
-				//evilTrail.color = 0xFFFF0000;
-				if(freeplayState.dj != null){
-					freeplayState.insert(freeplayState.members.indexOf(freeplayState.dj), evilTrail);
-				}else{
-					freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), evilTrail);
-				}
-			}
-			particlesEmitter.add(particle);
-		}
-		
-		particlesEmitter.start(false, 0.23);
-		var freeplayState = FlxG.state.subState;
-		//if(freeplayState.dj != null){
-		//	freeplayState.insert(freeplayState.members.indexOf(freeplayState.dj), particlesEmitter);
-		//}else{
-		//	freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), particlesEmitter);
-		//}
-		//freeplayState.insert(freeplayState.members.indexOf(freeplayState.bgDad), particlesEmitter);
-		freeplayState.add(particlesEmitter);	
   }
 
   var beatFreq:Int = 1;
   var beatFreqList:Array<Int> = [1, 2, 4, 8];
-
-  
-
   
   public override function onBeatHit(event):Void
   {
-	if(pulseParticlesOnBeat) pulseParticles();	
+	   if(pulseParticlesOnBeat) pulseParticles();	
   
     // increases the amount of beats that need to go by to pulse the glow because itd flash like craazy at high bpms.....
     beatFreq = beatFreqList[Math.floor(Conductor.instance.bpm / 166)];
@@ -307,6 +304,7 @@ class ModchartHellBackingCard extends BackingCard
     funnyScroll3.visible = true;
     glowDark.visible = true;
     glow.visible = true;
+    arrows.visible = true;
   }
 
   public override function confirm():Void
@@ -335,5 +333,6 @@ class ModchartHellBackingCard extends BackingCard
     funnyScroll3.visible = false;
     glowDark.visible = false;
     glow.visible = false;
+    arrows.visible = false;
   }
 }

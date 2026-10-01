@@ -3,14 +3,8 @@
  "songName": "What in the Testin'?!",
  "artist": "Hazard24",
  "charter": "Hazard24",
- "divisions": 96,
  "looped": false,
- "offsets": {
-  "instrumental": 0,
-  "altInstrumentals": {  },
-  "vocals": {  },
-  "altVocals": {  }
- },
+ "offsets": { },
  "playData": {
   "songVariations": [],
   "difficulties": [
@@ -40,9 +34,9 @@
   },
   "album": "WITF_test",
   "previewStart": 0,
-  "previewEnd": 11995
+  "previewEnd": 0.463478260869565
  },
- "generatedBy": "What in the Funkin' - v0.8.1",
+ "generatedBy": "What in the Funkin' - v0.8.1, Edited by Hazard24",
  "timeFormat": "ms",
  "timeChanges": [
   {

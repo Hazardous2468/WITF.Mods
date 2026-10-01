@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="freeplayCapsule_modcharts.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="mp3 capsule w backing0000" x="2" y="2" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0001" x="2" y="136" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0002" x="2" y="270" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0003" x="2" y="404" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0004" x="2" y="538" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0005" x="2" y="672" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0006" x="2" y="806" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing0007" x="2" y="940" width="612" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0000" x="2" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0001" x="2" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0002" x="606" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0003" x="606" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0004" x="616" y="2" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0005" x="616" y="2" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0006" x="616" y="136" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0007" x="616" y="136" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0008" x="616" y="270" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0009" x="616" y="270" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0010" x="616" y="404" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0011" x="616" y="404" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0012" x="616" y="538" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0013" x="616" y="538" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0014" x="616" y="672" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0015" x="616" y="672" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0016" x="616" y="806" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0017" x="616" y="806" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0018" x="616" y="940" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0019" x="616" y="940" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0020" x="1210" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0021" x="1210" y="1074" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0022" x="1220" y="2" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0023" x="1220" y="2" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0024" x="1220" y="136" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0025" x="1220" y="136" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0026" x="1220" y="270" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0027" x="1220" y="270" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0028" x="1220" y="404" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0029" x="1220" y="404" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0030" x="1220" y="538" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0031" x="1220" y="538" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0032" x="1220" y="672" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0033" x="1220" y="672" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0034" x="1220" y="806" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0035" x="1220" y="806" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0036" x="1220" y="940" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0037" x="1220" y="940" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0038" x="2" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0039" x="2" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0040" x="606" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0041" x="606" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0042" x="1210" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0043" x="1210" y="1208" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0044" x="2" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0045" x="2" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0046" x="606" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0047" x="606" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0048" x="1210" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0049" x="1210" y="1342" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0050" x="2" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0051" x="2" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0052" x="606" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0053" x="606" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0054" x="1210" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0055" x="1210" y="1476" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0056" x="2" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0057" x="2" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0058" x="606" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0059" x="606" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0060" x="1210" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0061" x="1210" y="1610" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0062" x="2" y="1744" width="602" height="132"/>
+	<SubTexture name="mp3 capsule w backing NOT SELECTED0063" x="2" y="1744" width="602" height="132"/>
+</TextureAtlas>

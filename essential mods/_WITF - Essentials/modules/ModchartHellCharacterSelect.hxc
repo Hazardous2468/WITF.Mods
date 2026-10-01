@@ -1,0 +1,243 @@
+package witf.modules.charSelect;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.modding.events.CharacterSelectScriptEvent;
+import funkin.ui.charSelect.CharSelectSubState;
+import funkin.graphics.ZSpriteProjected;
+import funkin.graphics.ZProjectSpriteGroup;
+import flixel.group.FlxSpriteGroup.FlxTypedSpriteGroup;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import funkin.Conductor;
+
+
+
+// A module that exists purely to change the main menu background. Just replacing the menuBG asset isn't good enough as it makes the options unreadable.
+
+class ModchartHellCharSelectEffectsModule extends Module
+{
+  public function new()
+  {
+    super('ModchartHellCharSelectEffectsModule', 1, {state: CharSelectSubState});
+  }
+
+  final modchartsCharacterID:String = "modcharts";
+
+  var selectState:CharSelectSubState;
+  //var arrows:FlxTypedSpriteGroup<ArrowParticleSprite>;
+  var arrows:ZProjectSpriteGroup;
+
+  var beatPulseTween:FlxTween;
+  var velocityTween:FlxTween;
+  var speedMultiplier:Float = 1.0;
+
+
+  override public function onStateChangeEnd(event)
+  {
+    super.onStateChangeEnd(event);
+    selectState = null;
+    if (!Std.isOfType(event.targetState, CharSelectSubState)){
+      //trace("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN NOT CHARACTER SELECT!");
+      return;
+    }
+    //trace("YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY LOADED INTO CHARACTER SELECT!");
+    selectState = event.targetState;
+    initAssets();
+    curSelected = selectState.curChar;
+  }
+
+  override public function onStateChangeBegin(event)
+  {
+    super.onStateChangeBegin(event);
+    
+    if (!Std.isOfType(event.targetState, CharSelectSubState) && selectState != null){
+      //trace("CLLLLLLEEEEEEEEEEAAAAAAAAAAAAAAANNNNNNNNNNNN");
+      cleanup();
+    }
+  }
+
+  final howManyArrows:Int = 30;
+
+  function initAssets():Void{
+    if(selectState == null) return;
+    arrows = new ZProjectSpriteGroup();
+    selectState.insert(selectState.members.indexOf(selectState.barthing), arrows);
+    speedMultiplier = 1;
+
+    
+    for (i in 0...howManyArrows){ 
+      var arrowSpr:ArrowParticleSprite = new ArrowParticleSprite(0,0);
+      arrows.add(arrowSpr);
+      arrowSpr.kill(); // Start dead!
+      //arrowSpr.spawn();
+    }
+
+  }
+
+  function cleanup():Void{
+    selectState = null;
+    speedMultiplier = 1;
+    curSelected = "";
+    if (arrows != null) {
+      arrows.destroy();
+      arrows = null;
+    }
+    if(velocityTween!=null){
+      velocityTween.cancel();
+      velocityTween = null;
+    }
+    if(beatPulseTween!=null){
+      beatPulseTween.cancel();
+      beatPulseTween = null;
+    }
+  }
+
+  var curSelected(default, set):String = "";
+  function set_curSelected(newValue:String):String
+  {
+    if(selectState != null){
+
+
+      // Selected the modchart character
+      if(curSelected != modchartsCharacterID && newValue == modchartsCharacterID){
+        particlesActive = true;
+        
+        trace("MODCHART TIME: " + newValue);
+
+        if(velocityTween!=null){
+          velocityTween.cancel();
+        }
+        velocityTween = FlxTween.num(4.3, 1.0, 4, {ease: FlxEase.expoOut}, function(v){
+          speedMultiplier = v;
+        });
+
+        if(arrows!=null){
+          final burstCount:Int = 9;
+          for (i in 0...burstCount){ 
+            trySpawnParticle();
+          }
+        }
+      }
+
+      // Deselected the modchart character
+      else if(curSelected == modchartsCharacterID && newValue != modchartsCharacterID){
+        particlesActive = false;
+        trace("modchart not anymore :(   : " + newValue);
+
+        if(velocityTween!=null){
+          velocityTween.cancel();
+        }
+
+        velocityTween = FlxTween.num(speedMultiplier, 4.15, 2, {ease: FlxEase.sineIn}, function(v){
+          speedMultiplier = v;
+        });
+
+
+      }
+    }
+    
+    curSelected = newValue;
+    return newValue;
+  }
+
+  
+  var particlesActive(default, set):Bool = false;
+  function set_particlesActive(newValue:Bool):Bool
+  {
+    if(arrows!=null){
+      //arrows.visible = newValue;
+      //arrows.forEachAlive(function(spr:ArrowParticleSprite)
+      //{
+      //  spr.visible = newValue;
+      //});
+    }
+    trace("Particles Active? " + newValue);
+    particlesActive = newValue;
+    return newValue;
+  }
+
+
+  var scaleAmount:Float = 0.75;
+  override function onBeatHit(event:SongTimeScriptEvent):Void
+  {
+    super.onBeatHit(event);
+    if(beatPulseTween!=null){
+      beatPulseTween.cancel();
+    }
+    var beatLength:Float = Constants.SECS_PER_MIN / 90.0; // Stay Funky BPM is 90.
+    if(Conductor.instance != null){
+      beatLength = Conductor.instance.beatLengthMs / Constants.MS_PER_SEC;
+    }
+    beatPulseTween = FlxTween.num(0.9, 0.75, beatLength, {ease: FlxEase.quadInOut}, function(v){
+      scaleAmount = v;
+    });
+  }
+
+
+  override function onCharacterSelect(event:CharacterSelectScriptEvent)
+  {
+    super.onCharacterSelect(event);
+    trace("HAIII " + event.characterId);
+    curSelected = event.characterId;
+  }
+
+  final spawnEvery:Float = 0.74;
+  final spawnEveryTimeVariance:Float = 0.16;
+
+  function trySpawnParticle():Bool{
+    var result = arrows.getFirstAvailable();
+    if(result != null){
+      result.revive();
+      result.spawn(false);
+      timeTillNextSpawn = spawnEvery + (FlxG.random.float(-spawnEveryTimeVariance, spawnEveryTimeVariance));
+      return true;
+    }else{
+      return false;
+    }
+  }
+
+  var timeTillNextSpawn:Float = 0;
+  override function onUpdate(event):Void
+  {
+    super.onUpdate(event);
+    if(selectState == null) return;
+
+    
+    if(arrows!=null && arrows.visible){
+
+      if(particlesActive){
+        if(timeTillNextSpawn < 0){
+          trySpawnParticle();
+        }else{
+          timeTillNextSpawn -= event.elapsed;
+        }
+      }
+
+
+
+      arrows.forEachAlive(function(spr:ArrowParticleSprite)
+      {
+        spr.scale.set(scaleAmount, scaleAmount);
+        spr.x += (spr.velocity_x * speedMultiplier) * event.elapsed;
+        spr.y += spr.velocity_y* event.elapsed;
+        spr.angleZ += spr.velocity_angleZ * event.elapsed;
+        spr.angleY += spr.velocity_angleY * event.elapsed;
+        spr.angleX += spr.velocity_angleX * event.elapsed;
+
+        if((spr.x+spr.width+160) < 0){
+          //spr.x = FlxG.width;
+          //spr.spawn();
+          spr.kill();
+        }
+
+      });
+    }
+
+    
+  }
+
+
+}

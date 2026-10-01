@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="arrowParticles.png">
+<SubTexture name="10000" x="0" y="0" width="159" height="156" frameX="-2" frameY="-3" frameWidth="163" frameHeight="161" />
+<SubTexture name="20000" x="0" y="156" width="154" height="152" frameX="-1" frameY="-3" frameWidth="154" frameHeight="156" />
+<SubTexture name="30000" x="159" y="0" width="154" height="155" frameX="-1" frameY="-1" frameWidth="154" frameHeight="155" />
+<SubTexture name="40000" x="313" y="0" width="152" height="147" frameX="-1" frameY="-1" frameWidth="151" frameHeight="150" />
+<SubTexture name="50000" x="313" y="147" width="142" height="142" frameX="0" frameY="0" frameWidth="140" frameHeight="140" />
+<SubTexture name="60000" x="154" y="156" width="150" height="149" frameX="-2" frameY="0" frameWidth="151" frameHeight="147" />
+<SubTexture name="70000" x="0" y="308" width="138" height="138" frameX="0" frameY="0" frameWidth="136" frameHeight="136" />
+</TextureAtlas>

@@ -1,34 +1,16 @@
+package witf.modules.freeplay;
+
 import funkin.modding.module.Module;
 import funkin.play.PlayState;
-import funkin.ui.AtlasMenuItem;
 import flixel.FlxG;
 import funkin.util.Constants;
 import funkin.Preferences;
-import flixel.tweens.FlxTween;
-import flixel.tweens.FlxEase;
-import funkin.Conductor;
-import funkin.play.notes.Strumline;
-import flixel.math.FlxMath;
-import flixel.util.FlxStringUtil;
-import flixel.FlxSprite;
-
-import flixel.text.FlxText;
-import flixel.text.FlxTextBorderStyle;
+import funkin.graphics.FunkinSprite;
 import funkin.Paths;
-
 import funkin.audio.FunkinSound;
-
-import funkin.ui.debug.charting.ChartEditorState;
-
-import funkin.play.modchartSystem.ModHandler;
-import funkin.play.modchartSystem.ModConstants;
-
 import funkin.ui.freeplay.FreeplayState;
 import funkin.ui.mainmenu.MainMenuState;
-
 import funkin.modding.module.ModuleHandler;
-
-
 import flixel.addons.display.FlxRuntimeShader;
 import openfl.filters.ShaderFilter;
 import openfl.filters.BitmapFilter;
@@ -36,144 +18,149 @@ import openfl.utils.Assets;
 
 class FreeplayFunnyForHalved extends Module
 {
-	override function onStateChangeStart(event) {
-		super.onStateChangeStart(event);
-	}
-	
-	
-	var shader:FlxRuntimeShader = null; 
-	var shaderFilter:ShaderFilter = null; 
-		
-	var halfSelected:Bool = false;
-	function onUpdate(callback)
+	public function new()
 	{
-		if(PlayState.instance != null) return; //WE INGAME, SKIP ALL THIS!
-		var inFreeplay = Std.isOfType(FlxG.state.subState, FreeplayState);
-		if(!inFreeplay) return;
-		
-		//Will only work if on 'Modchart Hell' character, 
-		//otherwise this script will break due to how it accesses the custom backing card variables
-		var correctCharacter:Bool = FreeplayState.rememberedCharacterId == "nobody";
+		super('FreeplayFunnyForHalved', {state: MainMenuState});
+	}
+
+	var shader:FlxRuntimeShader; 
+	var shaderFilter:ShaderFilter; 
+	var halfSelected:Bool = false;
+	var backingImage:FunkinSprite;
+	override public function onSubStateOpenEnd(event)
+	{
+		super.onSubStateOpenEnd(event);
+		inFreeplayForModcharts = false;
+		if (!(event.targetState is FreeplayState)) return;
+		var correctCharacter:Bool = FreeplayState.rememberedCharacterId == "modcharts";
 		if(!correctCharacter) return;
-		
+		inFreeplayForModcharts = true;
+		halfSelected = false;
+
 		if(shader == null){
 			shader = new FlxRuntimeShader(Assets.getText(Paths.frag("halved/binaryglitch")), null);
 			shader.setBool('_active', true);
 			shader.setFloat('glitchStrength', 0.3);
 			shaderFilter = new ShaderFilter(shader);
-			
-			theColorWas = FlxG.state.subState.angleMaskShader.extraColor;
 		}
-		if(theColorWas == null) theColorWas = 0xFFFFFFFF;
-		
-		var curCapsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
-		
-		/*
-		if(FlxG.keys.justPressed.SHIFT){
-			var sndToPlay:String = "missnote3";
-			if(curCapsule == null){
-				sndToPlay = "missnote3";
-			}else{
-				if(FlxG.state.subState.curSelected == 0){ //RANDOM SELECTED
-					sndToPlay = "missnote1";
-				}else{
-					if(curCapsule.freeplayData.data.songName.toLowerCase() == "halved halved halved"){
-						sndToPlay = "notitg_mine";
-					}else{
-						sndToPlay = "missnote2";
-					}
-				}
-			}
-			FunkinSound.playOnce(Paths.sound(sndToPlay));
-		}
-		*/
-		
-		var freeplayCamera = FlxG.state.subState.funnyCam;
-		freeplayCamera.filtersEnabled=true;
-		
-		if(FlxG.state.subState.curSelected == 0){ //RANDOM SELECTED
-			if(halfSelected){
-				halfSelected = false;
-				
-				removeShaderToCamera(freeplayCamera, shaderFilter);
+		var fp = event.targetState;
+		backingImage = fp.backingImage.clone();
+	    backingImage.cameras = [fp.funnyCam];
+	    backingImage.shader = fp.angleMaskShader;
+	    backingImage.loadGraphic(Paths.image("halved_assets/freeplay-backingImage", "shared"));
+	    backingImage.setGraphicSize(0, FlxG.height + 1);
+	    backingImage.updateHitbox();
+	    fp.insert(fp.members.indexOf(fp.backingImage)+1, backingImage);
+	    backingImage.visible = false;
 
-				FlxG.state.subState.backingCard.pinkBack.visible = true;
-				FlxG.state.subState.backingCard.orangeBackShit.visible = true;
-				FlxG.state.subState.backingCard.alsoOrangeLOL.visible = true;
-				FlxG.state.subState.backingImage.visible = true;
-				FlxG.state.subState.angleMaskShader.extraColor = theColorWas;
-				
-				FlxG.state.subState.backingCard.active = true;
-				
-				//FlxG.state.subState.dj.active = true;
-				//FlxG.state.subState.dj.color = 0xFFFFFFFF;
-				FlxG.state.subState.dj.resetAFKTimer();
-				
-				if(FlxG.state.subState.backingCard.particleScaleTween != null){
-					FlxG.state.subState.backingCard.particleScaleTween.active = true;
-				}
-				FlxG.state.subState.backingCard.pulseParticlesOnBeat = true;
-				FlxG.state.subState.backingCard.particlesEmitter.active = true;
-			}
-			return;
+		//var curCapsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
+		//var id = curCapsule.freeplayData?.data?.id ?? null;
+		//updateHalvedFreeplayState(id == "halved");
+	}
+	override public function onSubStateCloseBegin(event)
+	{
+		super.onSubStateCloseBegin(event);
+		inFreeplayForModcharts = false;
+	}
+	override public function onSubStateCloseEnd(event)
+	{
+		inFreeplayForModcharts = false;
+		super.onSubStateCloseEnd(event);
+		if(backingImage!=null){
+			backingImage.destroy();
+			backingImage = null;
 		}
-		if(curCapsule != null && curCapsule.freeplayData.data != null){
-			if(curCapsule.freeplayData.data.songName.toLowerCase() == "halved halved halved"){
+	}
+
+	var inFreeplayForModcharts:Bool = false;
+	override function onUpdate(event)
+	{
+		super.onUpdate(event);
+		if(!inFreeplayForModcharts) return;
+		if(FlxG.state.subState != null && backingImage !=null && FlxG.state.subState.backingImage !=null){
+	      backingImage.setPosition(FlxG.state.subState.backingImage.x, FlxG.state.subState.backingImage.y);
+	    }
+		//var curCapsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
+		//var id = curCapsule.freeplayData?.data?.id ?? null;
+		//updateHalvedFreeplayState(id == "halved");
+	}
+
+	public function onCapsuleSelected(event):Void
+	{
+		super.onCapsuleSelected(event);
+
+		if(!inFreeplayForModcharts) return;
+
+		var capsule = event.capsule;
+	    var data = capsule.freeplayData;
+	    var id = event.capsule?.freeplayData?.data?.id ?? null;
+	    //var variation = event.capsule?.freeplayData?.curVariation ?? null;
+
+
+	    //var curCapsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
+		//var id = curCapsule.freeplayData?.data?.id ?? null;
+	   	updateHalvedFreeplayState(id == "halved");
+	}
+
+	function updateHalvedFreeplayState(active:Bool):Void{
+		var freeplayCamera = FlxG.state.subState.funnyCam;
+		trace("HALVED? " + (active));
+		if(active){
+			if(!halfSelected){
+				backingImage.visible = true;
+				freeplayCamera.filtersEnabled=true;
 				halfSelected = true;
-				
 				addShaderToCamera(freeplayCamera, shaderFilter);
-				
+
 				FlxG.state.subState.dj.resetAFKTimer();
-				//FlxG.state.subState.dj.color = 0xFF000000;
-				FlxG.state.subState.backingCard.active = false;
 				
 				FlxG.state.subState.backingCard.pinkBack.visible = false;
 				FlxG.state.subState.backingCard.orangeBackShit.visible = false;
 				FlxG.state.subState.backingCard.alsoOrangeLOL.visible = false;
-								
-				FlxG.state.subState.backingImage.visible = true;
-				FlxG.state.subState.angleMaskShader.extraColor = 0xFF000000;
 
-				
-				if(FlxG.state.subState.backingCard.particleScaleTween != null){
-					FlxG.state.subState.backingCard.particleScaleTween.active = false;
+				FlxG.state.subState.backingImage.color = 0xFF000000;
+
+				if(FlxG.state.subState.backingCard.beatPulseTween != null){
+					FlxG.state.subState.backingCard.beatPulseTween.active = false;
 				}
 				FlxG.state.subState.backingCard.pulseParticlesOnBeat = false;
-				FlxG.state.subState.backingCard.particlesEmitter.active = false;				
-				
-				
-			}else{
-				if(halfSelected){
-					halfSelected = false;
-					
-					removeShaderToCamera(freeplayCamera, shaderFilter);
-					
-					FlxG.state.subState.backingCard.pinkBack.visible = true;
-					FlxG.state.subState.backingCard.orangeBackShit.visible = true;
-					FlxG.state.subState.backingCard.alsoOrangeLOL.visible = true;
-					FlxG.state.subState.backingImage.visible = true;
-					FlxG.state.subState.angleMaskShader.extraColor = theColorWas;
-					
-			
-			
-					FlxG.state.subState.backingCard.active = true;
-					
-					//FlxG.state.subState.dj.active = true;
-					//FlxG.state.subState.dj.color = 0xFFFFFFFF;
-					FlxG.state.subState.dj.resetAFKTimer();
-					
-					if(FlxG.state.subState.backingCard.particleScaleTween != null){
-						FlxG.state.subState.backingCard.particleScaleTween.active = true;
-					}
-					FlxG.state.subState.backingCard.pulseParticlesOnBeat = true;
-					FlxG.state.subState.backingCard.particlesEmitter.active = true;
-				}
+				FlxG.state.subState.backingCard.arrows.active = false;		
+
+				FlxG.state.subState.backingCard.moreWays.alpha = 0.0;
+			    FlxG.state.subState.backingCard.funnyScroll.alpha = 0.0;
+			    FlxG.state.subState.backingCard.txtNuts.alpha = 0.0;
+			    FlxG.state.subState.backingCard.funnyScroll2.alpha = 0.0;
+			    FlxG.state.subState.backingCard.moreWays2.alpha = 0.0;
+			    FlxG.state.subState.backingCard.funnyScroll3.alpha = 0.0;
 			}
-			//lol.songData.songId;
-		}
+	    }else if(halfSelected){
+	    	halfSelected = false;
+	    	backingImage.visible = false;
+	    	removeShaderToCamera(freeplayCamera, shaderFilter);
+	    	FlxG.state.subState.backingCard.pinkBack.visible = true;
+			FlxG.state.subState.backingCard.orangeBackShit.visible = true;
+			FlxG.state.subState.backingCard.alsoOrangeLOL.visible = true;
+			FlxG.state.subState.backingImage.color = 0xFFFFFFFF;
+			
+			//FlxG.state.subState.dj.active = true;
+			//FlxG.state.subState.dj.color = 0xFFFFFFFF;
+			FlxG.state.subState.dj.resetAFKTimer();
+			
+			if(FlxG.state.subState.backingCard.beatPulseTween != null){
+				FlxG.state.subState.backingCard.beatPulseTween.active = true;
+			}
+			FlxG.state.subState.backingCard.pulseParticlesOnBeat = true;
+			FlxG.state.subState.backingCard.arrows.active = true;
+
+			FlxG.state.subState.backingCard.moreWays.alpha = 1.0;
+		    FlxG.state.subState.backingCard.funnyScroll.alpha = 1.0;
+		    FlxG.state.subState.backingCard.txtNuts.alpha = 1.0;
+		    FlxG.state.subState.backingCard.funnyScroll2.alpha = 1.0;
+		    FlxG.state.subState.backingCard.moreWays2.alpha = 1.0;
+		    FlxG.state.subState.backingCard.funnyScroll3.alpha = 1.0;
+	    }
 	}
-	var theColorWas = null;
-	
+
 	function addShaderToCamera(daCamera, daShaderFilter){
 		if(daCamera != null && daShaderFilter!=null){
 			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];

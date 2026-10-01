@@ -1,0 +1,99 @@
+package witf.modules.play.metamods;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import funkin.save.Save;
+import funkin.audio.FunkinSound;
+
+class NoFailModule extends Module
+{
+	public var enabled:Bool = true;
+	public var playerDied:Bool = false;
+	public var wasValidScore:Bool = false;
+	public var wasInPractice:Bool = false;
+
+	var destroyed:Bool = true;
+
+	public function new() {
+        super('NoFailModule', 99999, {state: PlayState});
+        destroyed = true;
+        //wasValidScore = PlayState.instance.currentSong.validScore;
+        //wasInPractice = PlayState.instance.isPracticeMode;
+    }
+
+    function initialize():Void
+	{			
+		if(destroyed){
+			destroyed = false;
+			wasValidScore = PlayState.instance.currentSong.validScore;
+        	wasInPractice = PlayState.instance.isPracticeMode;
+		}
+		PlayState.instance.currentSong.validScore = wasValidScore;
+		PlayState.instance.isPracticeMode = wasInPractice;
+		playerDied = false;
+	}
+
+    function cleanUp():Void{}
+
+	override function onSongLoaded(event):Void
+	{
+		super.onSongLoaded(event);
+		cleanUp();
+		initialize();
+	}
+
+	override function onDestroy(event):Void
+	{
+		cleanUp();
+		destroyed = true;
+		super.onDestroy(event);
+	}
+
+	override function onGameOver(event):Void
+	{
+		if(enabled){
+			if(!PlayState.instance.isPracticeMode){
+				event.cancelEvent();
+				trace("NO FAIL TRIGGERED FROM GAME OVER EVENT");
+				triggerFail();
+			}
+		}
+		super.onGameOver(event);
+	}
+
+
+	function triggerFail():Void{
+		if(!enabled){
+			return;
+		}
+		playerDied = true;
+
+		var snd:FunkinSound = FunkinSound.playOnce(Paths.sound("noFailTrigger"));
+		trace(" NO FAIL TRIGGERED!!! ");
+		PlayState.instance.isPracticeMode = true;
+		PlayState.instance.currentSong.validScore = false;
+		PlayState.instance.isPlayerDying = false;
+	}
+
+	override function onUpdate(event)
+	{
+		super.onUpdate(event);
+		if(PlayState.instance == null || !enabled) return;
+		if(PlayState.instance.isGamePaused) return;
+		if(PlayState.instance.isPracticeMode || PlayState.instance.isBotPlayMode ) return;
+		if(PlayState.instance.health <= 0 || PlayState.instance.isPlayerDying){
+			trace("NO FAIL TRIGGERED FROM UPDATE");
+			triggerFail();
+		}
+
+		
+	}
+
+	
+	
+	
+}
