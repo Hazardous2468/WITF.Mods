@@ -1,0 +1,298 @@
+package rewired.modules.freeplay;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.DateUtil;
+import flixel.text.FlxText;
+import flixel.FlxSprite;
+import funkin.graphics.FunkinSprite;
+import flixel.group.FlxSpriteGroup;
+import flixel.util.FlxTimer;
+import funkin.audio.FunkinSound;
+import funkin.Paths;
+import funkin.ui.freeplay.SongMenuItem;
+import funkin.data.song.SongData.SongTimeChange;
+import funkin.Conductor;
+
+// Reusing the '???' for Oblierated Erect lol
+// Though this script ALSO controls the visuals that occur when it gets hovered-over and the custom preview song.
+class KBBloodShedPreview extends Module
+{
+  public function new()
+  {
+    super('KBBloodShedPreview', {state: MainMenuState});
+  }
+
+  var starSprites:FunkinSprite;
+  var darkness:FunkinSprite;
+  var backingImage:FunkinSprite;
+  var cardBackDim:FunkinSprite;
+  var kbEyes:FunkinSprite;
+
+  override public function onSubStateOpenEnd(event)
+  {
+    super.onSubStateOpenEnd(event);
+    if (!(event.targetState is FreeplayState)) return;
+
+    var fp = event.targetState;
+
+    var sprite = new FunkinSprite();
+    sprite.visible = false;
+    sprite.kill();
+    fp.grpCapsules.members[0].add(sprite);
+    starSprites = new FunkinSprite().loadGraphic(Paths.image('freeplay/diffOverride/stars-error'));
+    starSprites.x = fp.albumRoll.difficultyStars.x + 83-14;
+    starSprites.y = fp.albumRoll.difficultyStars.y + 12-3;
+    fp.albumRoll.add(starSprites);
+    
+
+    /*
+    darkness = new FunkinSprite().makeSolidColor(FlxG.width*2, FlxG.height*2, 0xFF000000);
+    darkness.setGraphicSize(FlxG.width, FlxG.height);
+    darkness.screenCenter();
+    darkness.visible = false;
+    darkness.cameras = [fp.funnyCam];
+    darkness.alpha=0.42;
+    fp.insert(fp.members.indexOf(fp.dj)+1, darkness);
+    //fp.insert(fp.members.indexOf(fp.backingImage), darkness);
+    //fp.add(darkness);
+    */
+
+    
+    cardBackDim = new FunkinSprite().makeSolidColor(FlxG.width*2, FlxG.height*2, 0xFF000000);
+    cardBackDim.setGraphicSize(FlxG.width, FlxG.height);
+    cardBackDim.screenCenter();
+    cardBackDim.visible = false;
+    cardBackDim.cameras = [fp.funnyCam];
+    //cardBackDim.alpha=0.42;
+    cardBackDim.alpha=1;
+    fp.insert(fp.members.indexOf(fp.backingCard)+1, cardBackDim);
+    
+
+    backingImage = fp.backingImage.clone();
+    backingImage.cameras = [fp.funnyCam];
+    backingImage.shader = fp.angleMaskShader;
+    backingImage.loadGraphic(Paths.image("freeplay/kb_back", "shared"));
+    backingImage.setGraphicSize(0, FlxG.height + 1);
+    backingImage.updateHitbox();
+    fp.insert(fp.members.indexOf(fp.backingImage)+1, backingImage);
+    backingImage.visible = false;
+    
+    fp.exitMovers.set([starSprites], {
+      x: FlxG.width * 1.5,
+      speed: 0.4,
+      wait: 0
+    });
+
+    fp.exitMoversCharSel.set([starSprites], {
+      y: -100,
+      speed: 0.8,
+      wait: 0.1
+    });
+    
+
+    darkness = new FunkinSprite(0,0,Paths.image("freeplay/kb_vignette", "shared"));
+    darkness.setGraphicSize(FlxG.width, FlxG.height);
+    darkness.screenCenter();
+    darkness.visible = false;
+    darkness.cameras = [fp.funnyCam];
+    darkness.alpha=0.8;
+    fp.insert(fp.members.indexOf(fp.backingImage)+2, darkness);
+
+
+
+    //kbEyes = new FunkinSprite(0,0,Paths.image("kb_2026/kb_eyes", "shared"));
+    //kbEyes.scale.set(0.2,0.2);
+    //kbEyes.screenCenter();
+    //kbEyes.x = -70;
+    //kbEyes.y -= 129;
+
+    kbEyes = new FunkinSprite(0,0);
+    kbEyes.frames = Paths.getSparrowAtlas('freeplay/kb_appears'); 
+    kbEyes.animation.addByPrefix('KB_appears_behind_bf', 'KB_appears_behind_bf', 24, false);  
+    kbEyes.screenCenter();
+    kbEyes.x = 142;
+    kbEyes.y -= 129;
+
+    kbEyes.visible = false;
+    kbEyes.cameras = [fp.funnyCam];
+    fp.insert(fp.members.indexOf(fp.backingCard)+2, kbEyes);
+
+
+
+    fp.refresh();
+  }
+
+  override function onUpdate(event)
+  {
+    super.onUpdate(event);
+    var sub = FlxG.state.subState;
+    if (!(sub is FreeplayState))
+    {
+      return;
+    }
+    if(backingImage!=null && sub.backingImage!=null){
+      backingImage.setPosition(sub.backingImage.x, sub.backingImage.y);
+    }
+  }
+
+  override public function onDifficultySwitch(event)
+  {
+    super.onDifficultySwitch(event);
+    var capsule = FlxG.state.subState.grpCapsules.members[FlxG.state.subState.curSelected];
+    var data = capsule.freeplayData;
+    var id = (data != null) ? data.levelId : null;
+
+    // thanks mighty and comedy for helping me figure this out
+    for (cap in FlxG.state.subState?.grpCapsules?.members)
+    {
+      if (cap.freeplayData == null || cap.freeplayData.data == null) continue;
+
+      //trace(cap.freeplayData.data.id + " - " + cap.freeplayData.curVariation);
+
+      if (cap.freeplayData.data.id == "bloodshed")
+      {
+        trace('[found it]');
+        hideDifficulty(cap);
+        break;
+      }
+    }
+  }
+
+  function hideDifficulty(capsule:SongMenuItem)
+  {
+    var subTexture = Paths.getSparrowAtlas('freeplay/diffOverride/questionMark');
+    subTexture.parent.destroyOnNoUse = false;
+    for (num in capsule.difficultyNumbers)
+    {
+      if (num == null) continue;
+      if (!num.numToString.contains('QUESTION'))
+      {
+        num.frames.addAtlas(subTexture);
+        num.animation.addByPrefix('QUESTION', 'Numbers Big Question instance 1');
+        num.numToString.push('QUESTION');
+      }
+      num.digit = num.numToString.indexOf('QUESTION');
+    }
+  }
+
+  public function toggleStarVisiblity(visible:Bool):Void{
+    var sub = FlxG.state.subState;
+    if (!(sub is FreeplayState))
+    {
+      return;
+    }
+    var capsule = FlxG.state.subState.currentCapsule;
+    trace("Setting stars to be visible? " + visible);
+    sub.albumRoll.difficultyStars.stars.alpha = visible ? 1 : 0 ;
+    for (member in sub.albumRoll.difficultyStars.flames.members)
+    {
+      if(member!=null)
+        member.alpha = visible ? 1 : 0 ;
+    }
+    starSprites?.visible = !visible;
+  }
+
+  public function scaryFreeplay(active:Bool):Void
+  {
+    var sub = FlxG.state.subState;
+    if (!(sub is FreeplayState))
+    {
+      return;
+    }
+    darkness?.visible = active;
+    cardBackDim?.visible = active;
+    backingImage?.visible = active;
+
+    //sub.backingCard.visible = active;
+    //sub.backingImage.visible = !active;
+    //sub.backingImage.color = active ? 0xFF000000 : 0xFFFFFFFF;
+  }
+
+  public function onSongSelected(event):Void
+  {
+    super.onSongSelected(event);
+    var capsule = event.capsule;
+    var data = capsule.freeplayData;
+    var id = event.capsule?.freeplayData?.data?.id ?? null;
+    //var variation = event.capsule?.freeplayData?.curVariation ?? null;
+    if(id == "bloodshed"){
+      kbEyes?.visible = true;
+      kbEyes?.animation.play("KB_appears_behind_bf");
+    }
+  }
+
+  public function onCapsuleSelected(event):Void
+  {
+    super.onCapsuleSelected(event);
+
+
+    var capsule = event.capsule;
+    var data = capsule.freeplayData;
+    var id = event.capsule?.freeplayData?.data?.id ?? null;
+    var variation = event.capsule?.freeplayData?.curVariation ?? null;
+
+    trace(id + " - " + variation);
+
+    if(id == "bloodshed"){
+
+      hideDifficulty(event.capsule);
+      toggleStarVisiblity(false);
+      scaryFreeplay(true);
+
+      // Wait till the default timer expires, then we do our own check.
+      new FlxTimer().start(FreeplayState.FADE_IN_DELAY + 0.05, function(_)
+      {
+        var state = FlxG.state;
+        if(state==null) return;
+        var sub = state.subState;
+        if(sub == null) return;
+        if (!(sub is FreeplayState))
+        {
+          return;
+        }
+
+        trace("Are we still selected?");
+        var stillSelected = sub.currentCapsule?.freeplayData?.data?.id == "bloodshed";
+        if (!stillSelected) return;
+        trace("YES WE ARE!");
+
+        sub.clearPreviews();
+        if (FlxG.sound.music != null) FlxG.sound.music.stop();
+        playCustomPreview();
+      });
+    }else{
+      toggleStarVisiblity(true);
+      scaryFreeplay(false);
+    }
+
+  }
+
+
+
+  function playCustomPreview(){
+    trace("playing custom preview");
+    FunkinSound.playMusic('bloodshed_freeplay_preview', {
+      startingVolume: 0,
+      overrideExisting: true,
+      loop: true,
+      overrideExisting: true,
+      mapTimeChanges: false,
+      restartTrack: true,
+      onLoad: function()
+      {
+        FlxG.sound.music.fadeIn(1.5, 0, 0.7);
+        trace("Did it work?");
+        trace(Conductor.instance.startingBPM);
+      }
+    });
+    var timeChanges:Array<SongTimeChange> = [
+      new SongTimeChange(0, 160)
+    ];
+    Conductor.instance.mapTimeChanges(timeChanges);
+    //trace("Did it work? 2");
+    //trace(Conductor.instance.startingBPM);
+  }
+}

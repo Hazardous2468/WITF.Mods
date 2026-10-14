@@ -1,0 +1,51 @@
+package rewired.events;
+
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.play.PlayState;
+import funkin.play.event.SongEvent;
+import funkin.Conductor;
+
+// Modified version of the QT Rewired stage change event.
+// Includes the rapid-changing logic for the ending and the new SMPTE error screen state.
+class ChangeStageEventBloodShed extends SongEvent
+{
+  public function new()
+  {
+    super('changeStageBloodshed', {
+      processOldEvents: true
+    });
+  }
+
+  public override function handleEvent(data:SongEventData):Void
+  {
+    return;
+  }
+
+  public override function getTitle():String
+  {
+    return "Change Stage (BL00DSH3D)";
+  }
+
+  public override function getIconPath():String
+  {
+    return 'ui/chart-editor/events/changeStage';
+  }
+
+  override public function getEventSchema()
+  {
+    var stage_schema = {
+      name: "char",
+      title: "Type",
+      type: "enum",
+      keys: [
+        "Static" => "Killer",
+        "Warning (Red)" => "Red",
+        "Bluescreen" => "Blue",
+        "SMPTE" => "Error"
+      ],
+      defaultValue: "Killer"
+    };
+    return [stage_schema];
+  }
+}

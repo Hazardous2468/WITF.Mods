@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="tv_lights_bloodshed.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="tv lights animated0000" x="2093" y="2" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0001" x="4181" y="2" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0002" x="2093" y="1294" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0003" x="4181" y="1294" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0004" x="2" y="1296" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0005" x="2090" y="2586" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0006" x="4178" y="2586" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0007" x="2" y="2588" width="2086" height="1290"/>
+	<SubTexture name="tv lights animated0008" x="2090" y="3878" width="2086" height="1290"/>
+	<SubTexture name="tv lights blue0000" x="4178" y="3878" width="2086" height="1290"/>
+	<SubTexture name="tv lights error_thing0000" x="2" y="3880" width="2086" height="1289"/>
+	<SubTexture name="tv lights off0000" x="2" y="2" width="0" height="0"/>
+	<SubTexture name="tv lights red0000" x="2" y="2" width="2089" height="1292"/>
+</TextureAtlas>

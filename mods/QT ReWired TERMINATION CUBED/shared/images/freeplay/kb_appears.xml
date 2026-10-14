@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="kb_appears.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="KB_appears_behind_bf0000" x="2" y="2" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0001" x="2" y="79" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0002" x="2" y="79" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0003" x="2" y="156" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0004" x="2" y="156" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0005" x="2" y="233" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0006" x="2" y="233" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0007" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0008" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0009" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0010" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0011" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0012" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0013" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0014" x="2" y="310" width="148" height="75"/>
+	<SubTexture name="KB_appears_behind_bf0015" x="2" y="310" width="148" height="75"/>
+</TextureAtlas>

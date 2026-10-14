@@ -1,0 +1,37 @@
+{
+ "version": "2.2.4",
+ "songName": "Termination Erect",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": ["erect"],
+  "stickerPack": "kbStickers",
+  "characters": {
+   "player": "bf-qt",
+   "girlfriend": "gf-qt",
+   "instrumental": "erect",
+   "opponent": "kb_termination",
+   "opponentVocals": ["kb"],
+   "playerVocals": ["bf"]
+  },
+  "stage": "qtStageBloodShed",
+  "noteStyle": "funkin",
+  "ratings": {
+   "erect": 15,
+   "nightmare": 16
+  },
+  "album": "qt_generic",
+  "previewStart": 0,
+  "previewEnd": 0.1054
+ },
+ "generatedBy": "What in the Funkin' (v1.0.5) - v0.8.5",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 210,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

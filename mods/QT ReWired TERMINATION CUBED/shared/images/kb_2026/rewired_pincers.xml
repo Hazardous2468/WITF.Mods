@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="rewired_pincers.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="base0000" x="781" y="2" width="213" height="505"/>
+	<SubTexture name="close0000" x="266" y="510" width="249" height="505"/>
+	<SubTexture name="close0001" x="266" y="1017" width="249" height="505"/>
+	<SubTexture name="close0002" x="266" y="1524" width="249" height="505"/>
+	<SubTexture name="close0003" x="517" y="510" width="249" height="505"/>
+	<SubTexture name="close0004" x="530" y="2" width="249" height="505"/>
+	<SubTexture name="close0005" x="517" y="1017" width="249" height="505"/>
+	<SubTexture name="open0000" x="2" y="2" width="262" height="506"/>
+	<SubTexture name="open0001" x="2" y="510" width="262" height="506"/>
+	<SubTexture name="open0002" x="2" y="1018" width="262" height="506"/>
+	<SubTexture name="open0003" x="2" y="1526" width="262" height="506"/>
+	<SubTexture name="open0004" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="open0005" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="open0006" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="open0007" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="open0008" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="open0009" x="266" y="2" width="262" height="506"/>
+	<SubTexture name="ref0000" x="768" y="509" width="213" height="534"/>
+</TextureAtlas>

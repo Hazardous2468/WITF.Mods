@@ -1,0 +1,68 @@
+package rewired.modules.freeplay;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.freeplay.FreeplayState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.DateUtil;
+import flixel.text.FlxText;
+import flixel.FlxSprite;
+import funkin.graphics.FunkinSprite;
+import flixel.group.FlxSpriteGroup;
+
+// Allows you to select the other variations of Termination. Cubed being latest, Psych being Psyched Up, and Legacy being the OG Kade.
+// Note that additional logic is needed to load the correct chart data, which is a part of the Termination Song Script.
+class TerminationLegacyOptionsModule extends Module
+{
+  public function new()
+  {
+    super('TerminationLegacyOptionsModule', {state: MainMenuState});
+  }
+
+  override function onUpdate(event)
+  {
+    super.onUpdate(event);
+
+    var sub = FlxG.state.subState;
+    if (!(sub is FreeplayState))
+    {
+      return;
+    }
+
+    @:privateAccess
+    var capsule = FlxG.state.subState.currentCapsule;
+    var data = capsule.freeplayData;
+    var id = (data != null) ? data.levelId : null;
+    if (sub.instSelectMenu != null)
+    {
+      var label = sub.instSelectMenu.members[3];
+      if (data != null && data.data != null && data.data.id == "termination" && label.text == "INSTRUMENTAL")
+      {
+        label.text = "VERSION";
+        sub.instSelectMenu.instrumentalIds = ["legacy", "cubed", "psych"]; // Revox is current, "" is Legacy
+        sub.instSelectMenu.currentInstrumentalIndex = 1;
+        sub.instSelectMenu.currentInstrumental.text = sub.instSelectMenu.instrumentalIds[
+          sub.instSelectMenu.currentInstrumentalIndex
+        ];
+        
+        //sub.instSelectMenu.onConfirm = (targetInstId:String) -> sub.capsuleOnConfirmDefault(sub.currentCapsule, targetInstId == "2026" ? "" : "legacy");
+        sub.instSelectMenu.onConfirm = (targetInstId:String) -> sub.capsuleOnConfirmDefault(sub.currentCapsule, targetInstId == "cubed" ? "" : targetInstId);
+        //sub.instSelectMenu.onConfirm = function(targetInstID:String)
+        //{
+        //  var targetInstID:String
+        //  sub.capsuleOnConfirmDefault(sub.currentCapsule, getTargetInst(targetInstID));
+        //}
+      }
+    }
+  }
+
+  function getTargetInst(targetInstID:String){
+    if(targetInstID == "legacy" || targetInstID == "kade" || targetInstID == "old"){
+      return "legacy";
+    }else if (targetInstID == "psych"||targetInstID == "psyched up") {
+      return "psych";
+    }else{
+      return "";
+    }
+  }
+}

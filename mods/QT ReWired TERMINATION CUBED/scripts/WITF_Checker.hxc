@@ -1,0 +1,20 @@
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.util.WindowUtil;
+import funkin.modding.module.Module;
+class TerminationCubed_WITFChecker extends Module
+{
+  var isWITF:Bool = false;
+  public function new()
+  {
+    super('TerminationCubed_WITFChecker', {state: MainMenuState});
+    isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+    if(!isWITF){
+      WindowUtil.showWarning("WITF not found!", "Termination Cubed is made to work on What in the Funkin', 
+however it appears you've installed this mod outside of WITF (probably on a regular vanilla build). 
+
+As a result, this mod may not function as intended.
+Please download WITF for this mod to run properly: https://github.com/Hazardous2468/What-In-The-Funkin
+");
+    }
+  }
+}

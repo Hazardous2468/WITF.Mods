@@ -1,0 +1,238 @@
+package rewired.songs;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.play.PlayState;
+import funkin.play.song.Song;
+import funkin.audio.FunkinSound;
+import funkin.Paths;
+import funkin.play.PlayStatePlaylist;
+import funkin.play.GameOverSubState;
+import funkin.Preferences;
+import funkin.play.ResultState;
+import funkin.util.ReflectUtil;
+import funkin.play.Countdown;
+import funkin.save.Save;
+import funkin.ui.freeplay.charselect.PlayableCharacter;
+
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.ShaderFilter;
+import openfl.utils.Assets;
+
+// This script is responsible for the following:
+// Hiding the song from Freeplay until Termination-Erect is beaten,
+// Reducing the health gain (including hold health gain) and increasing health loss on misses,
+// Applying the glitch2 shader to the entire screen / stage,
+// The black intro tween,
+// Cancelling the countdown and going straight to the song.
+class BloodShedSongScript extends Song
+{
+
+  // Set this to true to forcefully make this song appear in Freeplay even if you haven't beaten Termination Erect.
+  public var forceAppear:Bool = false;
+
+
+
+
+  var blackTween:FlxTween;
+
+  public function new()
+  {
+    super('bloodshed');
+    isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+  }
+  var isWITF:Bool = false;
+
+  var _shader:FlxRuntimeShader;
+  var shaderFilter:ShaderFilter;
+
+  override function onCreate(event:ScriptEvent):Void {
+    super.onCreate(event);
+    _shader = new FlxRuntimeShader(Assets.getText(Paths.frag("kb_2026/glitch2")), null);
+    shaderFilter = new ShaderFilter(_shader);
+    if(isWITF) PlayState.instance.variables.set("shader", shaderFilter);
+    applyShader();
+  } 
+
+  override function onSongLoaded(e):Void
+  {
+    super.onSongLoaded(e);
+    if(shaderFilter!=null)
+      applyShader();
+  }
+
+  override function onGameOver(event)
+  {
+    super.onGameOver(event);
+    if(_shader!=null)
+      removeShader();
+  }
+
+  function applyShader(){
+    if(PlayState.instance.currentStage == null) return; // Don't apply if there is no stage (i.e. in chart editor)
+    _shader.setFloat("amount", 0.01375);
+    FlxG.camera.filters = [shaderFilter];
+    PlayState.instance.camHUD.filters = [shaderFilter];
+    
+    if(isWITF && PlayState.instance.camNotes != null) // For WITF
+      PlayState.instance.camNotes.filters = [shaderFilter];
+  }
+
+  function removeShader(){
+    _shader.setFloat("amount", 0.0);
+    FlxG.camera.filters = [];
+    PlayState.instance.camHUD.filters = [];
+    
+    if(isWITF && PlayState.instance.camNotes != null) // For WITF
+      PlayState.instance.camNotes.filters = [];
+  }
+
+
+  override function onUpdate(event:ScriptEvent):Void
+  {
+    super.onUpdate(event);
+    if(_shader != null){
+      _shader.setFloat('uTime', Conductor.instance.songPosition/Constants.MS_PER_SEC/2);
+    }
+
+    var playerStrumline:Strumline = PlayState.instance.playerStrumline;
+    if (playerStrumline != null)
+    {
+      for (holdNote in playerStrumline.holdNotes.members)
+      {    
+        if(holdNote!=null && holdNote.alive){
+          // While the hold note is being hit, and there is length on the hold note...
+            if (holdNote.hitNote && !holdNote.missedNote && holdNote.sustainLength > 0)
+            {
+            // UNDO the health gain from holding a hold note!
+            if (!PlayState.instance.isBotPlayMode)
+            {
+              PlayState.instance.health -= Constants.HEALTH_HOLD_BONUS_PER_SECOND * event.elapsed*0.4;
+            }
+            }
+        }
+      }
+
+    }
+
+  }
+
+  override function onSongRetry(event:ScriptEvent)
+  {
+    super.onSongRetry(event);
+    if(PlayState.instance.currentStage!=null){
+      PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 1;
+    }
+    if (blackTween != null) blackTween.cancel();
+  }
+
+  function fetchAssetPaths():Array<String>
+  {
+    var results:Array<String> = super.fetchAssetPaths();
+    results.push(Paths.animateAtlas("saw_mechanic/saw_assets_hazard", "shared"));
+    results.push(Paths.animateAtlas("saw_mechanic/warning_hazard", "shared"));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-1'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-2'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-3'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-4'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-1'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-2'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-3'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-4'));
+    results.push(Paths.sound('sawblades/sawblade_hit'));
+    results.push(Paths.image("ui/popup/funkin/dodged"));
+    return results;
+  }
+
+  override function onSongStart(event)
+  {
+    super.onSongStart(event);
+    if(PlayState.instance.currentStage!=null){
+      blackTween = FlxTween.tween(PlayState.instance.currentStage.getNamedProp('blackScreenR'), {alpha: 0}, 3.75, {ease: FlxEase.quadOut});
+    }
+  }
+
+  override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    super.onCountdownStart(event);
+
+    event.cancel();
+
+    Countdown.stopCountdown();
+    PlayState.instance.isInCountdown = true;
+
+    Conductor.instance.update(PlayState.instance.startTimestamp);
+    trace('skipped countdown');
+
+
+    GameOverSubState.musicSuffix = '';
+    GameOverSubState.blueBallSuffix = '';
+    if (PlayState?.instance?.currentStage?.getBoyfriend()?.characterId == 'bf-qt') PlayState.instance.currentStage.getBoyfriend()?.setSuffix('');
+
+    if(PlayState.instance.currentStage!=null){
+      PlayState.instance.currentStage.getNamedProp("blackScreenR").cameras = [PlayState.instance.camCutscene];
+      PlayState.instance.currentStage.getNamedProp("blackScreenR").zIndex = 9999;
+
+      if (blackTween != null) blackTween.cancel();
+
+      PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 1;
+      PlayState.instance.tweenCameraZoom(1.2, 0, true, FlxEase.quadInOut);
+      PlayState.instance.cameraFollowPoint.setPosition(1100, 655);
+    }
+  }
+
+
+  override function onNoteGhostMiss(event)
+  {
+    super.onNoteGhostMiss(event);
+  }
+
+  override function onNoteHit(event) {
+    super.onNoteHit(event);
+    if(event.judgement == "sick"){
+      event.healthChange *= 0.95; 
+    }else if(event.judgement == "good"){
+      event.healthChange *= 0.9; 
+    }else{
+      event.healthChange *= 0.75; 
+    }
+  }
+  override function onNoteMiss(event) {
+    super.onNoteMiss(event);
+    event.healthChange *= 1.2; 
+  }
+
+
+
+  // Make the song invisible until the required song is beaten
+  public override function listDifficulties(?variationId:String, ?variationIds:Array<String>, showLocked:Bool = false, showHidden:Bool = false):Array<String>
+  {
+    if(!forceAppear)
+    {
+      if (!Save.instance.hasBeatenSong('bloodshed', ['erect', 'nightmare'])){
+        if (!Save.instance.hasBeatenSong('termination', ['erect', 'nightmare']))
+          return [];
+      }
+    }
+
+    return super.listDifficulties(variationId, variationIds, showLocked, showHidden);
+  }
+
+  public override function getVariationsByCharacter(?char:PlayableCharacter):Array<String>
+  {
+    if(!forceAppear)
+    {
+      if (!Save.instance.hasBeatenSong('bloodshed', ['erect', 'nightmare'])){
+        if (!Save.instance.hasBeatenSong('termination', ['erect', 'nightmare']))
+          return [];
+      }
+    }
+
+    return super.getVariationsByCharacter(char);
+  }
+
+}

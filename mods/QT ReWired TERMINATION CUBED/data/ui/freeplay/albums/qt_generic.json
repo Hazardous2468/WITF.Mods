@@ -1,0 +1,8 @@
+{
+  "version": "1.0.0",
+  "name": "QT OST",
+  "artists": ["Hazard24"],
+  "albumOSTName": "QT OST",
+  "albumArtAsset": "freeplay/albumRoll/qt_classic_album",
+  "albumTitleAsset": "freeplay/albumRoll/qt_ost_generic-text"
+}

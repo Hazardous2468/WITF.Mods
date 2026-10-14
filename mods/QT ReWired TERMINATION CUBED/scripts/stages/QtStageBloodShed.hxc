@@ -1,0 +1,327 @@
+package rewired.stages;
+
+import flixel.FlxG;
+import funkin.play.character.CharacterType;
+import funkin.play.PlayState;
+import flixel.tweens.FlxTween;
+import funkin.play.stage.Stage;
+import funkin.graphics.shaders.AdjustColorShader;
+import funkin.play.character.BaseCharacter;
+import funkin.Conductor;
+import funkin.util.Constants;
+
+class QtStageBloodShed extends Stage
+{
+  private var colorShader:AdjustColorShader = new AdjustColorShader();
+  private var wallShader:AdjustColorShader = new AdjustColorShader();
+  private var tweenWarning:FlxTween;
+  private var tweenLight:FlxTween;
+  private var currentChange:String;
+
+  function new()
+  {
+    super('qtStageBloodShed');
+  }
+
+  override function buildStage()
+  {
+    super.buildStage();
+    resetBlackScreens();
+
+    for (prop in ["blackScreenR"])
+    {
+      getNamedProp(prop).scale.set(FlxG.width, FlxG.height);
+    }
+
+    getNamedProp("wall").shader = wallShader;
+    handleStageChange("Killer",true);
+  }
+
+  override function onGameOver(event)
+  {
+    super.onGameOver(event);
+    updateColorShader(0, 0, 0, 0);
+  }
+
+  override function onSongRetry()
+  {
+    super.onSongRetry();
+    handleStageChange("Killer",true);
+    resetBlackScreens();
+  }
+
+  override function onResume(event) {
+    super.onResume(event);
+    if(tweenLight!=null){
+      tweenLight.active = false;
+      //PlayState.instance.cameraTweensPausedBySubState.add(tweenLight);
+    }
+    if(tweenWarning!=null){
+      tweenWarning.active = false;
+      //PlayState.instance.cameraTweensPausedBySubState.add(tweenWarning);
+    }
+  }
+
+  override function onPause(event) {
+    super.onPause(event);
+    if(tweenLight!=null){
+      tweenLight.active = true;
+    }
+    if(tweenWarning!=null){
+      tweenWarning.active = true;
+    }
+  }
+
+  override function onSongLoaded(event)
+  {
+    super.onSongLoaded(event);
+    PlayState.instance.comboPopUps.offsets = [55, 300];
+    PlayState.instance.iconP2.zIndex += 1;
+  }
+  function getCurSongID():String{
+    return (PlayState.instance?.currentSong?.id ?? "?");
+  }
+  function isBloodShed():Bool{
+    return getCurSongID().toLowerCase() == "bloodshed";
+  }
+
+  var doneBeat:Int = 0;
+  var endingChaosCycleIndex:Int = 0;
+  var endingChaosCycle:Array<String> = ["Blue", "Killer", "Red", "Blue", "Error", "Red", "Killer"];
+  function beatHit(daBeat):Void
+  {
+    if(event.beat == doneBeat) return;
+    doneBeat = event.beat;
+
+    if(event.beat == 1184 && isBloodShed()){
+      handleStageChange("Blue");
+    }
+    
+
+    if (currentChange != "Red") return;
+
+    var durationMult:Float = 2;
+    var beatOffset:Int = 1;
+    var beatEvery:Int = 2;
+    if (isBloodShed()){
+      if(Conductor.instance.currentBeatTime >= 223.8 && Conductor.instance.currentBeatTime < 352){
+        beatOffset = 0;
+        beatEvery=4;
+        durationMult=4;
+      }
+      else if(Conductor.instance.currentBeatTime >= 1052){
+        beatOffset = 0;
+      }
+      if(Conductor.instance.currentBeatTime >= 1039.8 && Conductor.instance.currentBeatTime < 1054){
+        durationMult = 1;
+      }
+      else{
+        if((event.beat+beatOffset) % beatEvery != 0) return;
+      }
+    }else{
+
+      if(Conductor.instance.currentBeatTime >= 294.5 && Conductor.instance.currentBeatTime < 295.5){
+        return;
+      }
+      else if(Conductor.instance.currentBeatTime >= 295.5 && Conductor.instance.currentBeatTime < 360.5){
+        beatOffset = 0;
+        beatEvery = 1;
+        durationMult = 1;
+      }
+      else if(Conductor.instance.currentBeatTime >= 611.9 && Conductor.instance.currentBeatTime < 615.9){
+        return;
+      }
+      else if(Conductor.instance.currentBeatTime >= 675.9 && Conductor.instance.currentBeatTime < 680){
+        return;
+      }
+      else if(Conductor.instance.currentBeatTime >= 487 && Conductor.instance.currentBeatTime < 612){
+        beatOffset = 0;
+        beatEvery = 4;
+        durationMult = 4;
+      }
+      else if(Conductor.instance.currentBeatTime >= 615.9 && Conductor.instance.currentBeatTime < 676){
+        beatOffset = 0;
+        beatEvery = 1;
+        durationMult = 1;
+      }
+
+      if((event.beat+beatOffset) % beatEvery != 0) return;
+    }
+
+    cancelTweensIfNeeded();
+    var duration:Float = Conductor.instance.beatLengthMs/Constants.MS_PER_SEC;
+    duration*=durationMult;
+    getNamedProp("warningScreen").alpha = 1;
+    getNamedProp("tvLights").alpha = 1;
+    tweenWarning = FlxTween.tween(getNamedProp("warningScreen"), {alpha: 0}, duration);
+    tweenLight = FlxTween.tween(getNamedProp("tvLights"), {alpha: 0}, duration);
+  }
+
+  override function onStepHit(event:SongTimeScriptEvent):Void
+  {
+    super.onStepHit(event);
+    if (!isBloodShed()) return;
+    if(!Preferences.flashingLights) return;
+    if(event.step % 3 != 0) return;
+    if((Conductor.instance.currentBeatTime >= 1055.85 && Conductor.instance.currentBeatTime < 1184) || (Conductor.instance.currentBeatTime >= 1199.85 && Conductor.instance.currentBeatTime < 1248)){
+      endingChaosCycleIndex += 1;
+      if(endingChaosCycleIndex >= endingChaosCycle.length) endingChaosCycleIndex = 0;
+      handleStageChange(endingChaosCycle[endingChaosCycleIndex]);
+    }
+  }
+  override function onBeatHit(event:SongTimeScriptEvent):Void
+  {
+    super.onBeatHit(event);
+
+    if (getCurSongID().toLowerCase() == "termination" && PlayState.instance.currentInstrumental.toLowerCase() == "erect" && event.beat >= 764 && event.beat < 822){
+      if(event.beat % 2 == 1){
+        handleStageChange("Error");
+      }else{
+        handleStageChange("Blue");
+      }
+    }
+
+    beatHit(event.beat);
+  }
+
+  function fetchAssetPaths():Array<String>
+  {
+    var results:Array<String> = super.fetchAssetPaths();
+    return results;
+  }
+
+  override public function onSongEvent(event:SongEventScriptEvent):Void
+  {
+    super.onSongEvent(event);
+    switch (event.eventData.eventKind)
+    {
+      case "changeStageBloodshed":
+        handleStageChange(event.eventData.value.char);
+      case "changeStage":
+        handleStageChange(event.eventData.value.char);
+      case "blackIn":
+        getNamedProp('blackScreenR').alpha = 1;
+    }
+  }
+
+  private function cancelTweensIfNeeded():Void
+  {
+    if (tweenWarning != null) tweenWarning.cancel();
+    if (tweenLight != null) tweenLight.cancel();
+  }
+
+  function onUpdate(event:UpdateScriptEvent)
+  {
+    super.onUpdate(event);
+    getNamedProp("tvShine").alpha = getNamedProp("tvLights").alpha;
+    getNamedProp("TVFrontShine").alpha = getNamedProp("tvLights").alpha;
+  }
+
+
+  private function handleStageChange(charName:String, force:Bool = false):Void
+  {
+    if(currentChange == charName && !force) return; // No change needed, we're already set to this!
+    currentChange = charName;
+    cancelTweensIfNeeded();
+    updateStageProps(charName);
+    updateVisibility(charName);
+
+    switch (charName)
+    {
+      case "Killer":
+        getNamedProp("tvShine").color = 0xFFB09AB1;
+        getNamedProp("TVFrontShine").color = 0xFFB09AB1;
+        updatePropShader('TVFront', 35, -45, 20, -30);
+        updatePropShader('wall', 25, -55, 25, -35);
+        updatePropShader('fgWireBack', 0, -20, 10, -20);
+        updatePropShader('fgWireFront', 0, -20, 10, -25);
+        updateColorShader(-20, -60, 25, -30);
+      case "Blue":
+        getNamedProp("tvShine").color = 0xFF4B96C2;
+        getNamedProp("TVFrontShine").color = 0xFF4B96C2;
+        updatePropShader('wall', 0, -40, 25, -35);
+        updatePropShader('TVFront', -10, -25, 20, -30);
+        updatePropShader('fgWireBack', -35, -20, 10, -20);
+        updatePropShader('fgWireFront', -35, -20, 10, -25);
+        updateColorShader(-35, -55, 25, -30);
+      case "Error":
+        getNamedProp("tvShine").color = 0xFFDAFBD0;
+        getNamedProp("TVFrontShine").color = 0xFFDAFBD0;
+        updatePropShader('wall', 100, -75, 25, -37);
+        updatePropShader('TVFront', 90, -2, 25, -30);
+        updatePropShader('fgWireBack', 0, -20, 10, -20);
+        updatePropShader('fgWireFront', 0, -20, 10, -25);
+        updateColorShader(-5, -45, 25, -30);
+      case "Red":
+        getNamedProp("tvShine").color = 0xFFCE2029;
+        getNamedProp("TVFrontShine").color = 0xFFCE2029;
+        updatePropShader('wall', 35, -40, 25, -35);
+        updatePropShader('TVFront', 40, -30, 25, -30);
+        updatePropShader('fgWireBack', 30, -20, 10, -20);
+        updatePropShader('fgWireFront', 30, -20, 10, -25);
+        updateColorShader(-10, -55, 25, -30);
+        beatHit(Conductor.instance.currentBeat);
+    }
+    refresh();
+  }
+
+  private function updateStageProps(charName:String):Void
+  {
+    for (prop in ["lightOverlay", "tvLights"])
+    {
+      var target = getNamedProp(prop);
+      if (target != null) target.animation.play(charName);
+    }
+  }
+
+  override function addCharacter(character:BaseCharacter, charType:CharacterType):Void
+  {
+    super.addCharacter(character, charType);
+    character.shader = colorShader;
+  }
+
+  private function updateVisibility(charName:String):Void
+  {
+    getNamedProp("tvStaticLeft").visible = (charName == "Killer");
+    getNamedProp("tvStaticRight").visible = (charName == "Killer");
+    getNamedProp("blueScreen").visible = (charName == "Blue");
+    getNamedProp("warningScreen").visible = (charName == "Red");
+    getNamedProp("errorBarsScreen").visible = (charName == "Error");
+    getNamedProp("tvLights").visible = true;
+    getNamedProp("tvLights").alpha = 1;
+  }
+
+  private function updateColorShader(hue:Int, saturation:Int, contrast:Int, brightness:Int):Void
+  {
+    colorShader.hue = hue;
+    colorShader.saturation = saturation;
+    colorShader.contrast = contrast;
+    colorShader.brightness = brightness;
+  }
+
+  private function updatePropShader(prop:String, hue:Int, saturation:Int, contrast:Int, brightness:Int):Void
+  {
+    var targetProp = getNamedProp(prop);
+    if (targetProp == null) return;
+
+    // Assign the prop a colorAdjust shader if it doesn't already have one instead of creating a new one every time.
+    if(targetProp.shader == null){
+      var newShader = new AdjustColorShader();
+      targetProp.shader = newShader;
+    }
+
+    targetProp.shader.hue = hue;
+    targetProp.shader.saturation = saturation;
+    targetProp.shader.contrast = contrast;
+    targetProp.shader.brightness = brightness;
+  }
+
+  function resetBlackScreens():Void
+  {
+    endingChaosCycleIndex = 0;
+    for (prop in ["blackScreen", "blackScreenVideo", "spotLight", "redScreen"])
+    {
+      getNamedProp(prop).alpha = 0;
+    }
+  }
+}

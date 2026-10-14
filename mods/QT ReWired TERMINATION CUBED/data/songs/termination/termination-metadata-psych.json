@@ -1,0 +1,43 @@
+{
+ "version": "2.2.4",
+ "songName": "Termination (Psyched Up Edition)",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "hard"
+  ],
+  "songVariations": [],
+  "stickerPack": "kbStickers",
+  "characters": {
+    "instrumental": "psych",
+   "player": "bf-qt",
+   "girlfriend": "gf-qt",
+   "opponent": "kb",
+   "opponentVocals": [
+    "kb"
+   ],
+   "playerVocals": [
+    "bf"
+   ]
+  },
+  "stage": "qtStageKiller",
+  "noteStyle": "funkin",
+  "ratings": {
+   "hard": 14
+  },
+  "album": "qt_classic",
+  "previewStart": 0.164,
+  "previewEnd": 0.2206
+ },
+ "generatedBy": "What in the Funkin' (v1.0.5) - v0.8.5",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 222,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

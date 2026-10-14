@@ -1,0 +1,165 @@
+package rewired.songs;
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+import funkin.graphics.FunkinSprite;
+import funkin.play.PlayState;
+import funkin.play.song.Song;
+import funkin.audio.FunkinSound;
+import funkin.save.Save;
+import funkin.Paths;
+import funkin.play.PlayStatePlaylist;
+import funkin.play.GameOverSubState;
+import funkin.Preferences;
+import funkin.data.song.SongData.SongTimeChange;
+import funkin.Conductor;
+
+// Script responsible for the different variations of Termination to work.
+class TerminationSongScript extends Song
+{
+  public function new()
+  {
+    super('termination');
+  }
+
+  
+  public override function listAltInstrumentalIds(difficultyId:String, variationId:String):Array<String>
+  {
+    if (difficultyId == 'easy' || difficultyId == 'normal' || difficultyId == 'hard')
+    {
+      var hasBeatenThis = Save.instance.hasBeatenSong(this.id, null);
+
+      switch (variationId)
+      {
+        default:
+          return hasBeatenThis ? ['legacy','psych'] : [];
+      }
+    }
+  }
+  
+
+  override function onSongLoaded(event)
+  {
+    super.onSongLoaded(event);
+    var variation:String = PlayState.instance.currentInstrumental;
+    if (variation == "erect")
+    {
+     if (PlayState.instance.currentDifficulty == "nightmare")
+      {
+        PlayState.instance.vocals = PlayState.instance.currentChart.buildVocals("nightmare");
+        trace("TERMINATION LOADED INTO '" + variation + "' [NIGHTMARE]");
+      }else{
+        trace("TERMINATION LOADED INTO '" + variation + "'");
+      }
+
+      return;
+    }
+    else if (variation == "legacy" || variation == "psych")
+    {
+      PlayState.instance.currentVariation = variation;
+      PlayState.currentChart = PlayState.instance.currentSong.getDifficulty(PlayState.instance.currentDifficulty + "-"+variation, variation);
+      PlayState.instance.vocals = PlayState.instance.currentChart.buildVocals(variation);
+      event.notes = PlayState.instance.currentChart.notes.copy();
+      event.events = PlayState.instance.currentChart.getEvents();
+
+      // As the BPM gets read from the Termination-metadata and not the variation metadata. This corrects the BPM to how it should be for older Termination variations
+      var timeChanges:Array<SongTimeChange> = [new SongTimeChange(0, 222)];
+      Conductor.instance.mapTimeChanges(timeChanges);
+
+      trace("TERMINATION LOADED INTO '" + variation + "'");
+    }else{
+      trace("TERMINATION LOADED INTO 2026 (default)");
+      trace(PlayState.instance.currentInstrumental);
+    }
+
+    /*
+    // Force modchart refresh as we changed the currentVariation variable!
+    if(PlayState.instance.modchartEventHandler != null){
+      PlayState.instance.modchartEventHandler.clearEvents();
+      trace("WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW");
+    }else{
+      trace("NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN");
+    }
+    PlayState.instance.scanForModchart(false);
+    */
+    modchartNeedsRescan = true;
+
+  }
+  var modchartNeedsRescan:Bool = false;
+
+
+
+  override function onCreate(event:ScriptEvent):Void
+  {
+    super.onCreate(event);
+  }
+
+  function fetchAssetPaths():Array<String>
+  {
+    var results:Array<String> = super.fetchAssetPaths();
+    results.push(Paths.animateAtlas("saw_mechanic/saw_assets_hazard", "shared"));
+    results.push(Paths.animateAtlas("saw_mechanic/warning_hazard", "shared"));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-1'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-2'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-3'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-4'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-1'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-2'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-3'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-4'));
+    results.push(Paths.sound('sawblades/sawblade_hit'));
+    results.push(Paths.image("ui/popup/funkin/dodged"));
+    return results;
+  }
+
+  override function onSongStart(event)
+  {
+    super.onSongStart(event);
+  }
+
+  override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    super.onCountdownStart(event);
+
+    GameOverSubState.musicSuffix = '';
+    GameOverSubState.blueBallSuffix = '';
+    // PlayState.instance.currentStage.getBoyfriend()?.setSuffix('');
+
+    if (modchartNeedsRescan){
+      PlayState.instance.scanForModchart(false);
+      modchartNeedsRescan = false;
+    }
+
+    /*
+    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").visible = false;
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 0;
+
+    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp('blackScreenVideo'));
+    PlayState.instance.currentStage.getNamedProp('blackScreenVideo').alpha = 0;
+    PlayState.instance.currentStage.getNamedProp("blackScreenVideo").visible = false;
+    */
+
+
+  }
+
+  function onSongRetry(event:ScriptEvent)
+  {
+    super.onSongRetry(event);
+    //FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
+    //PlayState.instance.currentStage.getNamedProp("blackScreenR").visible = false;
+    //PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 0;
+
+    //FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp('blackScreenVideo'));
+    //PlayState.instance.currentStage.getNamedProp('blackScreenVideo').alpha = 0;
+    //PlayState.instance.currentStage.getNamedProp("blackScreenVideo").visible = false;
+  }
+
+  function onDestroy(event)
+  {
+    super.onDestroy(event);    
+  }
+}

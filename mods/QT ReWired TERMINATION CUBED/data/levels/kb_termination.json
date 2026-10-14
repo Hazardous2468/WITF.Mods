@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "KB 2026",
+  "capsule": {
+    "name": "KB 2026"
+  },
+  "visible": false,
+  "titleAsset": "storymenu/titles/kb_termination",
+  "props": [],
+  "background": "#FF0000",
+  "songs": ["termination"]
+}

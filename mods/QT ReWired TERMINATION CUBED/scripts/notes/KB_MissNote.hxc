@@ -1,0 +1,87 @@
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.Preferences;
+import flixel.FlxSprite;
+import flixel.FlxG;
+import funkin.play.notes.SustainTrail;
+import funkin.util.Constants;
+import funkin.Highscore;
+import funkin.play.notes.notekind.NoteKind;
+import funkin.play.notes.notekind.NoteKindManager;
+import funkin.data.notestyle.NoteStyleRegistry;
+import funkin.util.GRhythmUtil;
+import funkin.Conductor;
+
+// A note that appears but the botplay fails to hit it.
+class KB_MissNote extends NoteKind {
+    function new() {
+        super("kb_miss", "KB Miss Note");
+        this.scoreable = false;
+    }
+
+    override function onNoteHit(event) {
+		if(PlayState.instance == null) return;
+
+		super.onNoteHit(event);
+
+		if (event.judgement == "perfect") {
+			event.cancelEvent();
+			event.note.hasBeenHit = true;
+		}
+	}
+
+	// fffuuccckk the opponent never calls this. Oh well, update() logic it is.
+	override function onNoteMiss(event:NoteScriptEvent) 
+	{
+		super.onNoteMiss(event);
+	}
+		
+    override function onUpdate(event)
+	{
+		super.onUpdate(event);
+		if(PlayState.instance == null) return;
+		if(PlayState.instance.isPaused) return;
+
+		for (note in getNotes()) // 'getNotes()' Returns all notes of this kind.
+		{			
+			// Ignore BF notes as they trigger miss like usual.
+			if (note.noteData.getMustHitNote() ) continue;
+
+			var hitWindow = GRhythmUtil.getHitWindow(note);
+
+			if (Conductor.instance.songPosition > hitWindow.end && !note.hasMissed)
+    		{
+    			note.hasMissed = true;
+    			//trace("missed?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+    		}
+
+
+			//if(note.strumTime >= 196552 && note.strumTime < 196674){
+			//	trace(hitWindow.end);
+			//	trace("missed? " + note.hasMissed);
+			//}
+
+
+			if (note.hasMissed && !note.handledMiss){
+				note.handledMiss = true;
+				///trace("MISS");
+
+				// Could dispatch an event for this to also trigger the miss anim but I'm worried custom scripts will not be checking if the miss orginates from the player or the opponent.
+				//var event:NoteScriptEvent = new NoteScriptEvent(NOTE_MISS, note, Constants.HEALTH_MISS_PENALTY, Highscore.tallies.combo, true);
+            	//PlayState.instance.dispatchEvent(event);
+            	//if (event.eventCanceled) continue;
+
+				var dad = PlayState.instance.currentStage.getDad();
+				if(dad!=null){
+					//trace("MISS ANIM");
+					dad.playSingAnimation(note.noteData.getDirection(), true);
+				}
+				FunkinSound.playOnce(Paths.soundRandom('missnote', 1, 3), FlxG.random.float(0.5, 0.6));
+				PlayState.instance.health += Constants.HEALTH_MISS_PENALTY*-0.5;
+			}
+
+		}
+	}
+}

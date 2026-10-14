@@ -1,0 +1,30 @@
+{
+  "title": "QT Rewired - TERMINATION CUBED",
+  "id": "witf-termination-cubed",
+  "description": "An extension to the original QT Rewired mod that brings back Termination from the original mod.",
+  "author": "Hazard24",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Songs, Charts and Modcharts, and code.",
+			"url": "https://linktr.ee/Hazard24"
+		},
+		{
+			"name": "LAKE08",
+			"role": "Album art."
+		},
+		{
+			"name": "Rewired Team",
+			"role": "QT Assets and code."
+		}
+	],
+  "api_version": "0.8.6",
+  "mod_version": "1.0.0",
+  "witf_version": "1.1.1",
+  "dependencies": {
+		"witf-essentials": "*",
+		"qt-rewired": "*",
+		"qt-rewired-hazard-dodgestyle": "*"
+	},
+  "license": "CC BY-NC-ND 4.0"
+}
