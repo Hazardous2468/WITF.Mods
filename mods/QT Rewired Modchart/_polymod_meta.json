@@ -1,0 +1,20 @@
+{
+  "title": "QT Rewired - WITF Modchart",
+  "id": "qt-rewired-witf-modcharts",
+  "description": "Blissful modchart made for What In the Funkin'?!",
+  "author": "Hazard24",
+  "contributors": [
+    {
+      "name": "Hazard24",
+      "role": "The modcharts!",
+      "url": "https://linktr.ee/Hazard24"
+    }
+  ],
+    "api_version": "0.8.5",
+    "mod_version": "1.0.0",
+  "dependencies": {
+    "qt-rewired": "*",
+    "witf-essentials": "*"
+  },
+    "license": "CC BY-NC-ND 4.0"
+}

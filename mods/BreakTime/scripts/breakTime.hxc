@@ -243,8 +243,10 @@ class BreakTime extends Module {
 			if(ignoreHurtNotes && isHurtNote(noteKindID)) continue;
 			if(ignoreNonScorableNotes){
 				var noteKind:NoteKind = NoteKindManager.getNoteKind(noteKindID);
-				if(noteKind!=null && !noteKind.scorable){
-					continue;
+				if(noteKind!=null){
+					if(!noteKind.scoreable){
+						continue;
+					}
 				}
 			}
 

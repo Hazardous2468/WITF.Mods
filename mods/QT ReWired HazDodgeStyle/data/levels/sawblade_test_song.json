@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "Sawblade Testing",
+  "capsule": {
+    "name": "Sawblades"
+  },
+  "visible": false,
+  "titleAsset": "storymenu/titles/sawblade_testing",
+  "props": [],
+  "background": "#FF0000",
+  "songs": ["sawblade_test_song","raze-blade"]
+}

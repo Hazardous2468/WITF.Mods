@@ -1,0 +1,286 @@
+function modsTimeline()
+	
+	addHaxeLibrary("HazardAFT", "funkin.play.modchartSystem")
+	addHaxeLibrary("FlxRuntimeShader", "flixel.addons.display")
+	addHaxeLibrary("ShaderFilter", "openfl.filters")
+	addHaxeLibrary("BitmapFilter", "openfl.filters")
+	addHaxeLibrary("Assets", "openfl.utils")
+	addHaxeLibrary("FunkinSprite", "funkin.graphics")
+	runHaxeCode(
+	[[
+		//PUT YOU BACK WHERE YOU BELONG FOR THE SCRIPT TO FUNCTION AS INTENDED  (for the video)
+		var cam = PlayState.instance.camHUD;
+		game.playerStrumline.camera = cam;
+		game.opponentStrumline.camera = cam;
+		
+		var target1 = PlayState.instance.playerStrumline.mods;
+
+		
+		var glitch2 = new FlxRuntimeShader(Assets.getText(Paths.frag("QT_Rewired/glitch2")), null);
+		glitch2.setFloat('amount', 0.021);
+		glitch2.setInt('NUM_SAMPLES', 16);
+		addUpdate(function(elapsed){
+			glitch2.setFloat('uTime', Conductor.instance.songPosition/1000*2);
+		});	
+		
+		
+		var glitch2Mod:CustomModifier = createCustomMod("glitch2", 0.00);
+		glitch2Mod.modPriority = -9990;
+		glitch2Mod.strumsMod = false;
+		glitch2Mod.notesMod = false;
+		glitch2Mod.holdsMod = false;
+		glitch2Mod.pathMod = false;
+		glitch2Mod.specialMod = true;
+		glitch2Mod.speedMod = false;
+		eh.addCustomMod("bf", glitch2Mod);
+		glitch2Mod.specialMath = function() {
+			glitch2.setFloat('amount', glitch2Mod.currentValue);
+		};
+		
+		
+		var glitchLinesShader = new FlxRuntimeShader(Assets.getText(Paths.frag("QT_Rewired/glitch-lines")), null);
+	glitchLinesShader.setFloat('amount', 0.0);
+	addUpdate(function(elapsed){
+		glitchLinesShader.setFloat('uTime', Conductor.instance.songPosition/1000);
+	});	
+	
+	var glitchLinesMod:CustomModifier = createCustomMod("glitchLines", 0.00);
+	glitchLinesMod.modPriority = -9990;
+	glitchLinesMod.strumsMod = false;
+    glitchLinesMod.notesMod = false;
+    glitchLinesMod.holdsMod = false;
+    glitchLinesMod.pathMod = false;
+    glitchLinesMod.specialMod = true;
+    glitchLinesMod.speedMod = false;
+	eh.addCustomMod("bf", glitchLinesMod);
+	glitchLinesMod.specialMath = function() {
+		glitchLinesShader.setFloat('amount', glitchLinesMod.currentValue);
+	};
+		
+		
+		
+		
+		var newCamEffects:Array<BitmapFilter>=[];
+		newCamEffects.push(new ShaderFilter(glitchLinesShader));
+		newCamEffects.push(new ShaderFilter(glitch2));
+		
+		game.camHUD.setFilters(newCamEffects);
+		game.camNotes.setFilters(newCamEffects);
+		game.camAFT.setFilters(newCamEffects);
+		
+		
+	]])
+	
+	
+	
+	setdefault(1, "drawdistance")
+	set(-8, 1, "showlanemods")
+	set(-8, 1, "alpha")
+	set(-8, 5, "tipsy")
+	set(-8, 1.7894, "tipsyx__speed")
+	set(-8, 5, "tipsyx")
+	
+	ease(0, 32, "inOutSmoothStep", 0, "tipsyx")
+	ease(0, 32, "inOutSmoothStep", 0, "tipsy")
+	ease(0, 32, "inOutSmoothStep", 0, "alpha")
+	
+	
+	
+	ease(36-16, 8, "inOutSmoothStep", 0.5, "speedmod")
+	for i = 36, 94-8,8 do
+	
+		ease(i+8, 1, "inOutSmoothStep", 0, "stealth")
+		ease(i+4, 1, "inOutSmoothStep", 0.5, "stealth")
+		ease(i+8, 1, "inOutSmoothStep", 0, "tornado")
+		ease(i+4, 1, "inOutSmoothStep", 1, "tornado")
+		
+		ease(i+8, 1, "inOutSmoothStep", 0.5, "speedmod")
+		ease(i+4, 1, "inOutSmoothStep", 1, "speedmod")
+	
+	end
+	
+	ease(94, 2, "inOutSmoothStep", 1, "speedmod")
+	
+	ease(101, 24, "pop", 3, "drunk","dad")
+	ease(101, 12, "pop", 2, "bumpy--3","bf")
+	
+	
+	
+	ease(131.5, 0.5, "inQuint", 0.017, "glitch2","bf")
+	ease(164, 0.5, "outQuad", 0.027, "glitch2","bf")
+	ease(164, 0.5, "outQuad", 0.008, "glitchLines","bf")
+	ease(169.5, 3.5, "bell", 0.04, "glitchLines","bf")
+	
+	ease(176, 1, "bell", 0.04, "glitchLines","bf")
+	ease(178, 1, "bell", 0.04, "glitchLines","bf")
+	ease(179, 1, "bell", 0.065, "glitchLines","bf")
+
+	ease(169.5+16, 3.5, "bell", 0.045, "glitchLines","bf")
+	ease(169.5+16+6, 3.5, "bell", 0.045, "glitchLines","bf")
+	
+	ease(194, 1, "outExpo", 0.0, "glitchLines","bf")
+	ease(194, 2, "outExpo", 0.0, "glitch2","bf")
+	
+	for i =132, 159 do
+		add(i, 1, "pop", -1, "tiny")
+		add(i, 1, "pop", 0.2, "flip")
+	end
+	
+	
+	
+	set(210, 4, "drunk__speed")
+	
+	ease(212,2, "pop", 1, "tipsy","bf")
+	ease(211.5,2, "inOutQuad", 0.5, "drunk")
+	ease(272,4, "inOutQuad", 0.0, "drunk")
+	
+	
+	ease(276,   1.1, "outElastic", 1, "reverse","dad")
+	ease(277.5, 1.1, "outElastic", 0, "reverse","dad")
+	ease(279,   1.1, "outElastic", 1, "reverse","dad")
+	ease(280.5, 1.1, "outElastic", 0, "reverse","dad")
+	ease(282, 1, "outElastic", 1, "reverse","dad")
+	ease(283, 1, "outElastic", 0, "reverse","dad")
+	add(284, 6, "outCubic", 360*3, "rotatex","dad")
+	
+	ease(16+276,   1.1, "outElastic", 1, "reverse","bf")
+	ease(16+277.5, 1.1, "outElastic", 0, "reverse","bf")
+	ease(16+279,   1.1, "outElastic", 1, "reverse","bf")
+	ease(16+280.5, 1.1, "outElastic", 0, "reverse","bf")
+	ease(16+282, 1, "outElastic", 1, "reverse","bf")
+	ease(16+283, 1, "outElastic", 0, "reverse","bf")
+	add(16+284, 6, "outCubic", 360*3, "rotatex","bf")
+	
+	
+	ease(307, 1, "inOutCubic", 1, "beat")
+	ease(307, 1, "inOutCubic", 1, "beatz--0")
+	ease(307, 1, "inOutCubic", -1, "beatz--1")
+	ease(307, 1, "inOutCubic", 1, "beatz--2")
+	ease(307, 1, "inOutCubic", -1, "beatz--3")
+	
+	ease(319.5, 0.5, "inOutCubic", 0, "beat")
+	ease(319.5, 0.5, "inOutCubic", 0, "beatz--0")
+	ease(319.5, 0.5, "inOutCubic", 0, "beatz--1")
+	ease(319.5, 0.5, "inOutCubic", 0, "beatz--2")
+	ease(319.5, 0.5, "inOutCubic", 0, "beatz--3")
+	
+	ease(320, 2, "linear", 1, "tiny","bf")
+	ease(322, 1, "outBack", 0, "tiny","bf")
+	
+	
+	ease(322, 0.2, "outQuint", -45, "noteskewx--1","dad")
+	ease(322, 0.2, "outQuint", 52, "noteskewx--0","dad")
+	ease(322, 0.2, "outQuint", -49, "noteskewx--3","dad")
+	ease(322, 0.2, "outQuint", 47, "noteskewx--2","dad")
+	ease(323, 1, "inOutCubic", 0, "noteskewx--0","dad")
+	ease(323, 1, "inOutCubic", 0, "noteskewx--1","dad")
+	ease(323, 1, "inOutCubic", 0, "noteskewx--2","dad")
+	ease(323, 1, "inOutCubic", 0, "noteskewx--3","dad")
+	
+	add(324, 0.5, "pop", -1, "tiny","dad")
+	
+	
+	ease(325, 1, "linear", 2, "bumpy","dad")
+	ease(354, 2, "linear", 0, "bumpy","dad")
+	for i = 326, 339 do
+		add(i, 1, "bounce", -0.4, "tiny","dad")
+		if i % 4 == 1 then
+			add(i, 1, "pop", -22, "skewx","dad")
+		elseif i % 4 == 3 then
+			add(i, 1, "pop", 22, "skewx","dad")
+		end
+	end
+	
+	
+	
+	
+	
+	
+	ease(356, 4, "inOutCubic", 0.89, "speedmod","bf")
+	ease(356, 4, "inOutCubic", 1.4, "wave","bf")
+	ease(364, 12, "inOutSmoothStep", 0, "wave","bf")
+	ease(364, 8, "inOutSmoothStep", 1, "speedmod","bf")
+	
+	
+	
+	for i = 388, 396-1 do
+		add(0.01+i, 1, "pop", -0.5, "tiny")
+	end
+	for i = 396, 404-0.5, 0.5 do
+		add(0.01+i, 0.5, "pop", -0.52, "tiny")
+		add(0.01+i+0.5, 0.5, "pop", -0.5, "tiny")
+	end
+	
+	ease(400, 8, "inOutSmoothStep", 0.5, "speedmod","bf")
+	
+	add(404, 6, "inCubic", -1, "flip")
+	add(404, 6, "inCubic", 360*1.3, "anglez","dad")
+	add(404, 6, "inCubic", 360*-1.3, "anglez","bf")
+	ease(404, 6, "inCubic",1, "alpha")
+	
+	ease(404, 4, "inCubic",0.5, "strumstealth","dad")
+	ease(404, 4, "inCubic",0.5, "stealth","dad")
+	
+
+	
+	
+	
+	
+		--slow down
+	reset(410)
+	set(410, 1, "alpha")
+	set(410, -0.5, "flip")
+	set(410, 1, "centerx")
+	
+	ease(411, 1.5, "inExpo",0, "alpha","bf")
+	ease(411, 1.5, "inExpo",0, "flip","bf")
+	
+	
+
+	
+	add(412, 2, "pop", -1, "tiny")
+	ease(412, 2, "outSine", 1, "drunk")
+	ease(416,4, "inOutSine", 0, "drunk")
+	
+	
+	add(414, 2, "pop", -0.75, "tiny")
+	
+	ease(415, 6, "inOutQuad", 0.5, "speedmod")
+	ease(420, 4, "inOutQuad", 0.8, "speedmod")
+	
+	add(424,4, "inOutSine", 360, "rotatey")
+	ease(424,4, "inOutSine", 0, "centerx","bf")
+	
+	add(427,1, "pop", -0.2, "moveyd--3")
+	add(427.5,1, "pop", -0.4, "moveyd--1")
+	
+	ease(427,2, "inOutQuad", 1, "alpha","bf")
+	
+	ease(429,1, "inExpo", 0, "alpha","dad")
+	ease(429.5,1, "inExpo", 0, "flip","dad")
+	
+	ease(437,1, "inQuad", 112*4, "x","dad")
+	set(420, 1, "spiralholds", "dad")
+	set(420, 0.24, "stealth", "dad")
+	set(420, 0.24, "strumstealth", "dad")
+	ease(438,8, "linear", 112*-4, "x","dad")
+	
+	add(440,4, "linear", -360, "rotatez","dad")
+	add(444,4, "outCubic", -0.2, "flip","dad")
+	ease(444,4, "outCubic", 1, "alpha","dad")
+	set(444,1,"centerx","bf")
+	ease(444,4, "outCubic", 0, "alpha","bf")
+	
+
+	ease(500-8, 8+8, "inOutSmoothStep",0, "centerx")
+	ease(452, 8, "inOutSmoothStep",1, "speedmod")
+
+	reset(500, "dad")
+	set(500,1,"alpha", "dad")
+	ease(500, 4, "inOutSmoothStep",0, "alpha","dad")
+	set(500,1,"tiny", "dad")
+	ease(500, 8, "inOutSmoothStep",0, "tiny","dad")
+	
+	
+	ease(507, 1, "inOutSmoothStep",1, "beat")
+end 

@@ -1,0 +1,182 @@
+package rewired.modules.playstate.dodgemechanic;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import flixel.FlxG;
+import funkin.util.Constants;
+import funkin.Preferences;
+import funkin.Conductor;
+import flixel.math.FlxMath;
+import flixel.util.FlxStringUtil;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.ui.debug.charting.ChartEditorState;
+import funkin.data.song.SongNoteDataRaw;
+import flixel.math.FlxRandom;
+import StringTools;
+import funkin.data.event.SongEventRegistry;
+import funkin.data.song.SongEventData;
+import funkin.save.Save;
+import funkin.modding.module.ModuleHandler;
+
+
+// A script which randomly places sawblade events in the chart every time the song gets loaded / restarted.
+
+class RandomSawsModule extends Module
+{
+	var displayNotif:Bool = true;
+
+	var enabled:Bool = false;
+	
+	var isWITF:Bool = false;
+	public function new()
+	  {
+	    super('RandomSawsModule', -10, {state: PlayState}); // Needs to be a higher priority then the main modules in order to allow it to replace the events.
+	    isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	  }
+	
+	// All the chances of each sawblade variant in % (0-100)
+	var sawbladeChance:Float = 28; 
+	var doubleSawbladeChance:Float = 30;
+	var tripleSawbladeChance:Float = 16;
+	var quadSawbladeChance:Float = 9;
+	var slowTimingChance:Float = 26; // For quad and triple, will instead use their 'long' variant instead of doubling the stepTime.
+	var stepTiming:Int = 4;
+	var slowStepTiming:Int = 8;
+	var stepModulo:Int = 4; // 4 = sawblades only spawn on beats. 2 = sawblades can be off beat. 1 = Any step can have a sawblade.
+
+	override function onSongLoaded(e) {
+		super.onSongLoaded(e);	
+
+		var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+		if(optionsModule!=null){
+			enabled = optionsModule.getSaveData_randomSawblade();
+			if (optionsModule.getSaveData_sawbladeMode() == "disabled") enabled = false;
+		}
+
+		if(!enabled) return;
+
+		var events:Array<SongEventData> = e.events;
+
+		//clear already existing sawblade events.
+		var eventsToRemove:Array<SongEventData> = [];
+		for (event in events){
+			if(StringTools.contains(event.eventKind.toLowerCase(), "sawkb") ){
+				eventsToRemove.push(event);
+			}
+	    }	
+	    for (event in eventsToRemove){
+	    	events.remove(event);
+	    }
+
+
+	    // re-add them on random beats.
+
+	    //Can't access songLength because the song hasn't loaded yet -.-
+		//var songLength:Float = PlayState.instance.currentSongLengthMs;
+
+	    //Load the song we are gonna play instead
+		var instId:String = PlayState.instance.currentInstrumental;
+		var suffix:String = (instId != '') ? '-$instId' : '';
+		var songInst = FunkinSound.load(Paths.inst(PlayState.instance.currentChart.song.id, suffix), 0, false, false, true, false, null, null, true);
+		
+		var songLength:Float = songInst.length;	
+		var howManySteps:Float = Conductor.instance.getTimeInSteps(songLength);
+		var howManyStepsRounded:Int = Std.int(howManySteps)+1;
+
+
+		var skipTheseSteps:Array<Int> = [];
+		for (curStep in 0...howManyStepsRounded){
+			
+			// Only on beats.
+			if(curStep % stepModulo != 0) continue; 
+
+			//Sawblade event already taking place.
+			if(skipTheseSteps.contains(curStep)) continue;
+			
+
+			if(FlxG.random.bool(sawbladeChance)){
+				var strumTime:Float = Conductor.instance.getStepTimeInMs(curStep);
+
+				var isSlow:Bool = FlxG.random.bool(slowTimingChance);
+				isSlow = false;
+
+				var stepTiming:Int = isSlow ? slowStepTiming : stepTiming;
+				var sawbladePatternID:Int = 1;
+				if(FlxG.random.bool(quadSawbladeChance)){
+					sawbladePatternID = isSlow ? 4 : 8;
+					stepTiming = stepTiming;
+					isSlow = false;
+				}
+				else if(FlxG.random.bool(tripleSawbladeChance)){
+					sawbladePatternID = isSlow ? 3 : 7;
+					stepTiming = stepTiming;
+					isSlow = false;
+				}
+				else if(FlxG.random.bool(doubleSawbladeChance)){
+					sawbladePatternID = 2;
+				}
+
+
+
+
+
+				var values = {sawblade_pattern_id: sawbladePatternID, step_timing: stepTiming};
+
+				
+				var eventDurationBeats:Int = switch (sawbladePatternID)
+			    {
+			      case 1:
+			        3;
+			      case 2:
+			        4;
+			      case 3:
+			        5;
+			      case 4:
+			        6;
+			      case 5:
+			        5;
+			      case 6:
+			        6;
+			      case 7:
+			        7;
+			      case 8:
+			        8;
+			      default:
+			        3;
+			    }
+				//if(isSlow){
+				//	eventDurationBeats *= 2;
+				//}
+				eventDurationBeats += 0.5;
+				var eventDurationSteps:Int = eventDurationBeats * Constants.STEPS_PER_BEAT * (stepTiming/Constants.STEPS_PER_BEAT);
+				var stepsLeftTillSongEnds:Int = howManyStepsRounded - curStep;
+				if(stepsLeftTillSongEnds < eventDurationSteps){
+					// Not enough room left at the end of the song!
+					continue;
+				}
+
+				var newEvent:SongEventData = new SongEventData(strumTime, "sawKB_Hazard" , values);
+				events.push(newEvent);
+				trace("Placed Sawblade at: " + newEvent.time + "(step: " + curStep + ") - {" + newEvent.value +  "}");
+
+				for (i in 0...eventDurationSteps){
+					var i_offseted = i + curStep;
+					skipTheseSteps.push(i_offseted);
+					//trace(i_offseted);
+				}
+			}
+
+			
+		}
+		
+
+		e.events = events;
+
+		if(displayNotif && isWITF)
+			PlayState.instance.modDebugNotif("Random sawblades generated, good luck!", 0xFFFFFFFF, true);	
+		PlayState.instance.currentSong.validScore = false;
+	}
+}

@@ -1,0 +1,1186 @@
+package rewired.events;
+
+// Changes from vanilla rewired sawblades:
+// New schema config for changing the sawblade timings. As such, interval is now in Steps instead of Beats.
+// Moved some of the dodge logic to be inside here for better support when sawblades overlap slightly (back-to-back sawblades cuz the dodge hit window bleeds into the next event).
+// And using our own sequence logic to account for offsets properly.
+
+import flixel.FlxG;
+import funkin.Paths;
+import funkin.Conductor;
+import funkin.play.PlayState;
+import funkin.play.scoring.Scoring;
+import funkin.save.Save;
+import funkin.modding.module.ModuleHandler;
+import funkin.Conductor;
+import funkin.play.event.SongEvent;
+import funkin.data.event.SongEventRegistry;
+import funkin.data.song.SongEventData;
+import funkin.modding.events.SongEventScriptEvent;
+import funkin.util.WindowUtil;
+import funkin.audio.FunkinSound;
+
+class SawbladeEvent_HazardEdit extends SongEvent
+{
+  public function new()
+  {
+    super('sawKB_Hazard');
+  }
+
+  var doTrace:Bool = false;
+  function _trace(traceMsg:String):Void{
+    if(doTrace) trace(traceMsg);
+  }
+
+  var sawbladeTriggered:Bool = false;
+  var sawbladeFinished:Bool = false;
+  var sequenceData = [];
+
+
+  var stepTiming:Int = 4;
+  var hitWindow:Float = (Scoring.PBOT1_BAD_THRESHOLD+Scoring.PBOT1_GOOD_THRESHOLD+Scoring.PBOT1_GOOD_THRESHOLD)/3;
+  var hitTimes:Array<Float> = [];
+  var currentSaw:Int = 0;
+  var sawbladesDodged:Array<Bool> = [];
+  var amntSaws:Int;
+  var sawPatternID:Int;
+  var dodgeAnimType:Int = 0;
+  var dodgeModule(get, never);
+  function get_dodgeModule()
+  {
+    return ModuleHandler.getModule('SawbladeAndDodgeModule_HazardVersion');
+  }
+
+  public override function onSongStart(event:ScriptEvent):Void
+  {
+    super.onSongStart(event);
+    resetEvent();
+  }
+
+  public override function onGameOver(event:ScriptEvent):Void
+  {
+    super.onGameOver(event);
+    resetEvent();
+  }
+
+  public override function onSongRetry(event:ScriptEvent):Void
+  {
+    super.onSongRetry(event);
+    resetEvent();
+  }
+
+  var doSawbladeOverlapError:Bool = false;
+
+  // This event gets called from the 'onUpdate' function in order to setup the event data properly.
+  public override function handleEvent(data:SongEventData):Void
+  {
+    if (dodgeModule.moduleActive == false){ 
+      trace("!WARNING! - DODGE MODULE IS INACTIVE! THIS SAWBLADE EVENT WILL NOT BE PROCESSED!");
+      return;
+    }
+    var playState = PlayState.instance;
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+      if (optionsModule.getSaveData_sawbladeMode() == "disabled") return;
+      if(!optionsModule.getSaveData_sawbladePausing()) playState.mayPauseGame = false;
+    }
+
+    var tempErrorCheck:Bool = doSawbladeOverlapError;
+    if (!doSawbladeOverlapError && playState.isChartingMode){
+      tempErrorCheck = true;
+    }
+
+    if (tempErrorCheck && sawbladeTriggered && !(sawbladeFinished && sequenceFinished)){
+      resetEvent();
+      playState.health = -1;
+      playState.update(0);
+      FunkinSound.playOnce(Paths.sound("sawblades/sawblade_crash"));
+      WindowUtil.showError("YOU FUCKING IDIOT!", "A sawblade event was triggered before the other one could finish!\nMake sure your sawblade events don't overlap!");
+    }else{
+      resetEvent();
+    }
+
+    sawbladeTriggered = true;
+    eventStepTime = Conductor.instance.getTimeInSteps(data.time);
+    
+    dodgeAnimType = FlxG.random.bool(61) ? 1 : 0;
+
+    stepTiming = data?.value?.step_timing ?? 4;
+    sawPatternID = data?.value?.sawblade_pattern_id ?? 1;
+    _trace("[SAWBLADE] SAW PATTERN ID: " + sawPatternID);
+
+    amntSaws = sawPatternID;
+    if (sawPatternID == "Single") amntSaws = 1;
+    else if (sawPatternID == "Double") amntSaws = 2;
+    else if (sawPatternID == "Triple") amntSaws = 3;
+    else if (sawPatternID == "Quadruple") amntSaws = 4;
+    else if (sawPatternID == "Triple Long" || sawPatternID == 6) amntSaws = 3;
+    else if (sawPatternID == "Quadruple Long" || sawPatternID == 8) amntSaws = 4;
+    else if (sawPatternID == "Single Long" || sawPatternID == 5) amntSaws = 1;
+    else if (sawPatternID == "Double Long" || sawPatternID == 6) amntSaws = 2;
+    else if (sawPatternID == "Fake Single" || sawPatternID == -1) amntSaws = 0;
+
+    addSawbladeTimings(sawPatternID);
+    sequenceData = getSequenceData(sawPatternID);
+    dodgeModule.activeEvents.push(this.superClass);
+
+    sawEventUpdate();
+  }
+
+  var lastReportedPosition:Float = -9999;
+  public function sawEventUpdate(){
+    if (PlayState.instance.health <= 0 && !PlayState.instance.isPracticeMode){ // If the player dies at any point, we set sequenceData to be empty.
+      sawbladeFinished = true;
+      sequenceData = [];
+    }
+    if(!(sawbladeFinished && sequenceFinished) && sawbladeTriggered){
+      if(lastReportedPosition == -9999) lastReportedPosition = Conductor.instance.songPosition;
+
+      if(Conductor.instance.songPosition < lastReportedPosition-160){
+        // We went backwards in time! Cancel everything to prevent issues!
+        sawbladeFinished = true;
+        sequenceData = [];
+      }
+
+      lastReportedPosition = Conductor.instance.songPosition;
+
+      //elapsedStepTime = Conductor.instance.currentStepTime - eventStepTime;
+
+      var offsetInSteps:Float = Conductor.instance.globalOffset / Conductor.instance.stepLengthMs;
+      var howMany:Int = sequenceData.length;
+      var howManyDone:Int = 0;
+      for(i in sequenceData){
+        if(i.triggeredCallback && i.triggeredCallbackAudio)
+        {
+          howManyDone += 1;
+          continue;
+        }
+        if(i.triggeredCallback && i.triggeredCallbackAudio) continue;
+
+        var stepTime:Float = eventStepTime + (stepTiming * i.beat);
+        var stepTimeOffset:Float = stepTime + (offsetInSteps);
+
+        if(!i.triggeredCallback){
+          if(Conductor.instance.currentStepTime >= stepTime){
+            i.callback();
+            i.triggeredCallback = true; 
+          }
+        }
+
+        if(!i.triggeredCallbackAudio){
+          if(Conductor.instance.currentStepTime >= stepTimeOffset){
+            i.callbackAudio();
+            i.triggeredCallbackAudio = true;
+          }
+        }
+      }
+      //trace(howMany);
+      //trace(howManyDone);
+      if(howManyDone >= howMany){
+        //trace("Sequence Done");
+        sequenceFinished = true;
+      }
+    }else{
+      lastReportedPosition = -9999;
+    }
+  }
+
+  override public function onUpdate(event)
+  {
+    super.onUpdate(event);
+
+    if (PlayState.instance == null || Conductor.instance == null) return;
+    if (PlayState.instance.isGamePaused) return;
+
+    sawEventUpdate();
+
+    // We need to trigger the event early if we have a negative offset so the audio can play early!
+    if(Conductor.instance.globalOffset < 0){
+
+      var songPosOffsetted:Float = Conductor.instance.songPosition-Math.min(0,Conductor.instance.globalOffset);
+      //trace(songPosOffsetted);
+
+      var songEventsToActivate:Array<SongEventData> = queryEvents(songPosOffsetted);
+      if (songEventsToActivate.length > 0)
+      {
+        //trace('Found ${songEventsToActivate.length} event(s) to activate.');
+        // Same as processSongEvents function from PlayState, modified to only look for our event!
+        for (event in songEventsToActivate)
+        {
+          if(event.eventKind.toLowerCase()=="sawkb_hazard"){
+            //trace('AAAAAAAAAAAAAAAAAA');
+            // If an event is trying to play, but it's over 1 second old, skip it.
+            var eventAge:Float = Conductor.instance.songPosition - event.time;
+            if (eventAge > 1000)
+            {
+              // Setting `event.processOldEvents = true` allows events to be handled even if they are old.
+              var eventHandler:Null<SongEvent> = SongEventRegistry.getEvent(event.eventKind);
+              if (eventHandler == null || !eventHandler.processOldEvents)
+              {
+                event.activated = true;
+                continue;
+              }
+            };
+
+            var eventEvent:SongEventScriptEvent = new SongEventScriptEvent(event);
+            PlayState.instance.dispatchEvent(eventEvent);
+
+            // Calling event.cancelEvent() skips the event. Neat!
+            if (!eventEvent.eventCanceled)
+            {
+              SongEventRegistry.handleEvent(event);
+            }
+          }
+        }
+      }
+    }
+  }
+  var nextEventIndex:Int = 0;
+  function queryEvents(currentTime:Float):Array<SongEventData>{
+
+    var events = PlayState.instance.songEvents;
+    var startIndex:Int = nextEventIndex;
+    var result:Array<SongEventData> = [];
+
+    for (i in startIndex...events.length)
+    {
+      if (events[i].activated) continue;
+
+      if (events[i].time > currentTime)
+      {
+        nextEventIndex = i;
+        return result;
+      }
+
+      result.push(events[i]);
+    }
+
+    return result;
+  }
+
+  public function resetEvent():Void{
+    nextEventIndex = 0;
+    currentSaw = 0;
+    hitTimes = [];
+    sawbladesDodged = [];
+    elapsedStepTime = 0;
+    sawbladeTriggered = false;
+    sawbladeFinished = false;
+    sequenceFinished = false;
+    eventStepTime=0;
+    for(i in sequenceData){
+      i.triggeredCallback = false;
+      i.triggeredCallbackAudio = false;
+    }
+    sequenceData = [];
+  }
+
+  public override function getTitle():String
+  {
+    return "Sawblade Event (Hazard)";
+  }
+
+  public override function getIconPath():String
+  {
+    return 'ui/chart-editor/events/sawKB_Hazard';
+  }
+
+  override public function getEventSchema()
+  {
+    var sawblade_timing_schema = {
+      name: "step_timing",
+      title: "Step Timing",
+      type: "integer",
+      defaultValue: 4
+    };
+    var sawblade_quanity_schema = {
+      name: "sawblade_pattern_id",
+      title: "Attack Sequence",
+      type: "enum",
+      keys: [
+        "Single" => 1,
+        "Double" => 2,
+        "Triple" => 3,
+        "Quadruple" => 4,
+        "Single Long" => 5,
+        "Double Long" => 6,
+        "Triple Long" => 7,
+        "Quadruple Long" => 8,
+        "Fake Single" => -1
+      ],
+      defaultValue: 1
+    };
+    return [sawblade_quanity_schema,sawblade_timing_schema];
+  }
+
+
+  public function addSawbladeTimings(daSawPatternID:Int):Void{
+    switch (daSawPatternID)
+    {
+      case 2:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*2));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*3));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 3:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*2));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*3));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 4:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*2));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*3));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*5));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 5:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 6:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*5));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 7:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*5));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*6));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case 8:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*4));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*5));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*6));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+        hitTime = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*7));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+      case -1:
+        return;
+      default:
+        var hitTime:Float = Conductor.instance.getStepTimeInMs(eventStepTime+(stepTiming*2));
+        hitTimes.push(hitTime);
+        sawbladesDodged.push(false);
+    }
+  }
+
+
+  var sequenceFinished:Bool = false;
+
+  function getSequenceData(daSawPatternID:Int){
+    var seq = switch (daSawPatternID)
+    {
+
+      case 8:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 4-2 beat 1");
+              _trace('[SAWBLADE] INCOMING LONG QUADRUPLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[2]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[3]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4-2 beat 2");
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.doSawAnimation(false);
+              dodgeModule.playWarningStepVFX("alert 4-2 beat 3");
+              _trace('[SAWBLADE] Third Warning.');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(4, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4-2 beat 4");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, true);
+              _trace('[SAWBLADE] Fourth Warning.');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 4-2 attack 1');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Long Quadruple First!');
+            }
+          },
+          {
+            beat: 5,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 4-2 attack 2');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 2, true);
+              _trace('[SAWBLADE] Attack Long Quadruple Second!');
+            }
+          },
+          {
+            beat: 6,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 4-2 attack 3');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 3, true);
+              _trace('[SAWBLADE] Attack Long Quadruple Third!');
+            }
+          },
+          {
+            beat: 7,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(4, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 4-2 attack 4');
+              _trace('[SAWBLADE] Attack Long Quadruple Fourth!');
+            }
+          }
+        ];
+
+
+      case 7:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 3-2 beat 1");
+              _trace('[SAWBLADE] INCOMING LONG TRIPLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[2]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3-2 beat 2");
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.doSawAnimation(false);
+              dodgeModule.playWarningStepVFX("alert 3-2 beat 3");
+              _trace('[SAWBLADE] Third Warning.');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3-2 beat 4");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, true);
+              _trace('[SAWBLADE] Fourth Warning.');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 3-2 attack 1');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Long Triple First!');
+            }
+          },
+          {
+            beat: 5,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 3-2 attack 2');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 2, true);
+              _trace('[SAWBLADE] Attack Long Triple Second!');
+            }
+          },
+          {
+            beat: 6,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 3-2 attack 3');
+              _trace('[SAWBLADE] Attack Long Triple Third!');
+            }
+          }
+        ];
+
+
+      case 6:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 2-2 beat 1");
+              _trace('[SAWBLADE] INCOMING LONG DOUBLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 2-2 beat 2");
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.doSawAnimation(false);
+              dodgeModule.playWarningStepVFX("alert 2-2 beat 3");
+              _trace('[SAWBLADE] Third Warning.');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 2-2 beat 4");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, true);
+              _trace('[SAWBLADE] Fourth Warning.');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 2-2 attack 1');
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Long Double First!');
+            }
+          },
+          {
+            beat: 5,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 2-2 attack 2');
+              _trace('[SAWBLADE] Attack Long Double First!');
+            }
+          }
+        ];
+
+
+
+      case 5:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 1-2 beat 1");
+              _trace('[SAWBLADE] INCOMING LONG SINGLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 1-2 beat 2");
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.doSawAnimation(false);
+              dodgeModule.playWarningStepVFX("alert 1-2 beat 3");
+              _trace('[SAWBLADE] Third Warning.');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 1-2 beat 4");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, true);
+              _trace('[SAWBLADE] Fourth Warning.');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX('alert 1-2 attack 1');
+              _trace('[SAWBLADE] Attack Long Single!');
+            }
+          }
+        ];
+
+
+      case 4:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 4 beat 1");
+              _trace('[SAWBLADE] INCOMING QUADRUPLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[2]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[3]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(4, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4 beat 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, false);
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4 attack 1");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Quadruple First!');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4 attack 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 2, true);
+              _trace('[SAWBLADE] Attack Quadruple Second!');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4 attack 3");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 3, true);
+              _trace('[SAWBLADE] Attack Quadruple Second!');
+            }
+          },
+          {
+            beat: 5,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(4, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 4 attack 4");
+              _trace('[SAWBLADE] Attack Quadruple Fourth!');
+            }
+          }
+        ];
+
+
+      case 3:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 3 beat 1");
+              _trace('[SAWBLADE] INCOMING TRIPLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[2]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3 beat 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, false);
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3 attack 1");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Triple First!');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3 attack 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 2, true);
+              _trace('[SAWBLADE] Attack Triple Second!');
+            }
+          },
+          {
+            beat: 4,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(3, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 3 attack 3");
+              _trace('[SAWBLADE] Attack Triple Third!');
+            }
+          }
+        ];
+
+
+      case 2:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 2 beat 1");
+              _trace('[SAWBLADE] INCOMING DOUBLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[1]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 2 beat 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, false);
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 2 attack 1");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 1, true);
+              _trace('[SAWBLADE] Attack Double First!');
+            }
+          },
+          {
+            beat: 3,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(2, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 2 attack 2");
+              _trace('[SAWBLADE] Attack Double Second!');
+            }
+          }
+        ];
+      
+      case -1:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 1 beat 1");
+              _trace('[SAWBLADE] INCOMING FAKE SINGLE!');
+              _trace('[SAWBLADE] First Warning.');
+              //_trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 1 beat 2");
+              dodgeModule.doSawAnimation(false);
+              if(dodgeModule.sawSprite != null){
+                dodgeModule.sawSprite?.animation?.play('saw attack fail', true, false, 0);
+                dodgeModule.sawSprite?.offset.x = 32;
+              }
+              //dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, false);
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 5,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              return;
+            },
+            callback: () ->
+            {
+              dodgeModule.activeEvents.remove(this.superClass);
+              dodgeModule.hideAllVisuals();
+              if(dodgeModule.useScrollUI){
+                dodgeModule.undarkenScreen(false);
+              }
+              if(dodgeModule.sawSprite != null){
+                dodgeModule.sawSprite.visible = true;
+              }
+            }
+          }
+        ];
+      default:
+        [
+          {
+            beat: 0,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              if(!dodgeModule.useScrollUI) dodgeModule.darkenScreen();
+              dodgeModule.playWarningStepVFX("alert 1 beat 1");
+              _trace('[SAWBLADE] INCOMING SINGLE!');
+              _trace('[SAWBLADE] First Warning.');
+              _trace('[SAWBLADE] HitTime: ${hitTimes[0]}');
+            }
+          },
+          {
+            beat: 1,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, false);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 1 beat 2");
+              dodgeModule.executeAttack(this.superClass, Conductor.instance.stepLengthMs*stepTiming/Constants.MS_PER_SEC, 0, false);
+              _trace('[SAWBLADE] Second Warning.');
+            }
+          },
+          {
+            beat: 2,
+            triggeredCallbackAudio: false,
+            triggeredCallback: false,
+            callbackAudio: () ->
+            {
+              dodgeModule.playWarningStepSOUND(1, true);
+            },
+            callback: () ->
+            {
+              dodgeModule.playWarningStepVFX("alert 1 attack 1");
+              _trace('[SAWBLADE] Attack Single!');
+            }
+          }
+        ];
+    }
+
+
+
+
+    return seq;
+  }
+
+
+
+
+
+}

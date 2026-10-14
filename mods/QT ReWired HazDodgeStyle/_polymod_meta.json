@@ -1,0 +1,23 @@
+{
+  "title": "QT Rewired - Hazard Dodge Style",
+  "id": "qt-rewired-hazard-dodgestyle",
+  "description": "A mod that overhauls QT Rewired's dodge/sawblade logic.",
+  "author": "Hazard24",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Code, Music, Charting, Sound",
+			"url": "https://linktr.ee/Hazard24"
+		},
+		{
+			"name": "Rewired Team",
+			"role": "QT Assets and code."
+		}
+	],
+	"dependencies": {
+    "qt-rewired": "*"
+  },
+  "api_version": "0.8.6",
+  "mod_version": "1.0.0",
+  "license": "CC BY-NC-ND 4.0"
+}

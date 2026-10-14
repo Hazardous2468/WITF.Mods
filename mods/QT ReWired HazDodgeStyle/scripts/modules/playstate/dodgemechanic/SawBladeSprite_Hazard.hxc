@@ -1,0 +1,13 @@
+package rewired.modules.playstate.dodgemechanic;
+
+import funkin.graphics.FunkinSprite;
+import flixel.FlxG;
+
+class SawBladeSprite_HazardVersion extends FunkinSprite
+{
+  public function new(x:Float, y:Float)
+  {
+    super(x, y);
+    loadTextureAtlas("saw_mechanic/saw_assets_hazard", "shared");
+  }
+}

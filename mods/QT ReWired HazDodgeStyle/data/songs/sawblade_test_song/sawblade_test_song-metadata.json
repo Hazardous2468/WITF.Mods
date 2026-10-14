@@ -1,0 +1,48 @@
+{
+ "version": "2.2.4",
+ "songName": "Sawblade Test Song",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal",
+   "hard"
+  ],
+  "stickerPack": "kbStickers",
+  "characters": {
+   "player": "bf-qt",
+   "girlfriend": "gf-qt",
+   "opponent": "kb",
+   "opponentVocals": [
+    "kb"
+   ],
+   "playerVocals": [
+    "bf-qt"
+   ]
+  },
+  "stage": "qtStageKiller",
+  "noteStyle": "funkin",
+  "ratings": {
+   "normal": 4,
+   "hard": 4
+  },
+  "album": "WITF_test",
+  "previewEnd": 0.311984400779961
+ },
+ "generatedBy": "What in the Funkin' (v1.0.5) - v0.8.5",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 120,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 16000,
+   "b": 32,
+   "bpm": 180,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

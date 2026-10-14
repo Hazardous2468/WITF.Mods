@@ -1,0 +1,124 @@
+package rewired.songs;
+
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+import funkin.play.PlayState;
+import funkin.play.song.Song;
+import funkin.Paths;
+import funkin.play.GameOverSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.FlxTweenUtil;
+
+
+class RazeBladeSongScript extends Song
+{
+  public function new()
+  {
+    super('raze-blade');
+  }
+
+  override function onCreate(event:ScriptEvent):Void
+  {
+    super.onCreate(event);
+  }
+
+  function fetchAssetPaths():Array<String>
+  {
+    var results:Array<String> = super.fetchAssetPaths();
+    results.push(Paths.animateAtlas("saw_mechanic/saw_assets_hazard", "shared"));
+    results.push(Paths.animateAtlas("saw_mechanic/warning_hazard", "shared"));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-1'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-2'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-3'));
+    results.push(Paths.sound('sawblades/alerts_brutal/alert-4'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-1'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-2'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-3'));
+    results.push(Paths.sound('sawblades/attacks_brutal/attack-4'));
+    results.push(Paths.sound('sawblades/sawblade_hit'));
+    results.push(Paths.image("ui/popup/funkin/dodged"));
+    return results;
+  }
+
+  override function onNoteGhostMiss(event)
+  {
+    super.onNoteGhostMiss(event);
+    event.cancel();
+    event.stopPropagation();
+  }
+
+
+  override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    super.onCountdownStart(event);
+    GameOverSubState.musicSuffix = '';
+    GameOverSubState.blueBallSuffix = '';
+    // PlayState.instance.currentStage.getBoyfriend()?.setSuffix('');
+
+    //FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp('blackScreenVideo'));
+    //PlayState.instance.currentStage.getNamedProp('blackScreenVideo').alpha = 0;
+
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").cameras = [PlayState.instance.camCutscene];
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").zIndex = 9999;
+
+    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 1;
+
+
+
+    var elements = [
+      PlayState.instance.healthBar,
+      PlayState.instance.healthBarBG,
+      PlayState.instance.iconP2,
+      PlayState.instance.iconP1,
+      PlayState.instance.playerStrumline
+    ];
+
+    for (element in elements)
+    {
+      element.alpha = 0;
+      element.visible = false;
+    }
+
+
+    var sawModule = ModuleHandler.getModule("SawbladeAndDodgeModule_HazardVersion");
+    if(sawModule!=null){
+      sawModule.maxSawHitsOverride = -1;
+      sawModule.sawbladeModeOverride = "no-penalty";
+      PlayState.instance.scoreText.x = FlxG.width / 2 - PlayState.instance.scoreText.width / 2;
+      sawModule.sawHitCounter.x = FlxG.width / 2 - sawModule.sawHitCounter.width / 2;
+    }
+  }
+
+
+
+  override function onUpdate(event):Void
+  {
+    super.onUpdate(event);
+    if(PlayState.instance==null) return;
+
+    if(PlayState.instance.scoreText!=null){
+      PlayState.instance.scoreText.x = FlxG.width / 2 - PlayState.instance.scoreText.width / 2;
+    }
+  }
+
+  function onSongRetry(event:ScriptEvent)
+  {
+    super.onSongRetry(event);
+    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
+    PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 1;
+  }
+
+  override function onSongStart(event)
+  {
+    super.onSongStart(event);
+    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
+    FlxTween.tween(PlayState.instance.currentStage.getNamedProp('blackScreenR'),{alpha: 0}, 1.75,{ease: FlxEase.quadInOut});
+  }
+
+  function onDestroy(event)
+  {
+    super.onDestroy(event);    
+  }
+}

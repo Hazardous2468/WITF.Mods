@@ -1,0 +1,297 @@
+package rewired.modules.options;
+
+import funkin.modding.module.Module;
+import funkin.ui.options.OptionsState;
+import funkin.modding.events.ScriptEvent;
+import flixel.FlxG;
+import funkin.save.Save;
+import funkin.ui.AtlasText;
+import funkin.ui.ButtonStyle;
+import funkin.ui.TextMenuItem;
+import funkin.util.InputUtil;
+import funkin.ui.options.PreferencesMenu;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.ui.FullScreenScaleMode;
+import StringTools;
+
+class QT_Hazard_OptionsCategory extends Module
+{
+  public function new()
+  {
+    super('QT_Hazard_OptionsCategory', 1, {state: OptionsState});
+
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_MODE))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_MODE, "cripple");
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_SOUND))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_SOUND, "brutal");
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_VFX))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_VFX, "rewired");
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_LIMIT))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_LIMIT, 4);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_REPLACE))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_REPLACE, false);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_RANDOM))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_RANDOM, false);
+    }
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_PLAYBACKPITCH))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_PLAYBACKPITCH, true);
+    }  
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_PAUSING))
+    {
+      Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_PAUSING, false);
+    }   
+  }
+
+  public static var SAVE_KEY_SAWBLADE_MODE:String = "qt-hazwired-SawbladeMode";
+  public static var SAVE_KEY_SAWBLADE_LIMIT:String = "qt-hazwired-SawbladeLimit";
+  public static var SAVE_KEY_SAWBLADE_REPLACE:String = "qt-hazwired-SawbladeReplaceRewired";
+  public static var SAVE_KEY_SAWBLADE_RANDOM:String = "qt-hazwired-SawbladeRandom";
+  public static var SAVE_KEY_SAWBLADE_SOUND:String = "qt-hazwired-SawbladeSFX";
+  public static var SAVE_KEY_SAWBLADE_VFX:String = "qt-hazwired-SawbladeVFX";
+  public static var SAVE_KEY_SAWBLADE_PLAYBACKPITCH:String = "qt-hazwired-SawbladePlaybackRatePitch";
+  public static var SAVE_KEY_SAWBLADE_PAUSING:String = "qt-hazwired-SawbladePausing";
+  
+
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if (!Std.isOfType(event.targetState, OptionsState)) return;
+
+    addCustomCategory(event.targetState);
+    addOptions(event.targetState);
+  }
+
+  function addCustomCategory(state)
+  {
+    var prefs:PreferencesMenu = state.optionsCodex.addPage('qt-hazwired', new PreferencesMenu());
+    prefs.onExit.add(() ->
+    {
+      FlxG.state.optionsCodex.switchPage('options');
+    });
+    prefs.preferenceDesc = [];
+    prefs.items.clear();
+    prefs.preferenceItems.clear();
+    var optionspage = FlxG.state.optionsCodex.pages.get('options');
+    var exit = optionspage.items.getItem("LAG ADJUSTMENT") ?? null;
+    var option = optionspage.createItem("QT HazWired Options", () -> FlxG.state.optionsCodex.switchPage('qt-hazwired'));
+    if (exit != null)
+    {
+      optionspage.items.members.remove(option);
+      optionspage.items.members.insert(optionspage.items.members.indexOf(exit), option);
+    }
+    for (i in 0...optionspage.items.length)
+    {
+      var item = optionspage.items.members[i];
+      item.y = 100 + i * 100;
+    }
+  }
+
+  function addOptions(options:OptionsState)
+  {
+    var preferencesPage = options.optionsCodex.pages.get("qt-hazwired");
+    if (preferencesPage != null)
+    {
+
+      preferencesPage.createPrefItemEnum('Sawblade Mode', "Changes how the Sawblade Mechanic works. (Default is Cripple)",
+        ["Cripple" => "cripple","Bleed" => "bleed", "Instakill" => "instakill", "Disabled" => "disabled", "Damage" => "damage", "Auto Dodge" => "auto"], function(value:String, oValue:String):Void
+      {
+        Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_MODE, oValue);
+        Save.instance.flush();
+      },
+        getSawbladeModeDisplay(Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_MODE)));
+
+
+
+      preferencesPage.createPrefItemNumber('Sawblade Limit', 'How many hits you can take before the next one will instantly kill you. (Default is 4)',
+          function(value:Float)
+          {
+            Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_LIMIT, value);
+            Save.instance.flush();
+          }, null, getSaveData_sawbladeLimit(), 1, 15, 1, 0);
+
+
+      preferencesPage.createPrefItemCheckbox("Random Sawblades", "When enabled, sawblade events will be randomly placed in every song you load.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_RANDOM, value);
+            Save.instance.flush();
+          }, getSaveData_randomSawblade());
+
+
+      preferencesPage.createPrefItemEnum('VFX Type', "Changes how the alerts get displayed.",
+        ["Disabled" => "disabled","Rewired" => "rewired","Classic" => "classic"], function(value:String, oValue:String):Void
+      {
+        Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_VFX, oValue);
+        Save.instance.flush();
+      },
+        getSawbladeVFXModeDisplay(Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_VFX)));
+
+
+      preferencesPage.createPrefItemEnum('Sound Type', "Changes what sounds to play.",
+        ["Cubed" => "brutal","Classic" => "classic", "Rewired" => "rewired", "Disabled" => "disabled"], function(value:String, oValue:String):Void
+      {
+        Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_SOUND, oValue);
+        Save.instance.flush();
+      },
+        getSawbladeSFXModeDisplay(Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_SOUND)));
+
+
+      preferencesPage.createPrefItemCheckbox("SFX PlaybackRate Sync", "When enabled, the sounds will have their pitch changed to the current playback rate.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_PLAYBACKPITCH, value);
+            Save.instance.flush();
+          }, getSaveData_sawbladePitchRate());
+
+
+      preferencesPage.createPrefItemCheckbox("Allow Pausing", "When enabled, pausing will be allowed when a sawblade is active. Otherwise, pausing is disabled (the default).",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_PAUSING, value);
+            Save.instance.flush();
+          }, getSaveData_sawbladePausing());
+
+
+      preferencesPage.createPrefItemCheckbox("Replace Rewired Saw Events", "When enabled, Rewired Sawblade events will be replaced by the new Sawblade event.",
+          function(value:Bool):Void
+          {
+            Save.instance.modOptions.set(SAVE_KEY_SAWBLADE_REPLACE, value);
+            Save.instance.flush();
+          }, getSaveData_sawbladeReplace());
+
+    }
+  }
+
+
+
+  function getSawbladeModeDisplay(value:String):String
+  {
+    return switch (value)
+    {
+      case "auto":
+        "Auto Dodge";
+      case "bleed":
+        "Bleed";
+      case "cripple":
+        "Cripple";
+      case "damage":
+        "Damage";
+      case "default":
+        "Default";
+      case "instakill":
+        "Instakill";
+      case "disabled":
+        "Disabled";
+      default:
+        "Default";
+    }
+  }
+
+  function getSawbladeSFXModeDisplay(value:String):String
+  {
+    return switch (value)
+    {
+      case "classic":
+        "Classic";
+      case "rewired":
+        "Rewired";
+      case "brutal":
+        "Cubed";
+      case "disabled":
+        "Disabled";
+      default:
+        "?";
+    }
+  }
+
+  function getSawbladeVFXModeDisplay(value:String):String
+  {
+    return switch (value)
+    {
+      case "classic":
+        "Classic";
+      case "rewired":
+        "Rewired";
+      case "disabled":
+        "Disabled";
+      default:
+        "?";
+    }
+  }
+
+
+  function getSaveData_sawbladeMode():String
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_MODE)) return "cripple";
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_MODE);
+  }
+
+  function getSaveData_sawbladeLimit():Float
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_LIMIT)) return 4;
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_LIMIT);
+  }
+
+  function getSaveData_sawbladeReplace():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_REPLACE)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_REPLACE);
+  }
+
+  function getSaveData_sawbladePausing():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_PAUSING)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_PAUSING);
+  }
+
+  function getSaveData_randomSawblade():Bool
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_RANDOM)) return false;
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_RANDOM);
+  }
+
+  function getSaveData_sawbladeSFX():String
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_SOUND)) return "brutal";
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_SOUND);
+  }
+  function getSaveData_sawbladeVFX():String
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_VFX)) return "rewired";
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_VFX);
+  }
+
+  // left over from testing
+  function shouldUseScrollUI():Bool
+  {
+    return false;
+  }
+
+  function getSaveData_sawbladePitchRate():String
+  {
+    if (!Save.instance.modOptions.exists(SAVE_KEY_SAWBLADE_PLAYBACKPITCH)) return true;
+    return Save.instance.modOptions.get(SAVE_KEY_SAWBLADE_PLAYBACKPITCH);
+  }
+
+  
+
+
+
+  function getSaveData_test():String{
+    trace("WEEEEEE");
+    return "Hello!!!";
+  }
+
+}

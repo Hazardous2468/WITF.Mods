@@ -18,6 +18,5 @@ void main() {
     color.rgb = mix(color.rgb, vec3(0.0), mask);
 
     gl_FragColor = color;
-	
 }
 

@@ -1,0 +1,1786 @@
+package rewired.modules.playstate.dodgemechanic;
+
+// AN OVERHAULED DODGE MODULE FROM QT REWIRED BY HAZARD24
+
+// TODO:
+// Bleed image has different anim states.
+// Maybe make the sounds offset their position when they get played based on the time diff so if a lag occurs, the sound won't start from the beginning and cause some weird swing alert rhythms.
+
+
+import flixel.FlxG;
+import flixel.FlxSprite;
+import flixel.math.FlxRect;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import flixel.util.FlxColor;
+import funkin.Conductor;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.graphics.FunkinSprite;
+import funkin.graphics.adobeanimate.FlxAtlasSprite;
+import funkin.modding.module.Module;
+import funkin.play.GameOverSubState;
+import funkin.play.PlayState;
+import funkin.play.event.SongEvent;
+import funkin.play.scoring.Scoring;
+import funkin.util.Constants;
+import funkin.util.HapticUtil;
+import funkin.util.TouchUtil;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import funkin.ui.FullScreenScaleMode;
+import StringTools;
+import funkin.save.Save;
+import funkin.Preferences;
+import funkin.util.InputUtil;
+import funkin.util.Constants;
+import flixel.math.FlxPoint;
+import flixel.math.FlxMath;
+import flixel.ui.FlxBar;
+import funkin.play.components.HealthIcon;
+import funkin.data.event.SongEventRegistry;
+import funkin.data.character.CharacterDataParser;
+import funkin.data.song.SongEventData;
+import funkin.modding.module.ModuleHandler;
+import funkin.play.character.CharacterType;
+import flixel.effects.FlxFlicker;
+import funkin.Highscore;
+
+
+class SawbladeAndDodgeModule_HazardVersion extends Module
+{
+  // Editable config values:
+  var soundStyle(get, null):String;
+  function get_soundStyle():String
+  {
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+      return optionsModule.getSaveData_sawbladeSFX();
+    }else{
+      return "brutal";
+    }
+  }
+
+  var RATE_PITCH_SHIFT(get, null):Bool;
+  function get_RATE_PITCH_SHIFT():Bool
+  {
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+      return optionsModule.getSaveData_sawbladePitchRate();
+    }else{
+      return true;
+    }
+  }
+
+  // Change this to any number to override the maxSawHits. Otherwise, defaults to using the integer defined in the preferences menu.
+  public var maxSawHitsOverride(default, set):Int = -2;
+  function set_maxSawHitsOverride(newValue:Int):Int
+  {
+    maxSawHitsOverride = newValue;
+    sawHits = sawHits; // force update sawHits counter text
+    return newValue;
+  }
+
+
+  var maxSawHits(get, null):Int;
+  function get_maxSawHits():Int
+  {
+    if(maxSawHitsOverride >= -1){
+      return maxSawHitsOverride;
+    }
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+      return optionsModule.getSaveData_sawbladeLimit();
+    }else{
+      return 4;
+    }
+  }
+
+  // To punish those who dodge early (because in OG QT, you can cheese sawblades by dodging every beat).
+  // Stings, doesn't it?
+  function getDodgeCooldownDuration():Float{
+    var beatLengthMs = Conductor.instance.beatLengthMs;
+    
+    // For really slow BPM's, we add a maximum cap to the beatLength.
+    var lowBPM:Float = 170;
+    var lowBeatLengthMs = 60/lowBPM*Constants.MS_PER_SEC;
+    beatLengthMs = Math.min(beatLengthMs, lowBeatLengthMs);
+    //trace(beatLengthMs);
+
+    return beatLengthMs*2.35;
+  }
+
+  static inline var playHitSnd:Bool = true;
+  static inline var playDodgeSnd:Bool = true;
+  static inline var sawbladeScoreDODGE:Int = 500;
+  static inline var sawbladeScoreMISS:Int = -500;
+
+
+  // Config ends
+
+
+  var bfDodgeCooldownMultiplier:Float = 1.0; // When getting hit, the cooldown duration expires much quicker to help prevent note locking.
+  var bfDodging:Bool = false;
+  var dodgeToggleAnim(default, set):Int = 0;
+  function set_dodgeToggleAnim(newValue:Int):Int
+  {
+    dodgeToggleAnim = newValue;
+    return newValue;
+  }
+
+
+  // Touch area for Mobile.
+  var touchArea:FlxRect;
+  var touchX:Float;
+  var touchY:Float;
+  var touchWidth:Float = 280;
+  var touchHeight:Float = 280;
+  var touchAreaSprite:FlxSprite;
+
+  var alertVignette:FunkinSprite;
+  var warningVfx:FunkinSprite;
+  var sawSprite:SawBladeSprite_HazardVersion;
+  var sawHitCounter:FlxText;
+  var bleedingHealthbarSpr:FunkinSprite;
+  var dodgeText:FlxText;
+  var dodgeText2:FlxText;
+  var dodgeFormat:String;
+  var dodgeTextSwapTimer:FlxTimer;
+
+  // These sounds get created but aren't used? Either an oversight or used to cache the sounds in, idk but I'm just gonna leave them there anyway to be safe
+  var warnSound:FunkinSound;
+  var attackSound:FunkinSound;
+  var sawHitSound:FunkinSound;
+
+  
+  var bleedRate:Float = 0.05; // How fast health drains per second. Note that this is multiplied by sawHits.
+  var redSineTime:float = 0; // Timer for the sine wave used for the red pulsing effect when about to hit sawblade limit.
+
+
+  var playState;            //Easy ref to the current playState instance.
+  var stage:Dynamic;        //Easy ref to the current stage instance.
+
+  //If no "blackScreen" prop is present in the current Stage, this will be used for the background dim when a sawblade event is active.
+  var dimOverlay:FlxSprite;
+
+  // An array of active sawblade events currently ongoing.
+  var activeEvents:Array<SongEvent> = [];
+
+  // An array of all the timers that we have created to keep track of. Used so we can pause / unpause them easily.
+  var allTimers:Array<FlxTimer> = [];
+
+  // Modulate the sawblade sfx by this amount (added onto pitch)
+  var sfxPitchAdditive:Float = 0;
+
+  // Minimum pitch amount for sounds to prevent really really long sounds or any problems zero pitch might cause.
+  final minPitch:Float = 0.075;
+
+
+  var spinVibrationPreset:VibrationPreset = {
+    period: 0.05,
+    duration: 0.2,
+    amplitude: 0.6,
+    sharpness: 0.7
+  };
+  var attackVibrationPreset:VibrationPreset = {
+    period: 0,
+    duration: 0.3,
+    amplitude: 1.0,
+    sharpness: 0.9
+  };
+
+  public function new()
+  {
+    super('SawbladeAndDodgeModule_HazardVersion', 2, {state: PlayState});
+  }
+
+  function destroyAssets():Void
+  {  
+    //for (theEvent in activeEvents){
+    //  theEvent.stopSequence();
+    //}
+    activeEvents = [];
+
+    if(bleedingHealthbarSpr != null){
+      bleedingHealthbarSpr.destroy();
+      bleedingHealthbarSpr = null;
+    }
+    if(sawHitCounter != null){
+      sawHitCounter.destroy();
+      sawHitCounter = null;
+    }
+    if(sawHitSound!=null){
+      sawHitSound.destroy();
+      sawHitSound = null;
+    }
+    if(alertVignette!=null){
+      alertVignette.destroy();
+      alertVignette = null;
+    }
+    if (warningVfx != null)
+    {
+      warningVfx.destroy();
+      warningVfx = null;
+    }
+    if (sawSprite != null)
+    {
+      sawSprite.destroy();
+      sawSprite = null;
+    }
+    if (warnSound != null)
+    {
+      warnSound.destroy();
+      warnSound = null;
+    }
+    if (attackSound != null)
+    {
+      attackSound.destroy();
+      attackSound = null;
+    }
+    if (touchAreaSprite != null)
+    {
+      touchAreaSprite.destroy();
+      touchAreaSprite = null;
+    }
+    if (dimOverlay != null)
+    {
+      dimOverlay.destroy();
+      dimOverlay = null;
+    }
+    if (dodgeText != null)
+    {
+      dodgeText.destroy();
+      dodgeText = null;
+    }
+    if (dodgeText2 != null)
+    {
+      dodgeText2.destroy();
+      dodgeText2 = null;
+    }
+    if (dodgeTextSwapTimer != null)
+    {
+      dodgeTextSwapTimer.cancel();
+      dodgeTextSwapTimer = null;
+    }
+    if(dodgeTextTween!=null){
+      dodgeTextTween.cancel();
+      dodgeTextTween = null;
+    }
+    if(screenDarkenTween!=null){
+      screenDarkenTween.cancel();
+      screenDarkenTween = null;
+    }
+    if(vfxFadeTween!=null){
+      vfxFadeTween.cancel();
+      vfxFadeTween = null;
+    } 
+    if(vfxScaleTween!=null){
+      vfxScaleTween.cancel();
+      vfxScaleTween = null;
+    }
+    if(warningVignetteTween!=null){
+      warningVignetteTween.cancel();
+      warningVignetteTween = null;
+    }
+  }
+  
+  var warningVignetteTween:FlxTween;
+  function initializeAssets():Void
+  {
+    var stage = playState.currentStage;
+    if(stage == null){ 
+      moduleActive = false;
+      trace("WARNING: CURRENT STAGE WAS NULL WHEN TRYING TO INIT SAWBLADE ASSETS!");
+      return; // If there is no stage, assume we're in chart editor thingy? This is kinda more of a bandaid fix then anything really.
+    }
+
+    sfxPitchAdditive = 0;
+
+    warnSound = FunkinSound.load(Paths.sound('sawblades/alerts/alert'), 1.0, false, false, false);
+    attackSound = FunkinSound.load(Paths.sound('sawblades/attacks/attack'), 1.0, false, false, false);
+    dimOverlay = new FlxSprite();
+    dimOverlay.makeGraphic(FlxG.width, FlxG.height, FlxColor.BLACK);
+    dimOverlay.scrollFactor.set();
+    dimOverlay.camera = playState.camHUD;
+    dimOverlay.alpha = 0;
+    dimOverlay.zIndex = 632;
+    playState.add(dimOverlay);
+
+
+    alertVignette = new FunkinSprite(0,0, Paths.image("saw_mechanic/alert-vignette"));
+    alertVignette.setGraphicSize(FlxG.width, FlxG.height);
+    alertVignette.screenCenter();
+    alertVignette.scrollFactor.set();
+    alertVignette.camera = playState.camHUD;
+    alertVignette.alpha = 0;
+    alertVignette.zIndex = 633;
+    playState.add(alertVignette);
+
+    if(!useScrollUI){
+      if(vfxStyle != "disabled"){
+        warningVfx = new FunkinSprite();
+
+        if(vfxStyle == "classic"){
+          warningVfx.loadTextureAtlas("saw_mechanic/warning_classic", "shared", {cacheOnLoad: true});
+          vfxTargetScale = 1.25;
+        }else{ 
+          warningVfx.loadTextureAtlas("saw_mechanic/warning_hazard", "shared", {cacheOnLoad: true});
+          vfxTargetScale = 1.0;
+        }
+        warningVfx.scale.set(vfxTargetScale,vfxTargetScale);
+        warningVfx.camera = playState.camHUD;
+        warningVfx.alpha = 0;
+        //warningVfx.zIndex = 633;
+        warningVfx.zIndex = 905; // Place it over the combo popup!
+        playState.add(warningVfx);
+      }
+    }
+
+    var sawPosition = getSawPosition();
+    sawSprite = new SawBladeSprite_HazardVersion(sawPosition.x, sawPosition.y);
+    var characterId:String = stage.getDad().characterId;
+    if(StringTools.contains(characterId.toLowerCase(), "darnell")){
+      sawSprite.scale.x = 1.2; // he's so far away :(
+    }
+    else if(StringTools.contains(characterId, "sserafim-kazuha")){
+      sawSprite.scale.x = -1;
+    }
+
+
+
+    sawSprite.visible = false;
+    sawSprite.shader = stage.getDad().shader;
+    stage.add(sawSprite);
+
+    sawSprite?.animation?.onFinish?.add((_) ->
+    {
+      if (_ == "saw attack final")
+      {
+        hideAllVisuals();
+      }
+      else if (_ == "saw attack")
+      {
+        hideAllVisuals();
+      }
+      else if (_ == "saw appear" || _ == "saw idle" )
+      {
+        sawSprite?.animation?.play('saw idle', true, false, 0); // scuffed way to loop it lmfao
+      }
+    });
+
+
+
+    // Hazard stuff
+    sawHitSound = FunkinSound.load(Paths.sound('sawblades/sawblade_hit'), 1.0, false, false, false);
+
+    //bleed style stuff
+    bleedingHealthbarSpr = new FunkinSprite(0,0,Paths.image("saw_mechanic/healthBar_bleeding"));
+    bleedingHealthbarSpr.zIndex = 799;
+    bleedingHealthbarSpr.x = playState.healthBarBG.x;
+    bleedingHealthbarSpr.y = playState.healthBarBG.y;
+    bleedingHealthbarSpr.y -= 17/2;
+    bleedingHealthbarSpr.cameras = [playState.camHUD];
+    playState.add(bleedingHealthbarSpr);
+    bleedingHealthbarSpr.alpha=0;
+
+    //cripple style stuff
+    playState.healthBarBG.loadGraphic(Paths.image("saw_mechanic/healthBar"));
+
+    sawHitCounter = new FlxText().setFormat(Paths.font('vcr.ttf'), 18, 0xFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+    sawHitCounter.scrollFactor.set();
+    sawHitCounter.text = '???';
+    sawHitCounter.zIndex = 802;
+    playState.add(sawHitCounter);
+    sawHitCounter.cameras = [PlayState.instance.camHUD];
+    sawHitCounter.x = PlayState.instance.scoreText.x;
+    sawHitCounter.y = PlayState.instance.scoreText.y;
+    sawHitCounter.y += 16;
+
+    sawHits = 0;
+    HEALTH_MIN = Constants.HEALTH_MIN;
+    playState.refresh(); //ensure all added sprites are properly sorted into their correct positions.
+  }
+
+
+
+  // For positioning the sawblade. I also hardcoded some values for other characters for the random sawblades module.
+  public function getSawPosition():FlxPoint{
+    var stage = playState.currentStage;
+    var sawPositionX:Float = 0;
+    var sawPositionY:Float = 0;
+    var opponent = stage.getDad();
+    if(opponent==null){
+      sawPositionX = 0;
+      sawPositionY = 0;
+      if(stage.getBoyfriend()!=null){
+        sawPositionX = stage.getBoyfriend().x -700;
+        sawPositionY = stage.getBoyfriend().y -370;
+      }
+      return new FlxPoint(sawPositionX, sawPositionY);
+    }
+
+    var characterId:String = opponent.characterId.toLowerCase();
+    var dadMidpoint = opponent.getGraphicMidpoint();
+    sawPositionX = dadMidpoint.x - 50;
+    sawPositionY = dadMidpoint.y - 275;
+
+    
+    // Hard coded values for base-game characters should you use sawblade events with them. Nothing really too advanced, can easily be changed if needed.
+    if(StringTools.contains(characterId, "pico")){
+      sawPositionX = opponent.x + 190;
+      sawPositionY = opponent.y - 240;
+    }
+    else if(StringTools.contains(characterId, "mom")){
+      sawPositionX = opponent.x + 140;
+      sawPositionY = opponent.y - 200;
+    }
+    else if(StringTools.contains(characterId, "dad")){
+      sawPositionX = opponent.x + 214;
+      sawPositionY = opponent.y - 38;
+    }
+    else if(StringTools.contains(characterId, "spooky")){
+      sawPositionX = opponent.x + 186;
+      sawPositionY = opponent.y - 200;
+    } 
+    else if(StringTools.contains(characterId, "monster")){
+      sawPositionX = dadMidpoint.x - 50;
+      sawPositionY = dadMidpoint.y - 345;
+    }
+    else if(StringTools.contains(characterId, "tankman")){
+      sawPositionX = opponent.x + 186;
+      sawPositionY = opponent.y - 200;
+    }
+    else if(StringTools.contains(characterId, "parents-christmas")){
+      sawPositionX = opponent.x + 600;
+      sawPositionY = opponent.y - 36;
+    }
+    else if(StringTools.contains(characterId, "senpai")){
+      sawPositionX -= 120;
+      sawPositionY -= 60;
+    }
+    else if(StringTools.contains(characterId, "spirit")){
+      sawPositionX += 100;
+      sawPositionY += 10;
+    }
+    else if(StringTools.contains(characterId, "darnell")){
+      sawPositionX = opponent.x + 270;
+      sawPositionY = opponent.y - 136;
+    }
+    else if(StringTools.contains(characterId, "sserafim-kazuha")){
+      sawPositionX = stage.getBoyfriend().x + 0;
+      sawPositionY = stage.getBoyfriend().y - 50;
+    }
+    else if(StringTools.contains(characterId, "qt")){
+      sawPositionX = opponent.x + 230;
+      sawPositionY = opponent.y - 225;
+    }
+    else if(StringTools.contains(characterId, "kb")){
+      sawPositionX = dadMidpoint.x - 50;
+      sawPositionY = dadMidpoint.y - 275;
+    }
+    else if(StringTools.contains(characterId, "hazard")){
+      sawPositionX = opponent.x + 190;
+      sawPositionY = opponent.y - 170;
+    }else{
+      // By default, position the sawblade so that it's attack lines up with BF.
+      sawPositionX = stage.getBoyfriend().x -700;
+      sawPositionY = stage.getBoyfriend().y -370;
+    }
+
+
+
+    return new FlxPoint(sawPositionX, sawPositionY);
+  }
+
+
+  var vfxScaleTween:FlxTween;
+  var vfxFadeTween:FlxTween;
+
+  var screenDarkenTween:FlxTween;
+
+  /**
+   * Darkens the screen when displaying alerts, called from the sawbladeEvent script OR the scrollUI logic. 
+   * Uses the "blackScreen" prop of the stage.
+   * Should this prop not exist, then the module will resort to it's own overlay.
+   * This way, the effect will always play out properly, regardless of stage or variation.
+   */
+  function darkenScreen(instant:Bool = false):Void
+  {
+    if(!moduleActive || playState == null) return;
+    if(vfxStyle == "disabled") return;
+    if (screenDarkenTween != null)
+    {
+      screenDarkenTween.cancel();
+    }
+    var blackScreen = playState.currentStage.getNamedProp("blackScreen");
+    if(instant){
+      if (blackScreen != null) blackScreen.alpha=0.3;
+      else if (dimOverlay != null) dimOverlay.alpha=0.3;
+    }else{
+      if (blackScreen != null) screenDarkenTween = FlxTween.tween(blackScreen, {alpha: 0.3}, 0.35, {ease: FlxEase.linear});
+      else if (dimOverlay != null) screenDarkenTween = FlxTween.tween(dimOverlay, {alpha: 0.3}, 0.35, {ease: FlxEase.linear});
+    }
+  }
+  function undarkenScreen(instant:Bool = false):Void
+  {
+    if(!moduleActive || playState == null) return;
+    if(vfxStyle == "disabled") return;
+    if (screenDarkenTween != null)
+    {
+      screenDarkenTween.cancel();
+    }
+    var blackScreen = playState.currentStage.getNamedProp("blackScreen");
+    if(instant){
+      if (blackScreen != null) blackScreen.alpha=0.0;
+      else if (dimOverlay != null) dimOverlay.alpha=0.0;
+    }else{
+      if (blackScreen != null) screenDarkenTween = FlxTween.tween(blackScreen, {alpha: 0}, 0.35, {ease: FlxEase.quadInOut});
+      else if (dimOverlay != null) screenDarkenTween = FlxTween.tween(dimOverlay, {alpha: 0}, 0.35, {ease: FlxEase.quadInOut});
+    }
+  }
+
+ 
+
+  // Plays the audio associated with the animName provided.
+  // Separate from playWarningStepVFX BECAUSE audio and visuals can be desynced due to global offset.
+  public function playWarningStepSOUND(sndSuffix:Int, isAttack:Bool = false, targetMS:Float = -67):Void
+  {
+    if(!moduleActive || playState == null || PlayState.instance == null) return;
+    if (playState.health <= 0 && !playState.isPracticeMode) return;
+    if(soundStyle == "disabled") return;
+    var folder_suffix:String = switch (soundStyle){
+      case "classic":
+        "_classic";
+      case "rewired":
+        "";
+      case "brutal":
+        "_brutal";
+      default:
+        "";
+    }
+    var alertSoundPath:String = 'sawblades/alerts' + folder_suffix + '/alert-$sndSuffix';
+    var attackSoundPath:String = 'sawblades/attacks'+ folder_suffix + '/attack-$sndSuffix';
+    var sndPath:String = isAttack ? attackSoundPath : alertSoundPath;
+    var snd:FunkinSound=FunkinSound.playOnce(Paths.sound(sndPath));
+    if(snd!=null){
+
+      if(soundStyle == "classic" && isAttack){ // The classic attack sound is so loud for some reason?
+        snd.volume = 0.65;
+      } 
+
+      snd.pitch = RATE_PITCH_SHIFT ? playState.playbackRate : 1.0;
+      snd.pitch += sfxPitchAdditive;
+      if(snd.pitch < minPitch) snd.pitch = minPitch; // Prevent really really low pitches.
+
+      var timeDif:Float = Conductor.instance.songPosition - targetMS;
+      if(targetMS != -67 && timeDif > 0){
+        snd.time = timeDif;
+      }
+      
+    }
+  }
+
+  //Because the sprite's scale is set by tweens, use this to change the vfxScale instead!
+  var vfxTargetScale:Float = 1.0;
+
+  // Plays the vfx sprite animation based on the provided animName.
+  public function playWarningStepVFX(animName:String, offsetX:Float=0, offsetY:Float=0):Void
+  {
+    if(vfxStyle == "disabled") return;
+    if (warningVfx != null && warningVfx.animation != null)
+    {
+      if(vfxFadeTween!=null){
+        vfxFadeTween.cancel();
+      }
+      if(vfxScaleTween!=null){
+        vfxScaleTween.cancel();
+      }
+      warningVfx.alpha = 1;
+      warningVfx.scale.x = vfxTargetScale;
+      warningVfx.scale.y = vfxTargetScale;
+      warningVfx.animation.play(animName);
+      warningVfx.screenCenter();
+      if(vfxStyle == "rewired"){
+        warningVfx.y -= Preferences.downscroll ? 28 : 18; // make room for the dot indicators
+      }
+      warningVfx.offset.set(offsetX, offsetY);
+      warningVfx.origin.y=warningVfx.height*0.75; // for the scale tween.
+    }
+    if(warningVignetteTween!=null){
+      warningVignetteTween.cancel();
+    }
+    if(alertVignette!=null){
+      alertVignette.alpha=0.48;
+      warningVignetteTween = FlxTween.tween(alertVignette, {alpha: 0.0}, Conductor.instance.beatLengthMs/Constants.MS_PER_SEC, {ease: FlxEase.smoothStepInOut});
+    }
+  }
+
+  // Summons the sawblade, ready to attack.
+  function doSawAnimation(skipAnim:bool = false):Void
+  {
+    if(playState==null) return;
+    if (playState.health <= 0 && !playState.isPracticeMode) return;
+
+    if(!skipAnim){
+      sawSprite?.animation?.play('saw appear', true, false, 0);
+      sawSprite?.offset?.y = 0;
+      updateSawZIndex();
+    }
+    HapticUtil.vibrateByPreset(spinVibrationPreset);
+    sawSprite?.visible = true;
+    sawbladePrepAnim = true;
+  }
+
+  // Gets set to true when the sawblade animation needs to play the 'appear' animation.
+  // While usually this goes unused as the sawEvent triggers the appear animation directly via the doSawAnim function, 
+  // this exists so that really delayed multi-saws have this animation replay the appear animation in between the attacks.
+  // Gets set to true by the sawAnim function. Gets set to false after a final sawblade fires, or via resetState.
+  var sawbladePrepAnim:Bool = false;
+
+  // If there are no more events remaining, hide the visuals.
+  public function hideAllVisuals(instant:Bool=false):Void
+  {
+    //if (playState.health <= 0 && !PlayState.instance.isPracticeMode) return;
+    if(activeEvents.length <= 0){
+      sawSprite?.visible = false;
+      if (warningVfx != null)
+      {
+        if(vfxFadeTween!=null){
+          vfxFadeTween.cancel();
+        }
+        if(vfxScaleTween!=null){
+          vfxScaleTween.cancel();
+        }
+        if(instant){
+          warningVfx.alpha=0;
+        }else{
+          vfxFadeTween = FlxTween.tween(warningVfx, {alpha: 0.0}, 0.4, {ease: FlxEase.smoothStepInOut});
+          vfxScaleTween = FlxTween.tween(warningVfx.scale, {x: 0.0, y:0.0}, 0.35, {ease: FlxEase.sineIn});
+        }
+        
+      }
+      if(!useScrollUI)
+        undarkenScreen(instant);
+
+      if(PlayState.instance!=null)
+        PlayState.instance.mayPauseGame = true;
+    }else{
+      if(sawbladePrepAnim){
+        // Instead of hiding the sawblade if there is an active event, we instead bring it right back out with the prepare animation. This is only really noticable for multi-sawblades with big gaps in between like seen in Termination-ERECT
+        doSawAnimation();
+      }
+    }
+  }
+
+  function updateSawZIndex(dodgeAnimType:Int = -1):Void{
+    if(sawSprite==null) return;
+    var characterId:String = stage.getDad().characterId;
+    if( !(StringTools.contains(characterId.toLowerCase(), "kb") || StringTools.contains(characterId.toLowerCase(), "qt") )  )
+    {
+      sawSprite.zIndex = stage.getDad().zIndex - 1;
+    }
+    else
+    {
+      if(dodgeAnimType < 0){
+        sawSprite.zIndex = getCurDodgeAnim() == 1 ? 299 : 199;
+      }else{
+        sawSprite.zIndex = dodgeAnimType == 1 ? 299 : 199;
+      }
+    }
+
+    //trace("--------------------------");
+    //trace("BF DODGE ANIM: " + dodgeToggleAnim);
+    //trace("SAW Z INDEX: " + sawSprite.zIndex);
+    //trace("--------------------------");
+
+    playState.currentStage.refresh();
+  }
+
+  function getCurDodgeAnim():Int{
+    if(activeEvents.length <= 0){ 
+      // No sawblade events, pick randomly.
+      return FlxG.random.bool() ? 1 : 0;
+    }else{  
+      // Grab first activeEvent
+      return activeEvents[0].dodgeAnimType;
+    }
+  }
+
+
+  // Prepares all the logic for the sawblade event, more specifically the 2nd alert and the logic responsible for the actual hitwindow of the dodge!
+  public function executeAttack(theEvent, interval:Float, whichSawID:Int = 0, skipSawPrepare = false):Void
+  {
+    if(!moduleActive || playState == null) return;
+    if (playState.health <= 0 && !PlayState.instance.isPracticeMode) return;
+
+
+    // In OG QT, a sawblade event becoming active would make sure BF is ready to dodge. NOW it doesn't, so be careful!
+    // This is to punish anyone trying to cheese this mechanic (like dodging on every beat)
+    //bfDodging = false;
+    //bfDodgeCooldown = 0; // Force BF to be ready to dodge!!
+    
+
+    doSawAnimation(skipSawPrepare);
+
+    var animationFrames = 3;
+    var animationFramerate = 24;
+    var animTimeOffset:FLoat = animationFrames / animationFramerate;
+    var t1 = new FlxTimer().start(interval-animTimeOffset, (_) ->
+    {
+      sawSprite?.animation?.play("saw attack", true, false, 0);
+      sawSprite?.visible = true;
+      updateSawZIndex(theEvent.dodgeAnimType);
+    });
+    allTimers.push(t1);
+
+
+    var t2 = new FlxTimer().start(interval, (_) ->
+    {
+      if (isBotplay())
+      {
+        if (stage?.getBoyfriend() != null)
+        {
+          //trace("BF DODGE ANIM: " + dodgeToggleAnim);
+          stage.getBoyfriend().playAnimation('dodge-' + theEvent.dodgeAnimType, true, true);
+          playDodgeSound();
+        }
+        onGoodHit(theEvent);
+      }
+
+      if(whichSawID+1>=theEvent.amntSaws){
+        sawbladePrepAnim = false;
+      }
+
+      playState.camGame.shake(0.007, 0.25);
+      if (HapticUtil.hapticsAvailable) HapticUtil.vibrateByPreset(attackVibrationPreset);
+
+      if(playState.currentStage.getGirlfriend() != null && getSawbladeMode() != "no-penalty") //GF gives no fucks if we're on no-penalty
+        playState.currentStage.getGirlfriend().playAnimation("dodge", true, true);
+
+      // Wait out the rest of the hitWindow before we execute any logic relating to if we dodged successfully or not.
+      var t3 = new FlxTimer().start(theEvent?.hitWindow / Constants.MS_PER_SEC, (_) ->
+      {
+        if(theEvent==null){
+          return;
+        }
+        var dodgeSuccess:bool = theEvent?.sawbladesDodged[whichSawID];
+        trace('[EXECUTE ATTACK] Did we dodge? ${dodgeSuccess}');
+        if (!dodgeSuccess) onBadHit(theEvent);
+      });
+
+      allTimers.push(t3);
+
+    });
+    allTimers.push(t2);
+  }
+
+
+  function onGoodHit(theEvent):Void
+  {
+    if (!isBotplay())
+    {
+      playState.health += 0.125;
+      playState.songScore += sawbladeScoreDODGE;
+      if (shouldSawbladesCountTowardsTallies())
+      {
+        Highscore.tallies.totalNotes+=1;
+        Highscore.tallies.totalNotesHit+=1;
+        Highscore.tallies.sick += 1;
+      }
+    }
+
+    playState.popUpScore("dodged");
+
+    // reset dodge variables in case there is another sawblade incoming!
+    bfDodging = false;
+    bfDodgeCooldown = 0;
+
+    theEvent?.sawbladesDodged[theEvent?.currentSaw]=true;
+    theEvent?.currentSaw += 1;
+
+    // Remove the event if there are no sawblades left to dodge.
+    if(theEvent.currentSaw >= theEvent.hitTimes.length){
+      activeEvents.remove(theEvent);
+      theEvent.sawbladeFinished=true;
+    }else{
+      theEvent.dodgeAnimType ^= 1;
+    }
+
+    if(activeEvents.length <= 0){
+      PlayState.instance.mayPauseGame = true;
+    }
+
+    if (dodgeTextSwapTimer != null)
+    {
+      dodgeTextSwapTimer.cancel();
+      dodgeTextSwapTimer = null;
+    }
+
+    if (dodgeText != null){
+      if(dodgeTextTween!=null){
+        dodgeTextTween.cancel();
+      }
+      dodgeTextTween = FlxTween.tween(dodgeText, {alpha: 0}, 1, {ease: FlxEase.smoothStepInOut}, {
+        onComplete: function(_)
+        {
+          dodgeText.kill();
+          playState.remove(dodgeText, true);
+          dodgeText = null;
+        }
+      });
+    }
+    if (dodgeText2 != null)
+    {
+      if(dodgeText2Tween!=null){
+        dodgeText2Tween.cancel();
+      }
+      dodgeText2Tween = FlxTween.tween(dodgeText2, {alpha: 0}, 1, {ease: FlxEase.smoothStepInOut}, {
+        onComplete: function(_)
+        {
+          dodgeText2.kill();
+          playState.remove(dodgeText2, true);
+          dodgeText2 = null;
+        }
+      });
+    }
+  }
+
+
+  function shouldSawbladesCountTowardsTallies():Bool{
+    if (PlayState.instance != null && PlayState.instance.currentSong.id.toLowerCase() == "raze-blade"){
+      return true;
+    }
+    return true;
+  }
+
+  var dodgeText2Tween:FlxTween;
+  var dodgeTextTween:FlxTween;
+
+  function onBadHit(theEvent):Void
+  {
+    if (isBotplay())
+    {
+      return;
+    }
+
+    // reset dodge variables in case there is another sawblade incoming!
+    bfDodging = false;
+    bfDodgeCooldown = 0;
+    theEvent?.currentSaw += 1;
+
+    playState.songScore += sawbladeScoreMISS;
+    if (shouldSawbladesCountTowardsTallies())
+    {
+      Highscore.tallies.totalNotes+=1;
+      Highscore.tallies.missed+=1;
+    }
+
+    bfDodgeCooldownMultiplier = Math.min(bfDodgeCooldownMultiplier + 2.3, 5.0);
+
+    var mode:String = getSawbladeMode();
+    if(maxSawHits == 0) mode = "instakill";    
+    switch (mode)
+    {
+      case "no-penalty":
+        sawHits+=1;
+        playHitSound();
+        playBoyfriendHitAnimation();
+      case "instakill":
+        executeInstantKill();
+      case "cripple":
+        executeCrippleDamage();
+      case "bleed":
+        executeBleedDamage();
+      case "disabled":
+        return;
+      default:
+        executeDamage();
+    }
+
+    HapticUtil.vibrateByPreset(attackVibrationPreset);
+
+    // Remove the event if there are no sawblades left to dodge.
+    if(theEvent.currentSaw >= theEvent.hitTimes.length){
+      theEvent.sawbladeFinished=true;
+      activeEvents.remove(theEvent);
+    }else{
+      theEvent.dodgeAnimType ^= 1;
+    }
+
+    if(activeEvents.length <= 0){
+      PlayState.instance.mayPauseGame = true;
+    }
+  }
+
+
+
+  function playHitSound():Void{
+    if(playHitSnd){
+      var sndStyle:String = soundStyle;
+
+      if(getSawbladeMode() == "no-penalty"){
+        sndStyle = "bonk";
+      }
+
+      // Rewired has no sawHit sound
+      if (sndStyle == "disabled" || sndStyle == "rewired") return;
+      
+      //sawHitSound.play();
+      var sndPath:String = switch (sndStyle){
+        case "classic":
+          "sawblades/sawblade_hit_classic";
+        case "brutal":
+          "sawblades/sawblade_hit";
+        case "bonk":
+          "sawblades/bonk";
+        default:
+          "sawblades/sawblade_hit";
+      }
+
+      var snd:FunkinSound = FunkinSound.playOnce(Paths.sound(sndPath));
+       if(snd!=null){
+          snd.pitch = RATE_PITCH_SHIFT ? PlayState.instance.playbackRate : 1.0;
+          if(snd.pitch < minPitch) snd.pitch = minPitch; // Prevent really really low pitches.
+        }
+    }
+  }
+
+  function playBoyfriendHitAnimation():Void{
+
+    FlxG.camera.flash(0xFFff0000, 0.3, null, true);
+    playState.camGame.shake(0.008, 0.3);
+
+    var boyfriend = playState.currentStage.getBoyfriend();
+    if(boyfriend!=null){
+
+      // sawHit needs to be in ignoreExclusionPref so it can overwrite the dodge anim properly. 
+      // Since bf-qt's script overwrites it and we don't have any way of modifying said script, we have to do it here instead.
+      // Also check to make sure it already exists so we don't endlessly add the animation to the array.
+      if(!boyfriend.ignoreExclusionPref.contains("sawHit-1")){
+        boyfriend.ignoreExclusionPref.push("sawHit-1");
+      }
+      if(!boyfriend.ignoreExclusionPref.contains("sawHit-0")){
+        boyfriend.ignoreExclusionPref.push("sawHit-0");
+      }
+      if(!boyfriend.ignoreExclusionPref.contains("sawHit-alt")){
+        boyfriend.ignoreExclusionPref.push("sawHit-alt");
+      }
+      if(getSawbladeMode() == "no-penalty"){
+        boyfriend.playAnimation("sawHit-alt", true, true);
+      }else{
+        // The order of operations should mean this gets run first BEFORE the activeEvent gets cleared (see onBadHit).
+        boyfriend.playAnimation("sawHit-" + getCurDodgeAnim(), true, true);
+      }
+      playState.currentStage.refresh();
+
+    }
+    
+  }
+
+  function executeDamage():Void
+  {
+    if(PlayState.instance.isGameOverState){return;}
+    if (maxSawHits >= 0 && sawHits >= maxSawHits && (PlayState?.instance?.isPracticeMode??false)==false){
+      //PlayState.instance.modDebugNotif("Saw Hit limit reached, killing!", true);
+      trace("Saw hit limit reached. Killing!");
+      executeInstantKill();
+      return;
+    }
+
+    var damage = Constants.HEALTH_MAX * 0.5;
+    var newHealth = Math.max(playState.health - damage, HEALTH_MIN);
+
+    playState.health = newHealth;
+    sawHits+=1;
+
+    if (newHealth <= HEALTH_MIN) executeInstantKill();
+    else
+    {
+      playHitSound();
+      playBoyfriendHitAnimation();
+    }
+  }
+
+  function executeCrippleDamage():Void{
+    if(PlayState.instance.isGameOverState){return;}
+    if (maxSawHits >= 0 && sawHits >= maxSawHits && (PlayState?.instance?.isPracticeMode??false)==false){
+      //PlayState.instance.modDebugNotif("Saw Hit limit reached, killing!", true);
+      trace("Saw hit limit reached. Killing!");
+      executeInstantKill();
+      return;
+    }
+
+
+    var crippleAdditive:Float = 0.35;
+    if(maxSawHits > 0){
+      crippleAdditive = 1.4 / maxSawHits;
+    }else{
+      crippleAdditive = 1.4 / 20;
+    }
+    //trace(crippleAdditive);
+
+
+    HEALTH_MIN = HEALTH_MIN + crippleAdditive;
+
+    sawHits+=1;
+    trace("Saw hits: " + sawHits);
+
+    var damage = Constants.HEALTH_MAX * 0.35;
+    if(sawHits>=2) damage = Constants.HEALTH_MAX * 0.2;
+    var newHealth = Math.max(playState.health - damage, HEALTH_MIN);
+    playState.health = newHealth;
+
+
+    if (newHealth <= HEALTH_MIN) executeInstantKill();
+    else
+    {
+      playHitSound();
+      playBoyfriendHitAnimation();
+    }
+  }
+
+  var oldMinHealth:Float = 0;
+  var HEALTH_MIN(default, set):Float = Constants.HEALTH_MIN;
+  function set_HEALTH_MIN(newValue:Float):Void
+  {
+    oldMinHealth = HEALTH_MIN;
+    HEALTH_MIN = Math.min(newValue, Constants.HEALTH_MAX-0.1); // Always at least give the player SOME room in the health bar, even if it's super tiny.
+    updateHealthbar();
+    if(oldMinHealth < HEALTH_MIN){
+      triggerHealthbarCutAnim();
+    }
+  }
+
+  // Updates the healthbar to reflect the new HEALTH_MIN value when being hit by a sawblade.
+  function updateHealthbar():Void{
+    if(PlayState.instance == null){
+      return;
+    }
+    if(PlayState.instance.healthBar == null){
+      return;
+    }
+    if(PlayState.instance.healthBarBG == null){
+      return;
+    }
+    if(!moduleActive){
+      return;
+    }
+
+    PlayState.instance.healthBar.x = PlayState.instance.healthBarBG.x + 4;
+
+    var p:Float = (Constants.HEALTH_MAX - HEALTH_MIN) / Constants.HEALTH_MAX;
+    //trace("p: " + p);
+    PlayState.instance.healthBar.scale.x = p;
+    healthBarDif = PlayState.instance.healthBar.barWidth * (1-PlayState.instance.healthBar.scale.x) / 2;
+    PlayState.instance.healthBar.x -= PlayState.instance.healthBar.barWidth * (1-PlayState.instance.healthBar.scale.x) / 2;
+
+    PlayState.instance.healthBar.setRange(HEALTH_MIN , Constants.HEALTH_MAX);
+
+    if(p == 1){
+      if(PlayState.instance.iconP1!=null)
+        PlayState.instance.iconP1.autoUpdate = true;
+      if(PlayState.instance.iconP2!=null)
+        PlayState.instance.iconP2.autoUpdate = true;
+    }else{
+      if(PlayState.instance.iconP1!=null)
+        PlayState.instance.iconP1.autoUpdate = false;
+      if(PlayState.instance.iconP2!=null)
+        PlayState.instance.iconP2.autoUpdate = false;
+    }
+
+    //PlayState.instance.iconP1.visible = false;
+    //PlayState.instance.iconP2.visible = false;
+  }
+
+  // Triggers the small animation thingy that occurs when being hit by a sawblade with cripple enabled.
+  function triggerHealthbarCutAnim():Void{
+    if (playState.health <= 0 && !PlayState.instance.isPracticeMode) return;
+    trace("CUT");
+
+    //var healthbarPiece:FunkinSprite = playState.healthBarBG.clone();
+    var healthbarPiece:FunkinSprite = new FunkinSprite(playState.healthBarBG.x, playState.healthBarBG.y, Paths.image("healthBar"));
+    healthbarPiece.color = Constants.COLOR_HEALTH_BAR_GREEN;
+    healthbarPiece.camera = playState.camHUD;
+    healthbarPiece.zIndex = playState.healthBarBG.zIndex+1;
+    //healthbarPiece.y += 64;
+    playState.add(healthbarPiece);
+    
+    var double:Bool = false;
+
+    var dif = PlayState.instance.healthBar.barWidth * (1-PlayState.instance.healthBar.scale.x);
+    var p:Float = (Constants.HEALTH_MAX - oldMinHealth) / Constants.HEALTH_MAX;
+    var oldDif = PlayState.instance.healthBar.barWidth * (1-p);
+    var clipWidth:FLoat = dif - oldDif;
+
+    if(clipWidth>=55){
+      clipWidth /= 2;
+      double=true;
+    }
+
+    var pieceClipRect:FlxRect = new FlxRect(healthbarPiece.width-dif, 0, clipWidth, healthbarPiece.height);
+    healthbarPiece.clipRect = pieceClipRect;
+    healthbarPiece.origin.set(healthbarPiece.width-dif + (clipWidth/2));
+
+    //healthbarPiece.alpha = 0.5;
+
+    FlxTween.tween(healthbarPiece, {x: healthbarPiece.x + 64}, 1, {ease: FlxEase.smoothStepOut, onComplete: function(_){
+      //healthbarPiece.visible = false;
+    }});
+
+     FlxTween.tween(healthbarPiece, {angle: FlxG.random.float(-20,20)}, 1, {ease: FlxEase.smoothStepOut});
+
+
+    FlxFlicker.flicker(healthbarPiece, 1, 0.06, false, true, function(_)
+    {
+      if(healthbarPiece!=null && playState!=null){
+          healthbarPiece.visible = false;
+          playState.remove(healthbarPiece);
+          healthbarPiece.destroy();
+          healthbarPiece = null;
+        }
+    });
+
+
+    if(double){
+      var healthbarPiece2:FunkinSprite = new FunkinSprite(playState.healthBarBG.x, playState.healthBarBG.y, Paths.image("healthBar"));
+      healthbarPiece2.color = Constants.COLOR_HEALTH_BAR_GREEN;
+      healthbarPiece2.camera = playState.camHUD;
+      healthbarPiece2.zIndex = playState.healthBarBG.zIndex+1;
+      playState.add(healthbarPiece2);
+      
+      var pieceClipRect2:FlxRect = new FlxRect(healthbarPiece2.width-dif + (clipWidth), 0, clipWidth, healthbarPiece2.height);
+      healthbarPiece2.clipRect = pieceClipRect2;
+      healthbarPiece2.origin.set(healthbarPiece2.width-dif + (clipWidth/2));
+
+      FlxTween.tween(healthbarPiece2, {x: healthbarPiece2.x + 102}, 1, {ease: FlxEase.smoothStepOut});
+
+      FlxTween.tween(healthbarPiece2, {angle: FlxG.random.float(-20,20)}, 1, {ease: FlxEase.smoothStepOut});
+
+      FlxFlicker.flicker(healthbarPiece2, 1, 0.06, false, true, function(_)
+      {
+        if(healthbarPiece2!=null && playState != null){
+          healthbarPiece2.visible = false;
+          playState.remove(healthbarPiece2);
+          healthbarPiece2.destroy();
+          healthbarPiece2 = null;
+        }
+      });
+
+  }
+
+
+
+    playState.refresh();
+
+  }
+
+
+  var healthBarDif:float = 0;
+  // Since the healthbar has been edited, we need to update how the icons position themselves manually to make sure they're correctly positioned.
+  function updateIcon(icon:HealthIcon):Void{
+    if(!moduleActive) return;
+    icon.y = PlayState.instance.healthBar.y - (icon.height / 2); 
+
+    switch (icon.playerId)
+    {
+      case 0: // Boyfriend
+        icon.updateHealthIcon(PlayState.instance.health-HEALTH_MIN);
+        // Update the position to match the health bar.
+        icon.x = PlayState.instance.healthBar.x
+          + (PlayState.instance.healthBar.width*PlayState.instance.healthBar.scale.x * (FlxMath.remapToRange(PlayState.instance.healthBar.value, HEALTH_MIN, Constants.HEALTH_MAX, 100, 0) * 0.01) - HealthIcon.POSITION_OFFSET);
+      
+      case 1: // Dad
+        var h:Float = Constants.HEALTH_MAX- PlayState.instance.health;
+        icon.updateHealthIcon(h);
+        // Update the position to match the health bar.
+        icon.x = PlayState.instance.healthBar.x
+          + (PlayState.instance.healthBar.width*PlayState.instance.healthBar.scale.x * (FlxMath.remapToRange(PlayState.instance.healthBar.value, HEALTH_MIN, Constants.HEALTH_MAX, 100, 0) * 0.01))
+          - (icon.width - HealthIcon.POSITION_OFFSET);
+    }
+
+    icon.x += healthBarDif;
+  }
+
+
+  
+  
+  
+  var sawHits(default, set):int = 0;
+  function set_sawHits(newValue:int):Void
+  {
+    sawHits = newValue;
+    if(bleedingHealthbarSpr!=null){
+      if (newValue > 0 && getSawbladeMode()=="bleed"){
+        bleedingHealthbarSpr.alpha=1;
+      }else{
+        bleedingHealthbarSpr.alpha=0;
+      } 
+    }
+    if(sawHitCounter!=null){
+      if(maxSawHits > 0){
+        sawHitCounter.text = newValue + "/" + maxSawHits + " hits";
+      }else{
+        if(maxSawHits == -1 || getSawbladeMode() == "no-penalty"){
+          sawHitCounter.text = newValue + " hits";
+        }else{
+          sawHitCounter.text = "";
+        }
+      }
+    }
+  }
+
+  
+  function executeBleedDamage():Void
+  {
+    if(PlayState.instance.isGameOverState){return;}
+    if (maxSawHits >= 0 && sawHits >= maxSawHits && (PlayState?.instance?.isPracticeMode??false)==false){
+      //PlayState.instance.modDebugNotif("Saw Hit limit reached, killing!", true);
+      trace("Saw hit limit reached. Killing!");
+      executeInstantKill();
+      return;
+    }
+    var damage = Constants.HEALTH_MAX * 0.35;
+    var newHealth = Math.max(playState.health - damage, HEALTH_MIN);
+
+    playState.health = newHealth;
+
+    sawHits+=1;
+    //PlayState.instance.modDebugNotif("Saw hits: " + sawHits, true);
+    trace("Saw hits: " + sawHits);
+
+    if (newHealth <= HEALTH_MIN) executeInstantKill();
+    else
+    {
+      playHitSound();
+      playBoyfriendHitAnimation();
+    }
+  }
+
+
+  function executeInstantKill():Void
+  {
+    // Fix for practice mode causing crashes.
+    if((PlayState?.instance?.isPracticeMode??false)==true){
+      trace("Player would've died but logic was skipped due to practice mode being enabled.");
+      //PlayState.instance.modDebugNotif("Would kill but practice is enabled.", true);
+
+      playHitSound();
+      playBoyfriendHitAnimation();
+      return;
+    }
+    trace("Player died to sawblade.");
+
+    if (PlayState?.instance?.currentStage?.getBoyfriend()?.characterId == 'bf-qt') PlayState.instance.currentStage.getBoyfriend().setSuffix('-saw');
+    FlxG.camera.flash(0xFFff0000, 1.0);
+    GameOverSubState.musicSuffix = '-sawblade';
+    GameOverSubState.blueBallSuffix = '-sawblade';
+    playState.health = -1;
+
+    //hideAllVisuals(true);
+    //destroyAssets();
+  }
+
+
+  override public function onSongStart(event)
+  {
+    super.onSongStart(event);
+  }
+  override public function onSongEnd(event)
+  {
+    super.onSongEnd(event);
+    trace("--------TALLIES--------");
+    trace("SICK: " + Highscore.tallies.sick);
+    trace("MISS: " + Highscore.tallies.missed);
+    trace("NotesTotal: " + Highscore.tallies.totalNotes);
+    trace("NoteHit: " + Highscore.tallies.totalNotesHit);
+  }
+
+
+  // An alternative UI style.
+  var useScrollUI:Bool = true;
+
+  // If true, will replace BF with BFQT 
+  var replace_BF_with_BFQT:Bool = true;
+
+  // The VFX style to use. VFX refering to the UI elements that appear (the big warning symbol)
+  var vfxStyle:String = "rewired";
+
+  var moduleActive:Bool = false;
+  override function onSongLoaded(e):Void
+  {
+    super.onSongLoaded(e);
+
+    maxSawHitsOverride = -2;
+    sawbladeModeOverride = "";
+
+    moduleActive = false;
+    destroyAssets();
+    resetState();
+
+    if (getSawbladeMode() == "disabled") return;
+
+    // Converting sawKB events into sawKB_Hazard events (if the option is enabled).
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+
+      useScrollUI = optionsModule.shouldUseScrollUI();
+      vfxStyle = optionsModule.getSaveData_sawbladeVFX();
+      autoDodge = optionsModule.getSaveData_sawbladeMode() == "auto";
+
+      if(optionsModule.getSaveData_sawbladeReplace()){
+        var events:Array<SongEventData> = e.events;
+        var eventsToRemove:Array<SongEventData> = [];
+        var eventsToAdd:Array<SongEventData> = [];
+        for (event in events){
+          if(event.eventKind.toLowerCase()=="sawkb"){
+            eventsToRemove.push(event);
+
+            event.value.step_timing = 4; // Rewired saws don't have variable timings
+            event.value.sawblade_pattern_id = event.value.num_sawblades;
+            var newEvent:SongEventData = new SongEventData(event.time, "sawKB_Hazard" , event.value);
+            events.push(newEvent);
+            moduleActive = true;
+          }
+        }
+        for (event in eventsToRemove){
+          events.remove(event);
+        }
+        e.events = events;
+      }
+    }
+    
+    if(!moduleActive){
+      // Scan through all the events for this song.
+      // If we detect a sawblade event, then we know we'll need to init the assets and enable this module!
+      // Otherwise, this module remains inactive.
+      for (event in e.events){
+        if(event.eventKind.toLowerCase()=="sawkb_hazard"){
+          moduleActive = true;
+          break;
+        }
+      }
+    }
+
+    if(!moduleActive){
+      return;
+    }
+
+    playState = PlayState.instance;
+    stage = playState.currentStage;
+
+
+    if(replace_BF_with_BFQT){
+      var bf = PlayState.instance?.currentStage?.getBoyfriend();
+      if(bf!=null){
+        var bfID:String = bf.characterId;
+        bfID = bfID.toLowerCase();
+        if(bfID == "bf"){
+          // swap to bf-qt instead of we're just regular BF for dodge anims.
+          var newBF = CharacterDataParser.fetchCharacter("bf-qt");
+
+
+
+          if(newBF!=null){
+            var zIndexWas = bf.zIndex;
+            PlayState.instance.currentStage.getBoyfriend().destroy();
+            newBF.set_characterType(CharacterType.BF);
+            //newBF.initHealthIcon(false);
+            PlayState.instance.currentStage.addCharacter(newBF, CharacterType.BF);
+            PlayState.instance.currentStage.getBoyfriend().zIndex = zIndexWas;
+            bf = newBF;
+            trace("Swapped bf to bf-qt");
+            //PlayState.instance.modDebugNotif("Swapped BF to BF-QT", 0xFFFFFFFF, true); 
+          }else{
+            trace("Couldn't swap from bf to bf-qt");
+            //PlayState.instance.modDebugNotif("Couldn't swap BF to BF-QT", 0xFFFFFFFF, true); 
+          }
+
+        }
+      }
+    }
+
+
+    var songIsAllowed = StringTools.startsWith(playState.currentSong.id, "obliterated");
+    showDodgeText(songIsAllowed);
+
+
+    initializeAssets();
+
+    touchX = (FlxG.width - touchWidth) / 2;
+    touchY = (FlxG.height - touchHeight) / 2 - 40;
+
+    touchAreaSprite = new FlxSprite(touchX, touchY);
+    touchAreaSprite.makeGraphic(Std.int(touchWidth), Std.int(touchHeight), 0x00000000);
+    touchAreaSprite.scrollFactor.set(0, 0);
+    touchAreaSprite.cameras = [playState.camHUD];
+    if (FlxG.onMobile) playState.add(touchAreaSprite);
+
+    undarkenScreen(true);
+  }
+
+  // For rewired compatibility.
+  static inline var DODGE_TEXT_SWAP_DELAY:Float = 5;
+  static inline var DODGE_TEXT_FADE_DURATION:Float = 2;
+  function showDodgeText(songIsAllowed:Bool=false):Void{
+    // Remove the dodge hint text from the original module so we can use our own.
+
+    var ogDodgeModule = ModuleHandler.getModule("SawbladeAndDodgeModule");
+    if(ogDodgeModule!=null){
+      if (ogDodgeModule.dodgeText != null){
+        ogDodgeModule.dodgeText.visible = false;
+      }
+      if (ogDodgeModule.dodgeText2 != null){
+        ogDodgeModule.dodgeText2.visible = false;
+      }
+
+      if (songIsAllowed)
+      {
+        var isErectVariation = playState.currentVariation == "erect";
+        dodgeText = new FlxText().setFormat(Paths.font('vcr.ttf'), 28, 0xFF0000, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+        dodgeText.scrollFactor.set();
+        dodgeFormat = FlxG.onMobile ? "TAP the sign" : "Press " + InputUtil.getKeyName(Save.instance.modOptions[
+          QtOptionsCategory.SAVE_KEY_QT_DODGE_KEYBIND
+        ][0]).toUpperCase();
+        dodgeText.text = dodgeFormat + ' on third beat to dodge' + (isErectVariation ? '...' : '!');
+        dodgeText.screenCenter();
+        dodgeText.y = (FlxG.onMobile || Preferences.downscroll) ? FlxG.height - dodgeText.height - 15 - FullScreenScaleMode.cutoutSize.y : PlayState.instance.healthBarBG.y
+          - 90;
+        dodgeText.zIndex = 999;
+        dodgeText.alpha = 1;
+        playState.add(dodgeText);
+        dodgeText.cameras = [PlayState.instance.camHUD];
+
+        if (isErectVariation)
+        {
+          dodgeText2 = new FlxText().setFormat(Paths.font('vcr.ttf'), 28, 0xFF0000, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+          dodgeText2.scrollFactor.set();
+          dodgeText2.text = 'But watch out, some attacks strike twice!';
+          dodgeText2.screenCenter();
+          dodgeText2.y = dodgeText.y;
+          dodgeText2.zIndex = 998;
+          dodgeText2.alpha = 0;
+          playState.add(dodgeText2);
+          dodgeText2.cameras = [playState.camHUD];
+
+          dodgeTextSwapTimer = new FlxTimer().start(DODGE_TEXT_SWAP_DELAY, (_) ->
+          {
+            if (dodgeText != null){ 
+              if(dodgeTextTween!=null){
+                dodgeTextTween.cancel();
+              }
+              dodgeTextTween = FlxTween.tween(dodgeText, {alpha: 0}, DODGE_TEXT_FADE_DURATION, {ease: FlxEase.smoothStepInOut});
+            }
+            if (dodgeText2 != null){ 
+              if(dodgeText2Tween!=null){
+                dodgeText2Tween.cancel();
+              }
+              dodgeText2Tween = FlxTween.tween(dodgeText2, {alpha: 1}, DODGE_TEXT_FADE_DURATION, {ease: FlxEase.smoothStepInOut});
+            }
+            dodgeTextSwapTimer = null;
+          });
+          allTimers.push(dodgeTextSwapTimer);
+        }
+      }
+    }
+  }
+
+  // Forces the sawblade's penalty style to this. Gets Reset in onDestroy and onSongLoad
+  public var sawbladeModeOverride(default, set):String = "";
+  function set_sawbladeModeOverride(newValue:String):String
+  {
+    sawbladeModeOverride = newValue;
+    sawHits = sawHits; // force update sawHits counter text (cuz of no-penalty style)
+    return newValue;
+  }
+
+
+
+  function getSawbladeMode():String{
+    var styleOverride:String = sawbladeModeOverride.toLowerCase();
+    if(styleOverride=="bleed" || styleOverride=="cripple" || styleOverride=="instakill" || styleOverride=="no-penalty"){
+      return styleOverride;
+    }
+    var optionsModule = ModuleHandler.getModule("QT_Hazard_OptionsCategory");
+    if(optionsModule!=null){
+      return optionsModule.getSaveData_sawbladeMode();
+    }else{
+      return "disabled";
+    }
+  }
+
+  override function onDestroy(event):Void
+  {
+    super.onDestroy(event);
+    if (getSawbladeMode() == "disabled") return;
+    resetState();
+    destroyAssets();
+    playState = null;
+    stage = null;
+    maxSawHitsOverride = -2;
+    sawbladeModeOverride = "";
+  }
+
+  function resetState():Void
+  {
+    sawbladePrepAnim = false;
+    sawHits = 0;
+    if(sawHitCounter!=null) sawHitCounter.color = FlxColor.WHITE;
+    HEALTH_MIN = Constants.HEALTH_MIN;
+    oldMinHealth = HEALTH_MIN;
+    bfDodging = false;
+    activeEvents = [];
+
+    for (timer in allTimers){
+      if(timer==null) continue;
+      timer.cancel();
+      timer.destroy();
+    }
+    allTimers = [];
+
+    if(PlayState.instance!=null) PlayState.instance.mayPauseGame = true;
+    hideAllVisuals(true);
+  }
+
+  function bfDodge():Void
+  {
+    //trace('Attempting Dodge...');
+    if (!canDodge() || Save.instance.modOptions.get(QtOptionsCategory.SAVE_KEY_SAWBLADE_MODE_QT) == "disabled"){ 
+      trace('Dodge failed...');
+      trace("Cooldown at: " + bfDodgeCooldown);
+      return;
+    }else{
+      trace('Dodging...');
+    }
+
+    performDodge();
+    checkHitTiming();
+  }
+
+  function canDodge():Bool
+  {
+    return (!bfDodging && bfDodgeCooldown <= 0 && !isBotplay());
+  }
+
+  var bfDodgeCooldown:Float = 0; //in MS
+  function performDodge():Void
+  {
+    var bf = stage?.getBoyfriend();
+    if (bf != null)
+    {
+      var curAnimation:String = bf.getCurrentAnimation();
+      // If we are in the hit animation, we cannot play the dodge animation. However, if we are dodging back-to-back sawblades, then this logic gets skipped.
+      // Also remember to make sure the dodge cooldown isn't triggered if the player tries to dodge in this state to avoid confusion (player doesn't visibly dodge but they still do and enter cooldown)
+      if(StringTools.startsWith(curAnimation, "sawHit") && activeEvents.length <= 0){
+        return;
+      }
+      bfDodging = true;
+      bfDodgeCooldown = getDodgeCooldownDuration();
+      bf.playAnimation('dodge-' + getCurDodgeAnim(), true, true);
+      playDodgeSound();
+    }else{
+      bfDodging = true;
+      bfDodgeCooldown = getDodgeCooldownDuration();
+    }
+  }
+
+  function playDodgeSound():Void{
+    if(playDodgeSnd){
+      if (soundStyle != "classic") return;
+      var sndPath:String = "sawblades/sawblade_dodge_classic";
+      var snd:FunkinSound = FunkinSound.playOnce(Paths.sound(sndPath));
+       if(snd!=null){
+          snd.pitch = RATE_PITCH_SHIFT ? PlayState.instance.playbackRate : 1.0;
+          if(snd.pitch < minPitch) snd.pitch = minPitch; // Prevent really really low pitches.
+        }
+    }
+  }
+
+  function checkHitTiming():Void
+  {
+    if(activeEvents.length <= 0){
+      trace("No sawblade events to dodge!");
+      return;
+    }
+
+    for (theEvent in activeEvents){
+      // No more sawblades left to dodge.
+      if(theEvent.currentSaw >= theEvent.hitTimes.length){
+        //trace(theEvent.hitTimes.length +" vs "+ theEvent.currentSaw);
+        return;
+      }
+
+      var hitTime = theEvent.hitTimes[theEvent?.currentSaw];
+      var hitWindow = theEvent?.hitWindow;
+      var timeDiff = Conductor.instance.songPosition - hitTime;
+
+      if (Math.abs(timeDiff) <= hitWindow)
+      {
+        trace('Sawblade dodged!');
+        onGoodHit(theEvent);
+      }
+      else
+      {
+        trace('Dodge Failed - outside hitWindow');
+      }
+      trace("HitWindow: " + hitWindow);
+      trace("TimeDiff: " + timeDiff);
+    }
+  }
+
+
+  override function onBeatHit(event):Void
+  {
+    super.onBeatHit(event);
+    if (moduleActive==false || PlayState.instance == null || Conductor.instance == null) return;
+
+    // Clearing out any Timers that are completed or null from the array.
+    var i = allTimers.length;
+    while (i-- > 0) {
+      var timer = allTimers[i];
+      if (timer == null || timer.finished) {
+        if (timer != null) {
+          timer.cancel();
+          timer.destroy();
+        }
+        allTimers.splice(i, 1);
+      }
+    }
+  }
+
+
+  override function onPause(event):Void
+  {
+    super.onPause(event);
+    if (moduleActive==false || PlayState.instance == null || Conductor.instance == null) return;
+    for (timer in allTimers){
+      if(timer!=null){ 
+        timer.active = false;
+      }
+    }
+  }
+  override function onResume(event):Void
+  {
+    super.onResume(event);
+    if (moduleActive==false || PlayState.instance == null || Conductor.instance == null) return;
+    for (timer in allTimers){
+      if(timer!=null){ 
+        timer.active = true;
+      }
+    }
+  }
+
+
+  override function onUpdate(event):Void
+  {
+    super.onUpdate(event);
+    if (moduleActive==false || PlayState.instance == null || Conductor.instance == null) return;
+
+    if (!PlayState.instance.isGamePaused){
+
+      // Handle / updating the bfDodgeCooldown.
+      if(bfDodgeCooldown > 0){
+        bfDodgeCooldown -= event.elapsed * Constants.MS_PER_SEC * bfDodgeCooldownMultiplier;
+      }else{
+        if(bfDodging){
+          bfDodgeCooldown = 0;
+          bfDodging = false;
+        }
+      }
+      if(bfDodgeCooldownMultiplier > 1){
+        bfDodgeCooldownMultiplier -= event.elapsed;
+      }
+      if(bfDodgeCooldownMultiplier < 1){
+        bfDodgeCooldownMultiplier = 1;
+      }
+
+
+      // Handle dodge input AFTER cooldown has been updated.
+      if (((FlxG.onMobile && TouchUtil.overlapsComplex(touchAreaSprite) && TouchUtil.justPressed) || dodgeBindJustPressed()))
+      {
+        bfDodge();
+      }
+
+
+      // Updating health icons and checking if we died. For cripple-style sawblades.
+      if(PlayState.instance.healthBar.scale.x != 1){
+        if(PlayState.instance.iconP1!=null)
+          updateIcon(PlayState.instance.iconP1);
+        if(PlayState.instance.iconP2!=null)
+          updateIcon(PlayState.instance.iconP2);
+      }
+      if(PlayState.instance.health <= HEALTH_MIN && !PlayState.instance.isPracticeMode && !PlayState.instance.isPlayerDying){
+        PlayState.instance.health = -1;
+        trace("rip bozo");
+      }
+
+      // Update the sawHit text to flash red when at maximum.
+      redSineTime += event.elapsed * 20.0;
+      if(sawHitCounter!=null){
+        if(sawHits >= maxSawHits && maxSawHits > 0){
+          var sinny:Float = (FlxMath.fastSin(redSineTime)*0.5)+0.5;
+          sawHitCounter.color = FlxColor.interpolate(FlxColor.WHITE, FlxColor.RED, sinny);
+        }
+        if(PlayState.instance.scoreText!=null){
+          // Also make it copy the alpha AND position of the scoreText should they get changed mid-song via other scripts.
+          sawHitCounter.alpha = PlayState.instance.scoreText.alpha;
+          sawHitCounter.y = PlayState.instance.scoreText.y;
+          sawHitCounter.y += 16;
+        }
+      }
+
+      // Handle the bleed logic.
+      if(getSawbladeMode() == "bleed"){
+        var bleedCap:float = HEALTH_MIN+0.125;
+
+        if (sawHits > 0 && playState.health > bleedCap){
+          var damage:float = bleedRate*sawHits*event.elapsed;
+          var newHealth = Math.max(playState.health - damage, bleedCap);
+          PlayState.instance.health = newHealth;
+        }
+      }
+
+    }
+  }
+
+  var autoDodge:Bool = false;
+  function isBotplay():Bool{
+
+    if(autoDodge||PlayState.instance.isBotPlayMode){
+      return true;
+    }
+
+    // Support for my Swap Chart Modifier (cuz KB doesn't need to dodge)
+    var chartModifiersModule = ModuleHandler.getModule("ChartModifiersModule");
+    if(chartModifiersModule!=null){
+      //var activeShuffles = chartModifiersModule.activeShuffles;
+      //if(activeShuffles.contains("swap")){
+      if(chartModifiersModule.isSwapped){
+         return true;
+      }else{
+        return false;
+      }
+    }else{
+      return false;
+    }
+  }
+
+  function dodgeBindJustPressed():Bool
+  {
+    return FlxG.keys.anyJustPressed(Save.instance.modOptions[
+      QtOptionsCategory.SAVE_KEY_QT_DODGE_KEYBIND
+    ]);
+  }
+
+
+
+  //override function onStateChangeBegin(event) {
+  //  super.onStateChangeBegin(event);
+  //  if (Save.instance.modOptions.get(QtOptionsCategory.SAVE_KEY_SAWBLADE_MODE_QT) == "disabled") return;
+  //  resetState();
+  //  destroyAssets();
+  //}
+
+
+}
+

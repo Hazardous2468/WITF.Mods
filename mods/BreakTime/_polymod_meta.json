@@ -1,5 +1,6 @@
 {
   "title": "Break Times",
+  "id": "breaktime",
   "description": "A mod that displays a stopwatch showing how long till the next note if there is a big enough gap, allowing the player to rest safely mid-song.",
  	"author": "Hazard24",
   "contributors": [
@@ -10,6 +11,6 @@
 		}
 	],
   "api_version": "0.8.6",
-  "mod_version": "1.2.0",
+  "mod_version": "1.2.1",
   "license": "CC BY 4.0,MIT"
 }

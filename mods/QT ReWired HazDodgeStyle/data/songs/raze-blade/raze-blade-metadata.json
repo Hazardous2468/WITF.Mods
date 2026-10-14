@@ -1,0 +1,37 @@
+{
+ "version": "2.2.4",
+ "songName": "Raze Blade",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal"
+  ],
+  "characters": {
+   "player": "bf-qt",
+   "girlfriend": "gf-qt",
+   "opponent": "kb_razeblade",
+   "opponentVocals": [
+    "kb"
+   ],
+   "playerVocals": [
+    "bf"
+   ]
+  },
+  "stage": "qtStage",
+  "noteStyle": "funkin",
+  "album": "qt_generic",
+  "stickerPack": "qtkbStickers",
+  "previewEnd": 0
+ },
+ "generatedBy": "What in the Funkin' (v1.1.1) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 160,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}
