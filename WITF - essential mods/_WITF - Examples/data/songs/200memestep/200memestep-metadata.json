@@ -1,0 +1,41 @@
+{
+ "version": "2.2.4",
+ "songName": "200MemeStep",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal",
+   "hard"
+  ],
+  "characters": {
+   "player": "nobody",
+   "opponent": "nobody",
+   "opponentVocals": [
+    "hazard24"
+   ],
+   "playerVocals": [
+    "player"
+   ]
+  },
+  "stage": "emptyStage",
+  "noteStyle": "maniac",
+  "ratings": {
+   "normal": 9,
+   "hard": 10
+  },
+  "album": "WITF",
+  "previewStart": 0.388269599248994,
+  "previewEnd": 0.59152546005564
+ },
+ "generatedBy": "What in the Funkin' (v1.1.0) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 200,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

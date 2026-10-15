@@ -1,0 +1,21 @@
+{
+  "title": "[WITF] Sledgehammer",
+  "description": "its okay!  :)",
+  "contributors": [
+		{
+			"name": "Savant",
+			"role": "Song"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Modchart and chart",
+  		"url": "https://linktr.ee/Hazard24"
+		}
+	],
+  "api_version": "0.8.6",
+  "mod_version": "1.0.1",
+  "dependencies": {
+		"witf-essentials": "*"	
+	},
+  "license": "CC BY-NC-ND 4.0"
+}

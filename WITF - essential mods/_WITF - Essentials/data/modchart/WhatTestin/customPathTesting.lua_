@@ -1,0 +1,193 @@
+function setUp()
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+end
+
+function hxCode()
+	addHaxeLibrary("FlxAngle", "flixel.math")
+	addHaxeLibrary("Strumline", "funkin.play.notes")
+	addHaxeLibrary("StrumlineNote", "funkin.play.notes")
+	addHaxeLibrary("Vector3D", "openfl.geom")
+	addHaxeLibrary("Vector4", "lime.math")
+	addHaxeLibrary("NoteData", "funkin.play.modchartSystem")
+	addHaxeLibrary("FileUtil", "funkin.util")
+	addHaxeLibrary("CustomPathMod", "funkin.play.modchartSystem.modifiers")
+	runHaxeCode(
+	[[
+		print("EXECUTING HX CODE...");
+
+  		//for (strumLine in PlayState.instance.allStrumLines)
+		//{	
+
+
+			//var customMod:CustomModifier = createCustomMod("custom_path_fixed", 0.0);
+			var customMod:CustomModifier = new CustomPathMod("custom_path_fixed");
+
+			
+			customMod.modPriority = -9999999;
+			customMod.unknown = false;
+			customMod.notesMod = true;
+			customMod.holdsMod = true;
+			customMod.pathMod = true;
+			customMod.strumsMod = true;
+			//strumLine.mods.addCustomMod(customMod);	
+
+			var posTypeSubMod = customMod.createSubMod("postype", 0.0);
+			var offsetSubMod = customMod.createSubMod("offset", 1.0);
+			var driveSubMod = customMod.createSubMod("drive", 0.0);
+
+			function executePath_V2(curPos:Float, column:Int, isReceptor:Bool = false):Vector4
+			{
+			  if (customMod._path == null)
+			  {
+			    return new Vector4(0, 0, 0, 0);
+			  }
+
+			  if (posTypeSubMod.value <= -0.5) // classic / old style
+			    {
+			      curPos = Math.abs(curPos) * -1 / 0.47;
+			      curPos = curPos / -1500.0 * customMod._pathDistance;
+			    }
+			    else
+			    {
+			      curPos *= -1;
+			    }
+
+			  var offset:Float = offsetSubMod.value;
+			  if(!isReceptor){ 
+			  	offset += driveSubMod.value;
+			  }
+
+			  
+
+			  // Sample the path at the note's current distance
+			  var pathAtDist = customMod.getPointAlongPath(curPos+offset);
+
+			  // Sample the path at distance 0 (the receptors / start of the path)
+			  var pathAtZero = customMod.getPointAlongPath(offset);
+
+			  // Relative offset from the strums
+			  var offset = new Vector4(
+			    pathAtDist.x - pathAtZero.x,
+			    pathAtDist.y - pathAtZero.y,
+			    pathAtDist.z - pathAtZero.z,
+			    0
+			  );
+
+			  
+			  return offset;
+			}
+
+			
+
+			//var strumResult:Array<Float> = [0,0,0,0];
+			customMod.noteMath = function(data:NoteData, strumLine:Strumline, ?isHoldNote = false, ?isArrowPath:Bool = false):Void
+  			{
+  				var path = customMod.customArrowPathModTest;
+			    if (customMod.currentValue == 0) return;
+			    if (path == null) return;
+
+			    
+
+			    var curPos:Float = data.curPos;
+			    if (posTypeSubMod.value > 0.5 || posTypeSubMod.value < -1.5)
+			    {
+			      curPos = data.curPos_unscaled;
+			    }
+			    if(!Preferences.downscroll){
+					curPos *= -1;
+				}
+
+			    var newPosition:Vector4 = executePath_V2(curPos, data.direction, false);
+			    var scaleAmount:Float = 1.0;
+			    newPosition.x *= scaleAmount;
+			    newPosition.y *= scaleAmount;
+			    newPosition.z *= scaleAmount;
+			     
+
+			    data.x += newPosition.x*customMod.currentValue;
+			    data.y += newPosition.y*customMod.currentValue;
+			    data.z += newPosition.z*customMod.currentValue;
+
+			    var linearYValue:Float = Math.abs(customMod.currentValue);
+			    if (linearYValue > 1.0) linearYValue = 1.0;
+			    linearYValue *= -1.0;
+    			data.y += data.curPos * linearYValue;
+			}	
+
+			customMod.strumMath = function(data:NoteData, strumLine:Strumline):Void
+  			{
+  				//if(driveSubMod.value == 0) return;
+  				var path = customMod.customArrowPathModTest;
+  				if (customMod.currentValue == 0) return;
+				if (path == null) return;
+
+				var scaleAmount:Float = 1.0;
+				var newPosition:Vector4 = executePath_V2(driveSubMod.value*-1, data.direction, true);
+			    newPosition.x *= scaleAmount;
+			    newPosition.y *= scaleAmount;
+			    newPosition.z *= scaleAmount;
+
+			    data.x += newPosition.x*customMod.currentValue;
+			    data.y += newPosition.y*customMod.currentValue;
+			    data.z += newPosition.z*customMod.currentValue;
+			}	
+
+
+
+
+	      	var modHandler = ModConstants.grabStrumModTarget("1");
+	      	//if (modHandler.fakeNote == null) modHandler.fakeNote = new NoteData();
+	      	//modHandler.fakeNote.defaultValues();
+	        //customMod.noteMath(modHandler.fakeNote, modHandler.strum, false, false);
+	        modHandler.addCustomMod(customMod);
+
+
+		//}
+
+
+
+	]])
+end
+
+function modsTimeline()
+
+	setdefault(-24, "movex", "dad")
+	setasleep(-20, "dad", true)
+	targetExclude("dad")
+
+	hxCode()
+	ease(0,2,"linear",3,"custom_path_fixed")
+	--ease(4,2,"linear",-4,"custom_path_fixed")
+
+	set(-16, 1, "custom_path_fixed__postype")
+
+	set(-16, 0, "custom_path_fixed__offset")
+	--ease(4,16,"linear",400,"custom_path_fixed__offset")
+	ease(10,16,"linear",400,"custom_path_fixed__drive")
+	ease(4,4,"linear",100,"custom_path_fixed__offset")
+
+
+
+	set(-16, 1, "showsubmods")
+	set(-16, 112*-4, "z")
+	set(-16, 1, "centerx")
+	set(-16, 2, "drawsize")
+	set(-16, 0.25, "speedmod")
+	--set(36.01, 1, "sudden")
+	--set(36.01, 1000, "sudden__offset")
+
+	ease(-2,2,"linear",1,"arrowpath")
+	set(-16, 0.1, "arrowpathwidth")
+	set(-16, 0.0, "arrowpathbacklength")
+	set(-16, 5555, "arrowpathlength")
+	set(-16, 1, "spiralpaths")
+	set(-16, 1, "spiralholds")
+
+	--set(36.01, 0, "x")
+
+
+
+end
+
+

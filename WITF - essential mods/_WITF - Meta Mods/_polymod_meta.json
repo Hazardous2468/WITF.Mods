@@ -1,0 +1,20 @@
+{
+  "title": "[WITF] Meta Mods",
+  "id": "witf-metamods",
+  "description": "Allows you to change up how you play songs such as enabling modifiers without a .lua file, modifying the chart, speeding up the song, etc",
+  "homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything",
+			"url": "https://linktr.ee/Hazard24"
+		}
+	],
+	"api_version": "0.8.6",
+  "mod_version": "2.2.1",
+  "witf_version": "1.1.1",
+  "dependencies": {
+		"witf-essentials": "*"
+	},
+  "license": "CC BY-NC-SA 4.0"
+}

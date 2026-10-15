@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "VS HAZARD (REAL)",
+  "visible": false,
+  "capsule": {
+    "name": "WITF TEST"
+  },
+  "titleAsset": "storymenu/titles/HAZARD_REAL",
+  "props": [  ],
+  "background": "#FFFF00",
+  "songs": ["sex_modifier_real","vs_hazard_real"]
+}

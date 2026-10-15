@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="modchartspixel.png">
+<SubTexture name="confirm-hold0000" x="0" y="0" width="46" height="44" frameX="0" frameY="0" frameWidth="42" frameHeight="40" />
+<SubTexture name="confirm0000" x="46" y="0" width="46" height="44" frameX="0" frameY="0" frameWidth="42" frameHeight="40" />
+<SubTexture name="confirm0001" x="0" y="44" width="46" height="44" frameX="0" frameY="0" frameWidth="42" frameHeight="40" />
+<SubTexture name="confirm0002" x="0" y="0" width="46" height="44" frameX="0" frameY="0" frameWidth="42" frameHeight="40" />
+<SubTexture name="idle0000" x="46" y="44" width="46" height="44" frameX="0" frameY="0" frameWidth="42" frameHeight="40" />
+</TextureAtlas>

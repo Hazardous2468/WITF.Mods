@@ -1,0 +1,105 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("\ngameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+end
+
+function modsTimeline()
+	setdefault(1, "spiralholds")
+	setdefault(0.8, "stealth", "dad")
+	setdefault(0.8, "strumstealth", "dad")
+	setdefault(1, "alpha", "dad")
+	--ease(0,16,"linear",360*8, "rotatez")
+
+	ease(-1,1,"linear",-112*3, "z")
+
+
+
+
+
+
+	runHaxeCode(
+	[[
+
+		PlayState.instance.playerStrumline.doUpdateClipsInDraw = false;
+
+		var strumLine = game.playerStrumline;
+
+		var strumBaseX:Float = strumLine.x = (FlxG.width / 2 - strumLine.width / 2);
+		var wallWalkTransition:Float = 0;
+		var wallWalkMove:Float = 0;
+		addResetEvent(function(){
+			strumLine.drawFunc = null;
+			strumLine.x = strumBaseX;
+			
+			wallWalkTransition = 0;
+			wallWalkMove = 0;
+			
+		});
+
+
+		eh.funcTweenModEvent(strumLine.mods, 0, 2, ModConstants.getEaseFromString("inOutSine"), 0, 1, function(v) {
+			wallWalkTransition = v;
+		}, "wallWalkTransition");
+
+		wallWalkMove = 0;
+		for (i in 4...32){
+			eh.funcTweenModEvent(strumLine.mods, i, 1, ModConstants.getEaseFromString("outSine"), 
+			wallWalkMove, wallWalkMove+ModConstants.strumSize, function(v) {
+				wallWalkMove = v;
+			}, "wallWalkMove");
+			
+			wallWalkMove += ModConstants.strumSize;
+			if(i%4 == 0){
+				wallWalkMove = 0;
+			}else if(i%4 == 2){
+				wallWalkMove = ModConstants.strumSize*-2;
+			}	
+		}
+
+
+		wallWalkMove=0;
+
+		var noteSize:Float = ModConstants.strumSize;
+		var strumSize:Float = ModConstants.strumSize*4;
+
+		eh.funcModEvent(strumLine.mods, 0, function() {
+			strumLine.drawFunc = function():Void{
+				strumLine.x = strumBaseX;	
+				strumLine.x -= strumSize/2;			
+				strumLine.draw();
+
+				strumLine.x = strumBaseX;		
+				strumLine.x += strumSize/2;	
+				strumLine.draw();
+			}
+
+		});
+
+
+		var customMod:CustomModifier = createCustomMod("holdperspectiveoffset", 0.0);
+		customMod.modPriority = 9999;
+		customMod.notPercentage = true;
+	    customMod.unknown = false;
+	    customMod.pathMod = true;
+	    customMod.notesMod = false;
+	    customMod.holdsMod = true;
+	    customMod.strumsMod = false;
+	    customMod.speedMod = false;
+	    customMod.specialMod = false;
+		customMod.noteMathFunc = function(data) {
+			if(data.noteType == "hold"){
+				data.perspectiveOffset.x = customMod.currentValue;
+				//data.x += customMod.currentValue;
+			}
+			
+		};
+
+		PlayState.instance.playerStrumline.mods.addCustomMod(customMod, false);
+	]])
+
+	--ease(0,1,"linear",112*4, "holdperspectiveoffset","1")
+	--ease(0,1,"linear",112*4, "holdperspectiveoffset","1")
+end
+
+

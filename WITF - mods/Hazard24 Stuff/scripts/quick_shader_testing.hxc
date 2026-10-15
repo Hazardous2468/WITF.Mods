@@ -1,0 +1,105 @@
+package hazard24.modules;
+
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.ui.title.TitleState;
+import funkin.ui.mainmenu.MainMenuState;
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import funkin.Assets;
+import flixel.util.FlxTimer;
+import funkin.graphics.FunkinCamera;
+import openfl.filters.ShaderFilter;
+
+class QuickShaderTester extends Module
+{
+  var enabled:Bool = false;
+
+  var shaderPath:String = "inhuman/vcr";
+  var shader:FlxRuntimeShader;
+  var shaderFilter:ShaderFilter;
+  var shaderTime:Float = 0.0;
+
+  public function new()
+  {
+    super('QuickShaderTester', 1, {state: MainMenuState});
+  }
+
+  override function onUpdate(event:UpdateScriptEvent):Void {
+    super.onUpdate(event);
+    if(shader != null){
+      shaderTime += event.elapsed;
+      shader.setFloat("iTime", shaderTime); 
+    }
+  }
+
+  var timer:FlxTimer;
+  //var timer:FunkinCamera;
+  override function onStateChangeEnd(event:StateChangeScriptEvent)
+  {
+    if(!enabled){
+      return;
+    }
+
+    if(timer != null){
+        timer.cancel();
+        timer = null;
+    }
+
+    if (!Std.isOfType(event.targetState, MainMenuState)) return;
+    var state = event.targetState;
+
+    
+    shader = new FlxRuntimeShader(Assets.getText(Paths.frag(shaderPath)), null);
+
+    shader.setFloat("iTime",0.0);
+    shader.setFloat("glitchModifier",0.123);
+    shader.setBool("distortionOn",true);
+    shader.setBool("perspectiveOn",true);
+    shader.setBool("vignetteMoving",false);
+    shader.setBool("forceAlpha",false);
+    shader.setBool("vignetteOn",true);
+
+    shaderFilter = new ShaderFilter(shader);
+
+
+    timer = new FlxTimer().start(0.5, function(tmr:FlxTimer)
+    {
+      var testCamera = new FunkinCamera('shaderTestCamera');
+      FlxG.cameras.add(testCamera, false);
+      testCamera.filtersEnabled = true;
+      addShaderToCamera(FlxG.camera, shaderFilter);   
+      addShaderToCamera(testCamera, shaderFilter);   
+      trace("hiawdwjaidosehgdnersujhujdrghuorghu9grhrgurghdujujo");
+
+    });
+
+    
+    //trace("jmpsdfgufh4gehujergujpdrgujpgdrujpdrg0ujdrgrdghu9ger4jprdguh4ujp");
+    //FlxG.camera.filters = [shaderFilter];
+  }
+
+  function addShaderToCamera(daCamera, daShaderFilter){
+    if(daCamera != null && daShaderFilter!=null){
+      if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+      else{ 
+        if(!daCamera.filters.contains(daShaderFilter))
+          daCamera.filters.push(daShaderFilter);
+      }
+    }else{
+      trace("ERROR: Either the camera or shader is null!");
+    }
+  }
+  
+  function removeShaderToCamera(daCamera, daShaderFilter){
+    if(daCamera != null && daShaderFilter!=null){
+      if(daCamera.filters != null)
+        daCamera.filters.remove(daShaderFilter);
+    }else{
+      trace("ERROR: Either the camera or shader is null!");
+    }
+  }
+
+
+
+}

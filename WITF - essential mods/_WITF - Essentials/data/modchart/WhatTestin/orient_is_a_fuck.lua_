@@ -1,0 +1,278 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+	copyZoom(false)
+end
+
+function hxCode()
+	addHaxeLibrary("FlxAngle", "flixel.math")
+	addHaxeLibrary("Strumline", "funkin.play.notes")
+	addHaxeLibrary("StrumlineNote", "funkin.play.notes")
+	runHaxeCode(
+	[[
+		print("yo");
+		//ModConstants.orientTimeOffset = -2;
+
+
+		var aaa:Int = -1;
+  		for (strumLine in PlayState.instance.allStrumLines)
+		{	
+			aaa = aaa + 1;
+
+			var strumNoteOrientSampler:StrumlineNote = new StrumlineNote(strumLine.noteStyle, strumLine.defaultPlayerControl, 0);
+			strumNoteOrientSampler.weBelongTo = strumLine;
+			PlayState.instance.customLuaSprites.set("strumNoteSampler-"+aaa, strumNoteOrientSampler);
+			strumNoteOrientSampler.camera = game.camNotes;
+			strumNoteOrientSampler.visible = true;
+			game.add(strumNoteOrientSampler);
+
+			//var debugTarget = createZSpr("debugTarget-"+aaa, 'hazard_debugPoint', false);
+			//debugTarget.screenCenter();	
+			//PlayState.instance.customLuaSprites.set("debugTarget-"+aaa, debugTarget);
+			//game.add(debugTarget);
+			//debugTarget.camera = game.camNotes;
+
+
+			var reverseFix:Bool = true;
+		var index:Int = 0;
+
+		var strumResult:Array<Float> = [0, 0, 0, 0];
+  		function getOrientAngle(data:NoteData):Float
+		  {
+		    var a:Float = 0.0; // height
+		    var b:Float = 0.0; // length
+		    switch (index % 3)
+		    {
+		      case 0: // z axis
+		      	if(data.noteType == "receptor"){
+		      		var strummy = data.whichStrumNote.weBelongTo;
+
+		      		var samply = strumNoteOrientSampler;
+		      		if(samply==null){
+		      			samply = PlayState.instance.customLuaSprites.get("strumNoteSampler-"+aaa);
+		      		}
+		      		if(samply==null){
+		      			return 0.0;
+		      		}
+		      		samply.direction = data.direction;
+		      		samply.noteModData.inOrientPass = true;
+
+		      		
+		      		var p = strummy.mods.getDefaultStrumPos(data.direction);
+		      		samply.x = p[0];
+		      		samply.y = p[1];
+		      		samply.z = p[2];
+			    	samply.scale.x = samply.targetScale;
+			    	samply.scale.y = samply.targetScale;
+			    	samply.skew.x = 0;
+    				samply.skew.y = 0;
+    				samply.resetStealthGlow(true);
+				    samply.noteModData.defaultValues();
+				    samply.noteModData.setValuesFromZSprite(samply);
+
+			    	samply.noteModData.direction = samply.direction;
+				    samply.noteModData.whichStrumNote = samply;
+				    samply.noteModData.noteType = "receptor";
+				    samply.noteModData.noteKind = "";
+				    samply.noteModData.noteStyleName = samply.noteStyleName;
+				    samply.noteModData.width = samply.width;
+				    samply.noteModData.height = samply.height;
+				    samply.strumExtraModData.noteStyleOffsetX = data.whichStrumNote.strumExtraModData.noteStyleOffsetX;
+				    samply.strumExtraModData.noteStyleOffsetY = data.whichStrumNote.strumExtraModData.noteStyleOffsetY;
+				    samply.weBelongTo = strumLine;
+				    samply.noteModData.curPos = 0;
+				    samply.noteModData.curPos_unscaled = 0;
+
+				    final ohgod:Float = data.whichStrumNote.strumExtraModData.strumPos;
+				    samply.strumExtraModData.strumPos = ohgod;
+				    samply.strumDistance = ohgod;
+				    samply.noteModData.strumPosition = ohgod;
+
+				    samply.strumExtraModData.playfieldX = strummy.x + (2 * Strumline.NOTE_SPACING);
+				    samply.strumExtraModData.playfieldY = FlxG.height / 2;
+				    samply.strumExtraModData.playfieldZ = 0;
+
+				    samply.noteModData.inOrientPass = true;
+
+				    var timeOffset:Float = 0;
+
+		      		//strummy.mods.setStrumPos(samply);
+		      		//strummy.mods.applyStrumModifierMath(samply, timeOffset);
+		      		//samply.scale.x += 1.0;
+		      		//samply.scale.y += 1.0;
+		      		samply.color = 0xFFFF0000;
+		      		samply.angle = 180;
+		      		//samply.y += 219;
+
+		      		//samply.noteModData.curPos = strumLine.calculateNoteYPos(samply.noteModData.strumTime+timeOffset) * samply.noteModData.speedMod * -1;
+		      		//samply.y -= samply.noteModData.curPos;
+
+
+		      		a = (data.y - samply.y)*-1;
+			        b = (data.x - samply.x);
+
+			        if(data.direction == 3){
+			        	trace("------------------");
+			        	trace(samply.x +" vs " + data.x);
+			        	trace(samply.y +" vs " + data.y);
+			        	trace(a);
+			        	trace(b);
+			        }
+
+	      		}else{
+			        a = (data.y - data.lastKnownPosition.y) * -1;
+			        b = (data.x - data.lastKnownPosition.x);
+			    }
+		      case 1: // x axis
+		        a = (data.y - data.lastKnownPosition.y) * -1;
+		        b = (data.z - data.lastKnownPosition.z);
+		      case 2: // y axis
+		        if (useAltMathSubmod.value >= 0.0)
+		        {
+		          b = (data.z - data.lastKnownPosition.z) * -1;
+		          a = (data.x - data.lastKnownPosition.x);
+		        }
+		        else
+		        {
+		          a = (data.y - data.lastKnownPosition.y) * -1;
+		          b = (data.x - data.lastKnownPosition.x);
+		        }
+		    }
+
+		    if (false) // Old math. Only allows 180 degrees
+		    {
+		      var calculateAngleDif:Float = Math.atan(b / a);
+
+		      if (Math.isNaN(calculateAngleDif))
+		      {
+		        calculateAngleDif = data.lastKnownOrientAngle[index]; // TODO -> Make this less likely to be a NaN in the first place lol
+		      }
+		      else
+		      {
+		        calculateAngleDif *= FlxAngle.TO_DEG;
+		        data.lastKnownOrientAngle[index] = calculateAngleDif;
+		      }
+		      return calculateAngleDif;
+		    }
+		    else // allows for 360 degrees
+		    {
+		      if (Preferences.downscroll)
+		      {
+		        a *= -1;
+		        b *= -1;
+		      }
+
+		      // Fixes for differences between notes and receptors.
+		      if (data.noteType != "receptor" && index >= 3)
+		      {
+		        a *= -1;
+		        b *= -1;
+		      }
+
+		      // Make it look nicer when reversed.
+		      if (reverseFix)
+		      {
+		        final reverseModAmount:Float = data.getReverse(); // 0 to 1
+		        if (reverseModAmount > 0.5)
+		        {
+		          a *= -1;
+		          b *= -1;
+		        }
+		      }
+
+		      final calculateAngleDif:Float = FlxAngle.degreesFromOrigin(a, b);
+		      data.lastKnownOrientAngle[index] = calculateAngleDif;
+		      return calculateAngleDif;
+		    }
+		  }
+
+
+
+			var customMod:CustomModifier = createCustomMod("orient_test", 0.0);
+			customMod.unknown = false;
+			customMod.notesMod = true;
+			customMod.holdsMod = false;
+			customMod.pathMod = false;
+			customMod.strumsMod = true;
+			customMod.specialMod = true;
+			customMod.modPriority = -99999;
+			strumLine.mods.addCustomMod(customMod);	
+			customMod.noteMathFunc = function(data){
+				if(data.inOrientPass) return;
+				if (index >= 3)
+			    {
+			      data.orient2[index - 3] = customMod.currentValue;
+			    }
+			    if (customMod.currentValue == 0 || data.noteType == "path" || data.noteType == "receptor") return;
+
+			    switch (index % 3)
+			    {
+			      case 0:
+			        data.angleZ += (getOrientAngle(data) * customMod.currentValue);
+			        data.angleZ -= strumResult[data.direction];
+			      case 1:
+			        data.angleX += (getOrientAngle(data) * customMod.currentValue);
+			      case 2:
+			        data.angleY += (getOrientAngle(data) * customMod.currentValue);
+			    }
+			}	
+			customMod.strumMathFunc = function(data){
+				if (customMod.currentValue == 0) return;
+				if(data.inOrientPass) return;
+			    final orientAngleAmount:Float = (getOrientAngle(data) * customMod.currentValue);
+			    switch (index % 3)
+			    {
+			      case 0:
+			        data.angleZ += orientAngleAmount;
+			      case 1:
+			        data.angleX += orientAngleAmount;
+			      case 2:
+			        data.angleY += orientAngleAmount;
+			    }
+			    strumResult[data.direction] = orientAngleAmount;
+			    data.whichStrumNote.strumExtraModData.orientStrumAngle[index] = orientAngleAmount;
+			}
+			customMod.specialMathFunc = function(lane:Int){
+				final whichStrum:StrumlineNote = strumLine.getByIndex(lane);
+    			whichStrum.strumExtraModData.orientExtraMath[index] = customMod.currentValue;
+			}
+		}
+
+
+
+	]])
+	setdefault(1, "orient_test", "1")
+end
+
+function modsTimeline()
+	hxCode()
+	--setdefault(1, "orient", "1")
+
+	setdefault(1, "showallmods", "1")
+	setdefault(24, "grain", "1")
+	setdefault(24, "pathgrain", "1")
+	setdefault(0.1, "arrowpath", "1")
+	setdefault(0.1, "arrowpathwidth", "1")
+
+
+	
+	setdefault(1, "alphanotes", "1")
+	setdefault(1, "alphaholds", "1")
+
+	setdefault(-1, "bumpyx", "1")
+	--setdefault(-2, "bouncex", "1")
+
+	--setdefault(1, "beat", "1")
+	--setdefault(45, "rotatez", "1")
+	--setdefault(45, "rotatey", "1")
+	ease(0, 4, "inOutSmoothStep", 600, "drive2","1")
+
+	--ease(0, 4, "inOutSmoothStep", -90, "rotatez","1")
+	--ease(0, 4, "inOutSmoothStep", 90, "rotatey","1")
+	--ease(0, 4, "inOutSmoothStep", 180, "rotatez","1")
+	--ease(0, 4, "inOutSmoothStep", 1, "drunk","1")
+	--ease(0, 4, "inOutSmoothStep", 1, "drunk","1")
+end
+
+

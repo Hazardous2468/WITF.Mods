@@ -1,0 +1,67 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+
+class SexModifierRealSongScript extends Song {
+	public function new() {
+		super('sex_modifier_real');
+	}
+
+	override function onModchartTimeline(event) {
+		super.onModchartTimeline(event);
+
+		var eh = PlayState.instance.modchartEventHandler;
+		var target1 = PlayState.instance.playerStrumline.mods;
+
+		//RAINBOW!
+		eh.funcTweenModEvent(target1, 4, 36-4, ModConstants.getEaseFromString("linear"), 0, (36-4)*3, function(v) {
+			var timmy:Float = v*32*1.25;
+			var p:Float = Math.PI;
+			var rad:Float = p/180;
+			
+			var red:Float = (1.1) * FlxMath.fastSin(timmy*rad);
+			var green:Float =  (1.1)*(FlxMath.fastSin(timmy*rad+(0.66*p)));
+			var blue:Float = (1.1)*(FlxMath.fastSin(timmy*rad+(0.66*p*2)));
+			
+			target1.setModVal("arrowpathred", red);
+			target1.setModVal("arrowpathblue", blue);
+			target1.setModVal("arrowpathgreen", green);
+			
+			
+		}, "RAINBOW STEALTH");
+	}
+
+	override function onNoteIncoming(event)
+	{
+		super.onNoteIncoming(event);
+		var note = event.note;
+		if(note.kind == "hurt"){
+			var daNoteMod = ModConstants.createNewMod("speed");
+			daNoteMod.currentValue = 3;
+			daNoteMod.baseValue = 3;
+			daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+			var daNoteMod2 = ModConstants.createNewMod("sudden");
+			daNoteMod2.currentValue = 1;
+			daNoteMod2.baseValue = 1;
+			daNoteMod2.strumOwner = PlayState.instance.playerStrumline;
+			daNoteMod2.setSubVal("offset", 7500/3.2);
+			daNoteMod2.setDefaultSubVal("offset", 7500/3.2);
+			if(note.noteModData.noteMods != null){
+				note.noteModData.noteMods.push(daNoteMod);
+				note.noteModData.noteMods.push(daNoteMod2);
+				if(note.holdNoteSprite != null){
+					note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+					note.holdNoteSprite.noteModData.noteMods.push(daNoteMod2);
+				}
+			}
+		}
+	}
+
+
+
+
+}

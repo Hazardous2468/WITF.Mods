@@ -1,0 +1,30 @@
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.modding.module.ModuleHandler;
+
+// Disables chart shuffles for dad notes (to make modchart not break) plus disables swap chart modifier
+class AddToSwapBlacklist_exampleSongs extends Module
+{	  
+	public function new() {
+        super("AddToSwapBlacklist_exampleSongs");	
+    }
+	
+	function daScriptLogic(){
+		var chartModifiersModule = ModuleHandler.getModule("ChartModifiersModule");
+		if(chartModifiersModule!=null){
+			var blackListArray = chartModifiersModule.scriptGet("swapBlacklist");
+			if(blackListArray.contains("sing-sing-red-indigo")) return;
+			blackListArray.push("sing-sing-red-indigo");
+			chartModifiersModule.scriptSet("swapBlacklist", blackListArray);
+			
+			var blackListArray = chartModifiersModule.scriptGet("dontShuffleDADNotesList");
+			if(blackListArray.contains("sing-sing-red-indigo")) return;
+			blackListArray.push("sing-sing-red-indigo");
+			chartModifiersModule.scriptSet("dontShuffleDADNotesList", blackListArray);
+		}
+	}
+	
+	override function onStateChangeEnd(event) {
+		daScriptLogic();
+	}
+}

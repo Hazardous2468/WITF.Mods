@@ -1,0 +1,32 @@
+function modsTimeline()
+
+	-- The following is just a small correction to make the rotation modifiers more accurate
+	-- Feel free to comment out a modifier if that modifier is unused for performance
+
+
+	local noteOffset = -4
+	local holdOffset = -2
+
+
+	--setdefault(noteOffset, "rotatez__notepoint_offset_x")
+	--setdefault(holdOffset, "rotatez__holdpoint_offset_x")
+
+	--setdefault(noteOffset, "rotatey__notepoint_offset_x")
+	--setdefault(holdOffset, "rotatey__holdpoint_offset_x")
+
+	setdefault(1.35, "speed")
+
+
+
+	--set(0, noteOffset, "rotatez__notepoint_offset_x")
+	--set(0, holdOffset, "rotatez__holdpoint_offset_x")
+	--set(0, noteOffset, "rotatey__notepoint_offset_x")
+	--set(0, holdOffset, "rotatey__holdpoint_offset_x")
+
+
+
+
+
+end
+
+

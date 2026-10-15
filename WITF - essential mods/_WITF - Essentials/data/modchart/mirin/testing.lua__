@@ -1,0 +1,147 @@
+function onCreate()
+	--notesBehindHUD(true)
+end
+function setUp()
+	--centerPlayer("")
+	--centerOpponent("")
+	--createNewPlayer(true)
+end
+function doPaths()
+	setdefault(0.5,  "arrowpath")
+	setdefault(0.15,  "arrowpathwidth")
+	setdefault(32,  "arrowpathgrain")
+end
+function doDrive()
+	--ease(0, 32, "linear",beatLength*32*1.389,"drive2")
+	--ease(0, 32, "linear",beatLength*32*-1,"drive")
+end
+
+
+function hxCode()
+	addHaxeLibrary("Constants", "funkin.util")
+	runHaxeCode(
+	[[
+		print("yo");
+		
+		var debugTicker:Int = 0;
+		
+		addUpdate(function(elapsed){
+			if(debugTicker > 0){
+				debugTicker -= elapsed;
+				return;
+			}else{
+				debugTicker = 0.25;
+			}
+			
+			for (strumLine in PlayState.instance.allStrumLines)
+			{		
+				strumLine.doUpdateClipsInDraw = true;
+				for (note in strumLine.notes.members){
+				
+					if(note==null||!note.alive) continue;
+					
+					var renderWindowEnd = note.strumTime+2000 + Constants.HIT_WINDOW_MS + (strumLine.renderDistanceMs / 8 * 1.0);
+					
+					if (Conductor.instance.songPosition >= renderWindowEnd)
+					{
+						note.kill();
+						print("Excuse me note?");
+					}
+				}
+			
+			
+				for (holdNote in strumLine.holdNotes.members){
+				
+					if(holdNote==null||!holdNote.alive) continue;
+					
+
+					if (holdNote.strumTime > 1382 && holdNote.strumTime < 1990)
+					{
+						//print("Hold does exist!");
+					}
+					if (!holdNote.handledMiss && holdNote.missedNote){
+						print("handledMiss");
+					}
+					
+					
+					var renderWindowEnd = holdNote.strumTime+2000 + holdNote.fullSustainLength + Constants.HIT_WINDOW_MS + (strumLine.renderDistanceMs / 8 * 1.0);
+				
+					if (Conductor.instance.songPosition >= renderWindowEnd)
+					{
+						// Hold note is offscreen, kill it.
+						holdNote.visible = false;
+						holdNote.kill(); // Do not destroy! Recycling is faster.
+						//print("Excuse me hold?");
+					}
+				}
+			}
+		});	
+	]])
+end
+
+function modsTimeline()
+
+
+	setdefault(1, "showallmods")
+	--doDrive()
+	--doPaths()
+	hxCode()
+	
+	setdefault(25,"pathgrain")
+	setdefault(25,"grain")
+	
+	setdefault(1.35,"speedmod")
+	
+	setdefault(0.25,"alphaholds")
+	setdefault(1,"3d")
+	
+	
+	for i = 0, 64-2,2 do
+	
+		add(i, 2, "linear", 360, "blacksphereflip")
+		
+		ease(i, 0.5, "inSine", -0.5, "tornado")
+		ease(i+0.5, 0.5, "outSine", -1, "tornado")
+		ease(i+1, 0.5, "inSine", -0.5, "tornado")
+		ease(i+0.5+1, 0.5, "outSine", 0, "tornado")
+		
+		add(i, 1, "pop", 1, "hourglass")
+		add(i+1, 1, "pop", 1, "hourglass")
+	end
+	
+	
+	local lazyAlt = false
+	local function anotherKickFunc(when, timeMult)
+		
+		local mult = lazyAlt and 1 or -1
+	
+		add(when, 1*timeMult, "pop",{ mult/2 , "drunk", mult/2 , "bumpyangle"})
+		add(when, 1*timeMult, "impulse", -2.25 , "tiny")
+		--add(when, 1, "impulse", -4 , "tiny")
+		--add(when, 1*timeMult, "impulse", 0.35 , "stealth")
+		
+		add(when, 1, "impulse", lazyAlt and 27 or -27, "skewx","1")
+		add(when, 1, "impulse", 0.8, "scale","1")
+		
+		lazyAlt = not lazyAlt
+		
+	end
+	
+	for i = 0, 64-8,8 do
+		if i == 0 or i == 24 or i == 32 or i == 56 then
+			for k = 0, 6 do
+				anotherKickFunc(i+k, 1)
+			end
+			anotherKickFunc(i+7, 0.5)
+			anotherKickFunc(i+7.5, 0.5)
+		else
+			for k = 0, 7 do
+				anotherKickFunc(i+k, 1)
+			end
+		end
+	end
+	
+	
+end
+
+

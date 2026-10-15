@@ -1,0 +1,19 @@
+{
+    "title": "[WITF] Hyper Nova",
+    "id": "witf-hypernova",
+    "description": "Song made for DreamiAmi.",
+	"contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Music, Chart, Modchart, Code, Visuals",
+      		"url": "https://linktr.ee/Hazard24"
+		}
+	],
+    "api_version": "0.8.6",
+    "mod_version": "1.0.3",
+	"dependencies": {
+		"witf-essentials": "*",
+		"witf-examples": "*"
+	},
+    "license": "CC BY-NC-SA 4.0"
+}

@@ -1,0 +1,85 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+	copyZoom(false)
+end
+
+function hxCode()
+	addHaxeLibrary("FlxAngle", "flixel.math")
+	addHaxeLibrary("Strumline", "funkin.play.notes")
+	addHaxeLibrary("StrumlineNote", "funkin.play.notes")
+	runHaxeCode(
+	[[
+		print("EXECUTING HX CODE...");
+
+  		for (strumLine in PlayState.instance.allStrumLines)
+		{	
+			
+			var customMod:CustomModifier = createCustomMod("test_drunk", 0.0);
+
+			function drunkMath(noteDir:Int, curPos:Float, currentValue:Float):Float
+			  {
+			    var time:Float = Conductor.instance.songPosition * 0.001;
+			    time*=8;
+			    var returnValue:Float = 0.0;
+
+			      returnValue = currentValue * (customMod.cos(
+			        (time) + (noteDir * 0.2) + (curPos * 0.45) * (10.0 / FlxG.height) * 1.0 * 1.75
+			      )) * (ModConstants.strumSize * 0.5);
+			    
+
+			    return returnValue;
+			  }
+
+			
+			customMod.unknown = false;
+			customMod.notesMod = true;
+			customMod.holdsMod = true;
+			customMod.pathMod = true;
+			customMod.strumsMod = true;
+			strumLine.mods.addCustomMod(customMod);	
+			var strumResult:Array<Float> = [0,0,0,0];
+			customMod.noteMathFunc = function(data){
+				if (customMod.currentValue == 0 || data.noteType == "receptor") return;
+				var strumPos:Float = data.whichStrumNote.strumDistance;
+    			data.x -= strumResult[data.direction]; // undo the strum  movement.
+    			data.x += drunkMath(data.direction, data.curPos, customMod.currentValue); // re apply but now with notePos
+			}	
+			customMod.strumMathFunc = function(data){
+			    if (customMod.currentValue == 0) return;
+			    strumResult[data.direction] = drunkMath(data.direction, data.curPos, customMod.currentValue);
+    			data.x += strumResult[data.direction];
+			}
+		}
+
+
+
+	]])
+	--setdefault(1, "test_drunk", "1")
+end
+
+function modsTimeline()
+	--hxCode()
+	
+
+	setdefault(1, "3d", "1")
+	setdefault(1, "showallmods", "1")
+	setdefault(24, "grain", "1")
+	setdefault(24, "pathgrain", "1")
+	setdefault(0.1, "arrowpath", "1")
+	setdefault(0.1, "arrowpathwidth", "1")
+
+
+	--setdefault(1, "alphanotes", "1")
+	--setdefault(1, "alphaholds", "1")
+
+	setdefault(1, "orient", "1")
+	--ease(4, 2, "inOutSmoothStep", 1200/2, "drive2","1")
+
+	ease(0, 2, "inOutSmoothStep", 1, "CosBounceX","1")
+	ease(4, 24, "inOutSmoothStep", 1200*2, "CosBounceX__offset","1")
+	
+end
+
+

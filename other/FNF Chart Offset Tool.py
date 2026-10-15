@@ -6,7 +6,7 @@ print("=== FNF Chart Offset Tool ===")
 
 
 # === CONFIGURE THESE ===
-input_file = "song-chart.json"   # Change if your file has a different name
+input_file = "test-metadata.json"   # Change if your file has a different name
 output_file = "converted-song-chart.json"
 cutoff = 0
 offset = 0

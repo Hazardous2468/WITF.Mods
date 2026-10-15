@@ -1,0 +1,22 @@
+function setUp()
+	trace("Welcome to the test song!")
+	trace("\ngameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+end
+
+function modsTimeline()
+	--setdefault(1, "spiralholds")
+	setdefault(0.8, "stealth", "dad")
+	setdefault(0.8, "strumstealth", "dad")
+	setdefault(1, "alpha", "dad")
+	--ease(0,16,"linear",360*8, "rotatez")
+
+	--ease(-1,1,"linear",-112*1, "z")
+
+	ease(-1,1,"linear",1, "drunk")
+
+
+
+end
+
+

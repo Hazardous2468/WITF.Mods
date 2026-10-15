@@ -1,0 +1,252 @@
+function setUp()
+	centerStrum("1")
+
+	createNewPlayer(true)
+	createNewPlayer(true)
+	createNewPlayer(true)
+	createNewPlayer(true)
+	createNewPlayer(true)
+
+
+end
+
+
+function modsTimeline()	
+
+	setdefault(-24, "movex", "dad")
+	setasleep(-20, "dad", true)
+	targetExclude("dad")
+
+
+	setasleep(-20, "3", true)
+	setasleep(-20, "4", true)
+	setasleep(-20, "5", true)
+	setasleep(-20, "6", true)
+	setasleep(-20, "7", true)
+
+	setdefault(1, "alpha", {3,4,5,6})
+	setdefault(1, "3d", {3,4,5,6})
+
+
+	for i=4, 36-4, 4 do
+		add(i-0.05, 1.25 , "tri", {-1.2, "drunk", -1.2, "tipsy"})
+	end
+	set(35, 3, "waveyy__speed")
+	ease(35.5, 1, "inOutQuart", {2, "drunk", 1, "waveyy"},"1")
+	ease(37.5, 1, "inOutQuart", {0, "drunk", 0, "waveyy"},"1")
+	
+
+
+	local lazyAlternator = -1
+	local b = getNoteBeats(3.95, 35.9, "dad")
+	for i, v in ipairs(b) do
+		if not (v[4] == "hurt") then
+			if lazyAlternator == 1 then
+				lazyAlternator = -1
+			else
+				lazyAlternator = 1
+			end
+
+			local duration = 0.25
+			if v[2] == 1 then
+				duration = 0.5
+			elseif v[2] == 2 then
+				duration = 0.75
+			elseif v[2] == 3 then
+				duration = 1
+			end
+
+			add(v[1], duration,"impulse",0.35,"scale")
+
+			add(v[1], duration,"pop", 0.5*lazyAlternator, "drunk")
+
+		end
+	end
+
+
+	ease(36, 2, "inOutQuart", 1, "alpha", "1")
+	set(36, 1, "zsort", "1")
+	set(87, 0, "zsort", "1")
+
+	for plr=3,6 do
+		setasleep(87, plr, true)
+		setasleep(36, plr, false)
+		set(36, 1, "alpha", plr)
+
+		ease(36, 2, "inOutQuart", 0, "alpha", plr)
+
+	end
+
+	local cubeSize = 5
+	local cubeZoom = -112*6
+
+	--front
+	set(36, cubeSize*0.5, "movez", 3)
+
+	--back
+	set(36, cubeSize*0.5, "movez", 4)
+	set(36, 180, "rotatey", 4)
+	set(36, 180, "angley", 4)
+
+	--left
+	set(36, cubeSize*0.5, "movez", 5)
+	set(36, 90, "rotatey", 5)
+	set(36, 90, "angley", 5)
+
+	--right
+	set(36, cubeSize*0.5, "movez", 6)
+	set(36, -90, "rotatey", 6)
+	set(36, -90, "angley", 6)
+
+
+
+
+	for plr=3,6 do
+		set(36, 1, "sudden",plr)
+		set(36, 912, "sudden__offset",plr)
+		set(36, 600, "sudden__start",plr)
+		set(36, 300, "sudden__end",plr)
+		set(36, 1, "sudden__noglow",plr)
+		set(36, 0.375, "speedmod",plr)
+
+		set(36, 1, "alphaholdcover", plr)
+		set(36, 1, "alphasplash", plr)
+
+		set(36, 0.5, "dizzy--0", plr)
+		set(36, -0.5, "dizzy--1", plr)
+		set(36, 0.5, "dizzy--2", plr)
+		set(36, -0.5, "dizzy--3", plr)
+
+		set(36, 0.8, "stealth", plr)
+		set(36, 0.8, "strumstealth", plr)
+
+		add(36, 2, "instant", cubeZoom, "z", plr)
+
+
+		--set(36, -3, "rotatez__priority",plr)
+		--resort(36)
+	end
+
+	--add(38, 84-38, "inOutSmootherStep", {360*6.5, "rotatey", 360*6.5, "angley"}, {3,4,5,6} )
+	--add(58, 84-58, "inOutSmootherStep", {360, "rotatex", 360, "anglex"}, {3,4,5,6} )
+
+
+
+	add(38, 84-38, "inOutSmootherStep", {360*6.5, "rotatey", 360*6.5, "angley"}, {3,4,5,6} )
+	--add(46, 84-46, "inOutSmootherStep", {360*-3.5, "rotatez", 360*-3.5, "anglez"}, {3,4,5,6} )
+	add(46, 84-46, "inOutSmootherStep", {360*2, "rotatex", 360*2, "anglex"}, {3,4,5,6} )
+
+
+
+	local b = getNoteBeats(37.95, 83.99, "dad")
+	for i, v in ipairs(b) do
+		if not (v[4] == "hurt") then
+			if lazyAlternator == 1 then
+				lazyAlternator = -1
+			else
+				lazyAlternator = 1
+			end
+
+			local duration = 0.25
+			if v[2] == 1 then
+				duration = 0.5
+			elseif v[2] == 2 then
+				duration = 0.75
+			elseif v[2] == 3 then
+				duration = 1
+			end
+
+			add(v[1], duration,"impulse",0.35,"scale", {3,4,5,6})
+
+			--add(v[1], duration,"pop", 3*lazyAlternator, "bumpy", {3,4,5,6})
+			add(v[1], duration,"pop", 2*lazyAlternator, "drunkz", {3,4,5,6})
+
+
+
+			add(v[1], duration,"impulse",0.35,"scale", 7)
+
+			add(v[1], duration,"impulse",lazyAlternator*1,"drunkangle", 7)
+
+			add(v[1], 	duration, "pop",0.35*lazyAlternator, "drunkx", 7)
+			add(v[1], duration, "pop",0.35*lazyAlternator, "drunky", 7)
+			add(v[1], duration, "pop",0.35*lazyAlternator, "drunkz", 7)
+		end
+	end
+
+
+
+
+
+
+
+	local b = getNoteBeats(37.95, 83.99, "bf")
+	for i, v in ipairs(b) do
+		if not (v[4] == "hurt") then
+			add(v[1], 1,"flip(outQuad)",1,"z--"..v[2], 7)
+		end
+	end
+
+
+	setasleep(36, 7, false)
+
+	setdefault(1, "alpha", 7)
+	set(36, 1, "alpha", 7)
+	ease(36, 2, "linear",0, "alpha", 7)
+	set(36, 112*3, "debugx", 7)
+
+	set(36,1, "custompath","7")
+	set(36,0.5, "flip","7")
+	
+	set(36, 0.5, "speedmod", 7)
+
+	set(36, 0,"drunk__desync",7)
+	set(36, 0,"drunky__desync",7)
+	set(36, 0,"drunkz__desync",7)
+
+	set(36, 1, "drunk__speed",7)
+	set(36, 1.33, "drunky__speed",7)
+	set(36, 0.85777, "drunkz__speed",7)
+
+	set(36, 1, "drunk__mult",7)
+	set(36, 1.1, "drunky__mult",7)
+	set(36, 0.85777, "drunkz__mult",7)
+
+	add(62, 80-62, "inOutSmoothStep",0.5, "drunkx", 7)
+	add(62, 80-62, "inOutSmoothStep",0.5, "drunky", 7)
+	add(62, 80-62, "inOutSmoothStep",0.5, "drunkz", 7)
+
+	for i=38, 82 do
+		add(i, 1, "linear", 195, "drive2", 7)
+	end
+
+	set(36,2, "drawsize","7")
+	set(36,1, "sudden","7")
+	set(36,2500, "sudden__offset","7")
+
+	set(36,1, "hidden","7")
+	set(36,-50, "hidden__start","7")
+	set(36,-300, "hidden__end","7")
+	set(36,1, "hidden__stealthpastreceptors","7")
+
+	
+	
+	set(36,1, "spiralholds","7")
+	set(36,1, "spiralpaths","7")
+	set(36,1, "arrowpath--0","7")
+	set(36,0.1, "arrowpathwidth","7")
+	set(36,15, "pathgrain","7")
+	set(36,2555, "arrowpathlength","7")
+	set(36,0, "arrowpathbacklength","7")
+
+	set(36,0.25, "scale","7")
+	set(36,112*-2, "z","7")
+	set(36,sw*-0.455, "x","7")
+
+	--resort(36, "7")
+
+
+	add(60, 84-60, "inOutSmootherStep", {360*2, "rotatex"}, 7 )
+
+end
+
+

@@ -1,0 +1,21 @@
+{
+    "title": "[WITF] Helpful debug scripts",
+    "id": "witf-debug",
+    "description": "Some useful scripts to help with modchart creation!",
+	"homepage": "https://github.com/Hazardous2468/What-In-The-Funkin",
+	"author": "Hazard24",
+    "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Everything",
+			"url": "https://linktr.ee/Hazard24"
+		}
+	],
+    "api_version": "0.8.6",
+    "mod_version": "2.4.3",
+    "witf_version": "1.1.1",
+	"dependencies": {
+		"witf-essentials": "*"
+	},
+    "license": "CC BY-NC-SA 4.0"
+}

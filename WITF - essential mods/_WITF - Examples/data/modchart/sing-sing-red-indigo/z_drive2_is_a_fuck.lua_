@@ -1,0 +1,146 @@
+function setUp()
+	trace("gameVersion: "..gameVersion)
+	trace("witfVersion: "..witfVersion)
+end
+
+function hxCode()
+	addHaxeLibrary("FlxAngle", "flixel.math")
+	addHaxeLibrary("Strumline", "funkin.play.notes")
+	addHaxeLibrary("StrumlineNote", "funkin.play.notes")
+	addHaxeLibrary("Vector3D", "openfl.geom")
+	addHaxeLibrary("Vector4", "lime.math")
+	addHaxeLibrary("NoteData", "funkin.play.modchartSystem")
+	addHaxeLibrary("FileUtil", "funkin.util")
+	addHaxeLibrary("CustomPathMod", "funkin.play.modchartSystem.modifiers")
+	runHaxeCode(
+	[[
+		print("EXECUTING HX CODE...");
+
+  		//for (strumLine in PlayState.instance.allStrumLines)
+		//{	
+
+
+			//var customMod:CustomModifier = createCustomMod("custom_path_fixed", 0.0);
+			var customMod:CustomModifier = new CustomPathMod("custom_path_fixed");
+
+			
+			customMod.modPriority = -9999999;
+			customMod.unknown = false;
+			customMod.notesMod = true;
+			customMod.holdsMod = true;
+			customMod.pathMod = true;
+			customMod.strumsMod = true;
+			//strumLine.mods.addCustomMod(customMod);	
+
+			var posTypeSubmod = customMod.createSubMod("postype", 0.0, ["pos","type","mode","curpos","curpostype"]);
+
+
+			function executePath_V2(curPos:Float, column:Int):Vector4
+			{
+			  if (customMod._path == null)
+			  {
+			    return new Vector4(0, 0, 0, 0);
+			  }
+
+			  if (posTypeSubmod.value <= -0.5)
+			    {
+			      curPos = Math.abs(curPos) * -1 / 0.47;
+			      curPos = curPos / -1500.0 * customMod._pathDistance;
+			    }else{
+			    	curPos *= -1;
+			    }
+
+			  // Sample the path at the note's current distance
+			  var pathAtDist = customMod.getPointAlongPath(curPos);
+
+			  // Sample the path at distance 0 (the receptors / start of the path)
+			  var pathAtZero = customMod.getPointAlongPath(0.0);
+
+			  // Relative offset from the strums
+			  var offset = new Vector4(
+			    pathAtDist.x - pathAtZero.x,
+			    pathAtDist.y - pathAtZero.y,
+			    pathAtDist.z - pathAtZero.z,
+			    0
+			  );
+
+			  
+			  return offset;
+			}
+
+			
+
+			//var strumResult:Array<Float> = [0,0,0,0];
+			customMod.noteMath = function(data:NoteData, strumLine:Strumline, ?isHoldNote = false, ?isArrowPath:Bool = false):Void
+  			{
+  				var path = customMod.customArrowPathModTest;
+			    //if (customMod.currentValue == 0) return;
+			    if (path == null) return;
+
+			    //var notePosition:Vector4 = new Vector4(data.x, data.y, data.z, 0);
+			    //var newPosition:Vector4 = customMod.executePath(customMod.beatTime, Math.abs(data.curPos) * -1 / 0.47, data.direction, customMod.currentValue, notePosition);
+			    
+			    var curPos:Float = data.curPos;
+			    if (posTypeSubmod.value > 0.5 || posTypeSubmod.value < -1.5)
+			    {
+			      curPos = data.curPos_unscaled;
+			      //print("hi");
+			    }
+
+			    var newPosition:Vector4 = executePath_V2(curPos, data.direction);
+			    data.x += newPosition.x*customMod.currentValue;
+			    data.y += newPosition.y*customMod.currentValue;
+			    data.z += newPosition.z*customMod.currentValue;
+
+			    var curVal:Float = customMod.currentValue * -1;
+    			data.y += data.curPos * curVal;
+			}	
+
+			customMod.strumMath = function(data:NoteData, strumLine:Strumline):Void
+  			{
+				return;
+			}	
+
+
+
+
+	      	var modHandler = ModConstants.grabStrumModTarget("7");
+	      	//if (modHandler.fakeNote == null) modHandler.fakeNote = new NoteData();
+	      	//modHandler.fakeNote.defaultValues();
+	        //customMod.noteMath(modHandler.fakeNote, modHandler.strum, false, false);
+	        modHandler.addCustomMod(customMod);
+
+
+		//}
+
+
+
+	]])
+end
+
+function modsTimeline()
+	hxCode()
+	--set(38, 1, "custom_path_fixed", "7")
+	ease(37,1,"linear",1,"custom_path_fixed","7")
+
+	set(36.01, -1, "custom_path_fixed__postype", "7")
+
+	set(36.01, 1, "sudden", "7")
+	set(36.01, 1000, "sudden__offset", "7")
+
+	set(36.01, 1, "arrowpath--1", "7")
+	set(36.01, 1, "arrowpath--2", "7")
+	set(36.01, 1, "arrowpath--3", "7")
+
+	set(36.01, 0, "x", "7")
+	set(36.01, 0.5*0.1, "speedmod", "7")
+
+	for i=38, 82 do
+		--add(i, 1, "linear", 100, "drive2", 7)
+		--add(i, 1, "pop", 4, "drunk", 7)
+	end
+
+
+end
+
+

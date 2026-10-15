@@ -1,0 +1,72 @@
+{
+ "version": "2.2.4",
+ "songName": "sing sing red indigo",
+ "artist": "Frums",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal",
+   "easy"
+  ],
+  "characters": {
+   "player": "nobody",
+   "opponent": "nobody",
+   "opponentVocals": [
+    "nobody"
+   ],
+   "playerVocals": [
+    "nobody"
+   ]
+  },
+  "stage": "emptyStage",
+  "noteStyle": "funkin-quant",
+  "ratings": {
+   "easy": 7,
+   "normal": 9,
+   "hard": 10
+  },
+  "album": "WITF",
+  "previewStart": 0.0,
+  "previewEnd": 0.156861226800604
+ },
+ "generatedBy": "What in the Funkin' (v1.1.1) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 114,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 103684.210526316,
+   "b": 197,
+   "bpm": 111,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 108008.53485064,
+   "b": 205,
+   "bpm": 105,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 112579.963422069,
+   "b": 213,
+   "bpm": 96,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 117579.963422069,
+   "b": 221,
+   "bpm": 84,
+   "bt": [4, 4, 4, 4]
+  },
+  {
+   "t": 123294.249136355,
+   "b": 229,
+   "bpm": 69,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

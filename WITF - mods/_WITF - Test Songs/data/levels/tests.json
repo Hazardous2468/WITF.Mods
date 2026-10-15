@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "HOLD TEST SONG",
+  "visible": false,
+  "capsule": {
+    "name": "WITF TEST"
+  },
+  "titleAsset": "storymenu/titles/HOLD_TEST",
+  "props": [  ],
+  "background": "#2E6363",
+  "songs": ["modifier_showcase", "hold_test", "hurt_note_test"]
+}

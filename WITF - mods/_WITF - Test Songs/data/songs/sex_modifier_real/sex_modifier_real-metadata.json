@@ -1,0 +1,40 @@
+{
+ "version": "2.2.4",
+ "songName": "Sex Modifier is real!!!!",
+ "artist": "Hazard24",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "hard"
+  ],
+  "characters": {
+   "player": "bf_modchart",
+   "girlfriend": "gf",
+   "opponent": "nobody_test",
+   "opponentVocals": [
+    "nobody"
+   ],
+   "playerVocals": [
+    "bf"
+   ]
+  },
+  "stage": "mainStage",
+  "noteStyle": "funkin",
+  "ratings": {
+   "hard": 6
+  },
+  "album": "WITF_test",
+  "previewStart": 0.0906977142759208,
+  "previewEnd": 0.501155258993504
+ },
+ "generatedBy": "What in the Funkin' (v1.1.1) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 130,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

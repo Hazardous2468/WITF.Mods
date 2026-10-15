@@ -1,0 +1,20 @@
+{
+  "title": "Hazard Stuff",
+  "id": "hazard24-stuff",
+  "description": "Contains some Quality of Life stuff",
+  "author": "Hazard24",
+  "contributors": [
+		{
+			"name": "Hazard24",
+			"role": "Scripts, Music, Sounds",
+			"url": "https://linktr.ee/Hazard24"
+		},
+		{
+			"name": "Spooky Mix",
+			"role": "ZoomCam and CamBop event art"
+		}
+	],
+  "api_version": "0.8.6",
+  "mod_version": "2.2.1",
+  "license": "Apache-2.0"
+}

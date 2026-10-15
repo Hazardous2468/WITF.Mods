@@ -1,0 +1,25 @@
+{
+    "title": "[WITF] Emergency Reset",
+    "id": "witf-emergencyreset",
+    "description": "Original song by AnbyFox!",
+	"contributors": [
+		{
+			"name": "AnbyFox",
+			"role": "Composer"
+		},
+		{
+			"name": "Hazard24",
+			"role": "Everything else"
+		}
+	],
+    "api_version": "0.8.0",
+    "mod_version": "1.0.0",
+	"dependencies": {
+		"witf-essentials": "*",
+		"witf-examples": "*"
+	},
+	"optionalDependencies": {
+		"witf-inhuman": "*"
+	 },
+    "license": "CC BY-NC-ND 4.0"
+}
