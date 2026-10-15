@@ -17,12 +17,16 @@ import funkin.Preferences;
 import funkin.data.song.SongData.SongTimeChange;
 import funkin.Conductor;
 
+import funkin.play.modchartSystem.ModConstants;
+
 // Script responsible for the different variations of Termination to work.
 class TerminationSongScript extends Song
 {
+  var isWITF:Bool = false;
   public function new()
   {
     super('termination');
+    isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
   }
 
   
@@ -132,34 +136,46 @@ class TerminationSongScript extends Song
       PlayState.instance.scanForModchart(false);
       modchartNeedsRescan = false;
     }
-
-    /*
-    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
-    PlayState.instance.currentStage.getNamedProp("blackScreenR").visible = false;
-    PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 0;
-
-    FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp('blackScreenVideo'));
-    PlayState.instance.currentStage.getNamedProp('blackScreenVideo').alpha = 0;
-    PlayState.instance.currentStage.getNamedProp("blackScreenVideo").visible = false;
-    */
-
-
   }
 
   function onSongRetry(event:ScriptEvent)
   {
     super.onSongRetry(event);
-    //FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp("blackScreenR"));
-    //PlayState.instance.currentStage.getNamedProp("blackScreenR").visible = false;
-    //PlayState.instance.currentStage.getNamedProp("blackScreenR").alpha = 0;
-
-    //FlxTween.cancelTweensOf(PlayState.instance.currentStage.getNamedProp('blackScreenVideo'));
-    //PlayState.instance.currentStage.getNamedProp('blackScreenVideo').alpha = 0;
-    //PlayState.instance.currentStage.getNamedProp("blackScreenVideo").visible = false;
   }
 
   function onDestroy(event)
   {
     super.onDestroy(event);    
   }
+
+
+
+  // For the KB scream notes to be fast
+  override function onNoteIncoming(event:NoteScriptEvent)
+  {
+    super.onNoteIncoming(event);
+    if(!isWITF) return;
+    if(PlayState.instance != null && PlayState.instance.currentVariation != "erect") return;
+
+    var note = event.note;
+
+    // If BF note, skip it.
+    if (note.noteData.getMustHitNote() ) return;
+    
+
+    if(note.strumTime >= 198256 && note.strumTime < 198835){
+      var daNoteMod = ModConstants.createNewMod("speed");
+      daNoteMod.currentValue = 1.6;
+      daNoteMod.baseValue = 1.6;
+      daNoteMod.strumOwner = PlayState.instance.opponentStrumline;
+      if(note.noteModData.noteMods != null){
+        note.noteModData.noteMods.push(daNoteMod);
+        if(note.holdNoteSprite != null){
+          note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+        }
+      }
+    }    
+  }
+
+
 }
