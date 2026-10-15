@@ -6,7 +6,7 @@ function modsTimeline()
 	addHaxeLibrary("Constants", "funkin.util")
 	
 	addHaxeLibrary("FlxRuntimeShader", "flixel.addons.display")
-	addHaxeLibrary("Assets", "openfl.utils")
+	addHaxeLibrary("Assets", "funkin")
 
 	--setdefault(256/-2, "rotatez__offsetx")
 	--setdefault(256/-2, "rotatez__offsety")

@@ -4,7 +4,7 @@ function modsTimeline()
 	addHaxeLibrary("FlxRuntimeShader", "flixel.addons.display")
 	addHaxeLibrary("ShaderFilter", "openfl.filters")
 	addHaxeLibrary("BitmapFilter", "openfl.filters")
-	addHaxeLibrary("Assets", "openfl.utils")
+	addHaxeLibrary("Assets", "funkin")
 	runHaxeCode(
 	[[
 		var target1 = PlayState.instance.playerStrumline.mods;
