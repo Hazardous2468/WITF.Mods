@@ -38,12 +38,10 @@ class ModchartDebug_PauseOptions extends Module
 
 
 	public function onSubStateCloseEnd(event:StateChangeScriptEvent):Void {
-	
 		if(pauseState != null){
 			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome1'), 0.5);
 			pauseState = null;
 		}
-	
         super.onSubStateCloseEnd(event);
 	}
 	

@@ -27,7 +27,7 @@ class HurtNotesManager extends Module {
 	var noteSplashes:Array<FlxSprite> = [];
 	
     function new() {
-        super("HurtNotesManager");
+        super("HurtNotesManager", -666);
     }
 	
 	override function onCountdownStart(event) {

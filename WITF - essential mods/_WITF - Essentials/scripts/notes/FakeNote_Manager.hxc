@@ -18,7 +18,7 @@ class FakeNotesManager extends Module {
 	
 	var isWITF:Bool = true;
     function new() {
-        super("FakeNotesManager");
+        super("FakeNotesManager", -666);
 		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
     }
 	

@@ -160,6 +160,7 @@ class SelectableModifiers_NEW extends Module
 		
 		inModMenu = false;
 		addedAlready = false;
+		showedChaosNotif = false;
 		//var isPlayState:Bool = Std.isOfType(event.targetState, PlayState);
 		//if(!isPlayState) addedAlready = false;
 	}
@@ -972,7 +973,7 @@ class SelectableModifiers_NEW extends Module
 			
 			case "oldboost": //Because this mod sucks ass unless you slow the scroll speed right down lmao
 				startingValue *= 2.4;
-				var mod_2 = ModConstants.createNewMod("speedmod");
+				var mod_2 = ModConstants.createNewMod("speed");
 				var startingValue2:Float = 0.35;
 				mod_2.baseValue = startingValue2;
 				mod_2.setVal(startingValue2);
@@ -1014,6 +1015,7 @@ class SelectableModifiers_NEW extends Module
 		}
 	}
 	
+	var showedChaosNotif:Bool = false;
 	function addMetaMods(){
 
 		//Do nothing if chartingMode!!!
@@ -1025,8 +1027,11 @@ class SelectableModifiers_NEW extends Module
 		var chaosModule = ModuleHandler.getModule("ChaosMode");
 		chaosModule.scriptSet("enabled", (modifiersEnabled.contains("chaos")));
 		if(chaosModule.scriptGet("enabled")){
-			//Mark notifs as critical error to display them on songs which hide notifs lol
-			PlayState.instance.modDebugNotif("'Chaos Mode' is still a WIP!", 0xFFFF6A00, true);
+			if(!showedChaosNotif){
+				showedChaosNotif = true;
+				//Mark notifs as critical error to display them on songs which hide notifs lol
+				PlayState.instance.modDebugNotif("'Chaos Mode' is still a WIP!", 0xFFFF6A00, true);
+			}
 		}
 
 		
@@ -1081,13 +1086,11 @@ class SelectableModifiers_NEW extends Module
 					case "oldboost": 
 						drawDistanceFix = true;
 				}
-
-				
 			}		
 			
 			if(metaSpeedMod != 1.0){
 				drawDistanceFix = true;
-				var mod_3 = ModConstants.createNewMod("speedmod");
+				var mod_3 = ModConstants.createNewMod("speed");
 				var startingValue3:Float = metaSpeedMod;
 				mod_3.baseValue = startingValue3;
 				mod_3.setVal(startingValue3);
@@ -1186,14 +1189,18 @@ class SelectableModifiers_NEW extends Module
 		super.onModchartSetup(event);
 	}
 	
+
+
+
 	// This gets called if we already have a modchart system in place!
 	// So we add the meta mods after the timeline has been created.
 	override function onModchartTimeline(event) {
 		super.onModchartTimeline(event);
-		if(!addedAlready){
-			addMetaMods();
-			addedAlready = true;
-		}
+		//if(!addedAlready){
+		addMetaMods();
+		//	addedAlready = true;
+			if (showDebugNotifs) PlayState.instance.modDebugNotif("Adding ontop of WITF", 0xFFFFFF00);
+		//}
 	}
 	
 	var invalidScoreMods:Array<String> = [
@@ -1223,6 +1230,7 @@ class SelectableModifiers_NEW extends Module
 		
 		return true;
 	}
+	var showDebugNotifs:Bool = false;
 	
 	// Otherwise, without a modchart system already present, we need to manually inject it ourselves!
 	override function onSongLoaded(event):Void
@@ -1231,7 +1239,7 @@ class SelectableModifiers_NEW extends Module
 
 		if(!checkIfScoreable()){
 			trace("Score will not be saved due to unscorable metamods in use!");
-			//PlayState.instance.modDebugNotif("Score will not be saved.", 0xFFFF0000);
+			if (showDebugNotifs) PlayState.instance.modDebugNotif("Score will not be saved.", 0xFFFF0000);
 			PlayState.instance.currentSong.validScore = false;
 		}
 		
@@ -1249,11 +1257,11 @@ class SelectableModifiers_NEW extends Module
 
 		
 		if(!checkIfWeEnableWITF()){ //don't do anything if there are no meta mods available to add
-			//PlayState.instance.modDebugNotif("No need to enable WITF", 0xFFFFFF00);
+			if (showDebugNotifs) PlayState.instance.modDebugNotif("No need to enable WITF", 0xFFFFFF00);
 			addMetaMods(); //for botplay and what not to still be enabled / disabled
 			return;
 		}else{
-			PlayState.instance.modDebugNotif("Force Enabling WITF", 0xFFFFFF00);
+			if (showDebugNotifs) PlayState.instance.modDebugNotif("Force Enabling WITF", 0xFFFFFF00);
 		}
 		
 		//Forces the song to act like there is a modchart!
@@ -1301,7 +1309,12 @@ class SelectableModifiers_NEW extends Module
 
 	
 
-	
-	
+	// Dumb fix for metamods not applying for songs with custom song scripts that replace... stuff
+	// actualy idk lol
+	override function onCountdownStart(event:CountdownScriptEvent):Void
+	{
+		super.onCountdownStart(event);
+		PlayState.instance.scanForModchart(false);
+	}
 	
 }

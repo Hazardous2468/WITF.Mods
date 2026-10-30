@@ -55,7 +55,7 @@ class ModchartDebug_HotKeys extends Module
 		}
 	}
 	
-	public function setSongTime(time:Float, resetEvents:bool = false)
+	public function setSongTime(time:Float, resetEvents:Bool = false)
 	{
 		if(FlxG.sound.music == null) return;
 		var game = PlayState.instance;
@@ -88,7 +88,7 @@ class ModchartDebug_HotKeys extends Module
 		
 		if (game.vocals != null) {
 			//vocals.time = time;
-			if (Conductor.instance().songPosition <= game.vocals.length)
+			if (Conductor.instance.songPosition <= game.vocals.length)
 			{
 				game.vocals.time = time;
 				game.vocals.pitch = game.playbackRate;

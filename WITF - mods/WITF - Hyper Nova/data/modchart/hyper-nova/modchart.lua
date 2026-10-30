@@ -1018,7 +1018,7 @@ function modsTimeline()
 	ease(1152, 13, "inSine", -38, "rotatez")
 	ease(1152, 13, "inSine", -38*1.5, "anglez")
 	ease(1151, 12, "inSine", -112*4, "z")
-	ease(1159, 2, "inOutCubic", 1, "tinyx")
+	ease(1159, 2, "inOutCubic", 2, "tinyx")
 	--set(1152, 1, "spiralholds")
 	
 	
