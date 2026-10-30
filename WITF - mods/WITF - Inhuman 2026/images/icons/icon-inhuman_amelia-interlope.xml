@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="icon-inhuman_amelia-interlope.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	
+	<SubTexture name="losing0000" x="1" y="1" width="150" height="150"/>
+	<SubTexture name="idle0000" x="152" y="1" width="150" height="150"/>
+	<SubTexture name="winning0000" x="152" y="1" width="150" height="150"/>
+
+	<SubTexture name="toWinning0000" x="152" y="1" width="150" height="150"/>
+	<SubTexture name="toLosing0000" x="152" y="1" width="150" height="150"/>
+	<SubTexture name="fromWinning0000" x="152" y="1" width="150" height="150"/>
+	<SubTexture name="fromLosing0000" x="152" y="1" width="150" height="150"/>
+
+	<SubTexture name="special0000" x="303" y="1" width="172" height="197" frameX="0" frameY="-1" frameWidth="173" frameHeight="198"/>
+	<SubTexture name="special0001" x="1" y="199" width="173" height="198"/>
+	<SubTexture name="special0002" x="175" y="199" width="172" height="197" frameX="0" frameY="-1" frameWidth="173" frameHeight="198"/>
+</TextureAtlas>

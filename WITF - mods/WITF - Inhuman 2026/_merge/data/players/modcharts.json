@@ -1,0 +1,6 @@
+[
+  { "op": "add", "path": "/ownedChars/-", "value": "inhuman/ashley" },
+  { "op": "add", "path": "/ownedChars/-", "value": "inhuman/amelia-interlope" },
+  { "op": "add", "path": "/ownedChars/-", "value": "inhuman/cinder" },
+  { "op": "add", "path": "/ownedChars/-", "value": "inhuman/operator" }
+ ]

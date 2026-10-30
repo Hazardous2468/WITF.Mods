@@ -1,0 +1,268 @@
+package inhuman.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.PauseSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import funkin.data.event.SongEventRegistry;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import flixel.util.FlxTimer;
+import funkin.save.Save;
+
+class InhumanIntroSkipModule extends Module {
+	var isWITF:Bool = false;
+	public function new() {
+		super("InhumanIntroSkipModule", 1, {
+          state: PlayState
+        });
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+
+
+	public function setSongTime(time:Float)
+	{
+		if(FlxG.sound.music == null) return;
+		var game = PlayState.instance;
+		if(game == null) return;
+		
+		var goingBackwards:bool = Conductor.instance.songPosition > time;
+		if(goingBackwards){
+			return;
+		}
+
+		FlxG.sound.music.pause();
+		if (game.vocals != null) {
+			game.vocals.pause();
+		}
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = game.playbackRate;
+		if(!game.isGamePaused){
+			FlxG.sound.music.play();
+		}
+		
+		if (game.vocals != null) {
+			if (Conductor.instance.songPosition <= game.vocals.length)
+			{
+				game.vocals.time = time;
+				game.vocals.pitch = game.playbackRate;
+			}
+			if(!game.isGamePaused){
+				game.vocals.play();
+			}
+		}
+		Conductor.instance.songPosition = time;
+		game.handleSkippedNotes();
+		Conductor.instance.update();
+		SongEventRegistry.handleSkippedEvents(game.songEvents, Conductor.instance.songPosition);
+	}
+
+	var didNotSkip:Bool = false;
+	override function onUpdate(event:UpdateScriptEvent):Void {
+        super.onUpdate(event);
+        if (skipPrompt == null) return; // no prompt means no skip
+
+        if (Conductor.instance.songPosition+1025 < skipToTime){
+    		if (FlxG.keys.justPressed.SPACE && Conductor.instance.songPosition >= 10 && !didNotSkip){
+    			triggerIntroSkip();
+    		}
+        }else{
+        	if (!didNotSkip){
+        		didNotSkip = true;
+        		if (fadeOutTimer != null)
+			    {
+			      	fadeOutTimer.cancel();
+			      	fadeOutTimer = null;
+			    }
+			    if(skipPromptAlphaTween!=null){
+			      skipPromptAlphaTween.cancel();
+			    } 
+			    skipPromptAlphaTween = FlxTween.tween(skipPrompt, {alpha:0.0}, 1.0, {ease: FlxEase.sineInOut});
+        	}
+        }
+
+       // var targetAlpha:Float= 0;
+       // if (Conductor.instance.songPosition < skipToTime){
+        	//targetAlpha = 1;
+        //}
+    }
+
+    override function onSongStart(event):Void {
+        super.onSongStart(event);
+        didNotSkip = false;
+        if (skipPrompt == null) return; // no prompt means no skip
+
+        if(skipPromptAlphaTween!=null){
+	      skipPromptAlphaTween.cancel();
+	    } 
+	    skipPromptAlphaTween = FlxTween.tween(skipPrompt, {alpha:1.0}, 1.0, {ease: FlxEase.sineInOut});
+	    
+	    if (fadeOutTimer != null)
+	    {
+	      	fadeOutTimer.cancel();
+	    }
+	    fadeOutTimer = new FlxTimer().start(3.0, (_) ->
+          {
+            if (skipPrompt != null){ 
+              if(skipPromptAlphaTween!=null){
+			      skipPromptAlphaTween.cancel();
+			    } 
+              skipPromptAlphaTween = FlxTween.tween(skipPrompt, {alpha: 0.25}, 3.0, {ease: FlxEase.sineInOut});
+            }
+            fadeOutTimer = null;
+          });
+    }
+
+
+    function skipDarkscape(){
+			if (PlayState.instance.variables.exists("HER_darkscapeEndFunc")){
+				var func:Void->Void = PlayState.instance.variables.get("HER_darkscapeEndFunc");
+				func(true);
+				//FunkinSound.playOnce(Paths.sound("inhuman/ui/menuDisappear"), 0.8);
+				PauseSubState.resume(pauseState);
+			}else{
+				//FunkinSound.playOnce(Paths.sound("inhuman/gameplay/comboBreakV2"), 0.8);
+			}
+		}
+
+    function triggerIntroSkip(){
+			setSongTime(skipToTime);
+  			destroyAssets();
+		}
+	
+
+	function addToPauseEntries(){
+		if(pauseState == null) return;
+			
+
+		if (skipPrompt != null && Conductor.instance.songPosition+1025 < skipToTime && Conductor.instance.songPosition >= 10 && !didNotSkip){
+			var newOption = {text: "Skip Intro", callback: triggerIntroSkip}
+			pauseState.currentMenuEntries.insert(1, newOption);
+		}
+
+		var canSkipDarkscape:Bool = false;
+		var hasBeatenHer2026:Bool = Save.instance.hasBeatenSong("HER", null);
+		if (hasBeatenHer2026){
+			if (PlayState.instance.variables.exists("HER_canSkipDarkscape"))
+				canSkipDarkscape = PlayState.instance.variables.get("HER_canSkipDarkscape");
+			if (canSkipDarkscape){
+				var newOption = {text: "Skip Darkscape", callback: skipDarkscape}
+				pauseState.currentMenuEntries.insert(1, newOption);
+			}
+		}
+		
+		pauseState.clearAndAddMenuEntries();
+		pauseState.changeSelection();
+	}
+
+	public function onSubStateCloseEnd(event:StateChangeScriptEvent):Void {
+		if(pauseState != null){
+			pauseState = null;
+		}
+        super.onSubStateCloseEnd(event);
+	}
+
+  var pauseState:PauseSubState = null;	
+	public function onSubStateOpenEnd(event:StateChangeScriptEvent):Void {
+        super.onSubStateOpenEnd(event);
+		if(pauseState != null) return; //We already in pause though?
+		var subState; 
+		if(PlayState.instance != null){
+			subState = PlayState.instance.subState;
+		}else{
+			subState=FlxG.state.subState;
+		}
+		if (Std.isOfType(subState, PauseSubState)) {
+			pauseState = subState;
+			addToPauseEntries();
+			//FunkinSound.playOnce(Paths.sound('chartingSounds/metronome2'), 0.5);
+		}else{
+			//FunkinSound.playOnce(Paths.sound('inhuman/gameplay/nofailTriggered'), 0.5);
+		}
+	}
+
+
+	
+	var skipToTime:Float = 0;
+	var skipPrompt:FlxText;
+	var skipPromptAlphaTween:FlxTween;
+	var fadeOutTimer:FlxTimer;
+
+	var firstTime:Bool = true;
+	override function onSongLoaded(e):Void
+	{
+		destroyAssets();
+		super.onSongLoaded(e);
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		//trace("firstTime? - " + firstTime);
+		if(!(!firstTime || PlayState.instance.deathCounter != 0)){  // First attempt will never show the prompt so that it doesn't get in the way when trying to record.
+			firstTime = false;
+			return;
+		} 
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+
+		skipToTime = 0;
+		switch(songName){
+			case "suicide-pact":
+				skipToTime = 14 * 1000;
+			case "overload":
+				skipToTime = 13 * 1000;
+			case "massacre":
+				skipToTime = 25 * 1000;
+			case "annhiliate":
+				skipToTime = 14 * 1000;
+			case "catacylsmic-corruption":
+				skipToTime = 20 * 1000;
+			case "interlope":
+				skipToTime = 48 * 1000;
+		}
+
+		if (skipToTime > 0){
+			firstTime = false;
+			skipPrompt = new FlxText().setFormat(Paths.font('PIXEAB__.TTF'), 36, 0xFFFFFFFF, "center", FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		    skipPrompt.scrollFactor.set();
+		    skipPrompt.text = "Press 'SPACEBAR' to skip intro";
+		    skipPrompt.zIndex = 970;
+		    PlayState.instance.add(skipPrompt);
+		    skipPrompt.cameras = [PlayState.instance.camHUD];
+		    skipPrompt.screenCenter();
+		    skipPrompt.alpha=0;
+		}
+	}
+
+	override function onDestroy(event):Void
+	{
+		super.onDestroy(event);
+		destroyAssets();
+		firstTime = true;
+		trace("drtgpie5snuj45gujhn456en4vtsene4tsute4vhn4vtehnu7se4vthu4vtesyhu7y4vt7ueyhset7y794vtes74vestyh97se4tvyh79setv4yh79s4veh74se97? - " + firstTime);
+	}
+
+	function destroyAssets():Void
+	{  
+		skipToTime = 0;
+		didNotSkip = false;
+		if (fadeOutTimer != null)
+	    {
+	      	fadeOutTimer.cancel();
+	      	fadeOutTimer = null;
+	    }
+		if(skipPromptAlphaTween!=null){
+	      	skipPromptAlphaTween.cancel();
+	      	skipPromptAlphaTween = null;
+	    } 
+		if(skipPrompt != null){
+			skipPrompt.destroy();
+			skipPrompt = null;
+		}
+	}
+
+
+}

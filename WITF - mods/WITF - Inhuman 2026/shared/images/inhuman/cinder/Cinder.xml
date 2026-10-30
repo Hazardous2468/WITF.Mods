@@ -1,0 +1,6 @@
+<?xml version='1.0' encoding='utf-8'?>
+<TextureAtlas imagePath="Cinder.png">
+<SubTexture name="neutral0000" x="0" y="0" width="296" height="535" frameX="-39" frameY="-59" frameWidth="374" frameHeight="640" />
+<SubTexture name="smug0000" x="296" y="0" width="296" height="535" frameX="-39" frameY="-59" frameWidth="374" frameHeight="640" />
+<SubTexture name="annoyed0000" x="592" y="0" width="296" height="535" frameX="-39" frameY="-59" frameWidth="374" frameHeight="640" />
+</TextureAtlas>

@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="TranceOverlay.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="tranceOverlay0000" x="0" y="0" width="2291" height="1475"/>
+	<SubTexture name="tranceOverlay0001" x="0" y="1475" width="2291" height="1475"/>
+	<SubTexture name="tranceOverlay0002" x="0" y="2950" width="2291" height="1475"/>
+</TextureAtlas>

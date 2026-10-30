@@ -1,0 +1,215 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import flixel.math.FlxMath;
+import funkin.Conductor;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import funkin.data.event.SongEventRegistry;
+import flixel.effects.particles.FlxParticle;
+import flixel.effects.particles.FlxTypedEmitter;
+import flixel.effects.particles.FlxEmitterMode;
+import funkin.util.MouseUtil;
+import funkin.play.PauseSubState;
+
+
+class HERSong extends Song {
+
+	/*
+		This script handles the repeating song logic.	
+	*/
+
+	
+	// Teleport to this beat when a repeat is triggered
+	var repeatStartBeat:Float = 630;
+	
+	// The beat which we trigger the repeat
+	var repeatTriggerBeat:Float = 632;
+	
+	// The beat we teleport to when the repeat is disabled.
+	var repeatEndBeat:Float = 639.05;
+
+	
+	public function new() {
+		super('HER');
+	}
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance.currentStage != null && PlayState.instance.currentStage.getBoyfriend() != null){ 
+			PlayState.instance.currentStage.getBoyfriend().visible = false;
+		}
+		
+		particlesEmitter = new FlxTypedEmitter(20,20, 52);
+		particlesEmitter.launchMode = FlxEmitterMode.SQUARE;
+		particlesEmitter.width = FlxG.width;
+		particlesEmitter.height = 12;
+		particlesEmitter.x = 0;
+		particlesEmitter.y = FlxG.height + 100;
+		particlesEmitter.lifespan.set(14, 20);
+		particlesEmitter.velocity.set(-60, -300, 60, -160);
+		particlesEmitter.angularVelocity.set(-180, 180, -90, 90);
+		particlesEmitter.launchAngle.set(-180, 180);
+		particlesEmitter.alpha.set(0.5, 0.5, 0, 0);
+		particlesEmitter.angle.set(-90, 90);
+		particlesEmitter.keepScaleRatio = true;
+		var particle:FlxParticle;
+		for (i in 0...64)
+		{
+			particle = new FlxParticle();
+			particle.scrollFactor.set();
+			particle.x -= 5000; //So errrrrrr.... basically... errrrr it... err... stops the trail from loading in the centre of the... err... screen? and because its off screen it... errrrrrrr... doesn't load and cause frame drops? yeah... something like that... i think
+			particle.loadGraphic(Paths.image("inhuman/cinder/particle"));
+			particlesEmitter.add(particle);
+			
+			particle.zIndex = 50;
+			particle.scale.x = 1.0;
+			particle.scale.y = 1.0;
+		}
+		particlesEmitter.start(false, 0.2);
+		particlesEmitter.zIndex = 50;
+		PlayState.instance.currentStage.add(particlesEmitter);
+		PlayState.instance.variables.set("particlesEmitter", particlesEmitter);
+		
+		PlayState.instance.currentStage.refresh();
+	}
+	
+	override function onDestroy(event:ScriptEvent):Void {
+		super.onDestroy(event);
+		MouseUtil.setMouseLock(false);
+	}
+	
+	override function onNoteGhostMiss(event) {
+		var inRepeat = PlayState.instance.variables.get("HER_inRepeat");
+		if(inRepeat) event.cancelEvent();
+		if(Conductor.instance.currentBeatTime >= 607.25 && Conductor.instance.currentBeatTime < 702) event.cancelEvent();
+		
+	}	
+		
+	public function setSongTime(time:Float)
+	{
+		if(time < 0) time = 0;
+		FlxG.sound.music.pause();
+		if (PlayState.instance.vocals != null) {
+			PlayState.instance.vocals.pause();
+		}
+
+		FlxG.sound.music.time = time;
+		FlxG.sound.music.pitch = PlayState.instance.playbackRate;
+		
+		if(!PlayState.instance.isGamePaused){
+			FlxG.sound.music.play();
+		}
+		
+		if (PlayState.instance.vocals != null) {
+			if (Conductor.instance.songPosition <= PlayState.instance.vocals.length)
+			{
+				PlayState.instance.vocals.time = time;
+				PlayState.instance.vocals.pitch = PlayState.instance.playbackRate;
+			}
+			if(!PlayState.instance.isGamePaused){
+				PlayState.instance.vocals.play();
+			}
+		}
+		Conductor.instance.songPosition = time;		
+		PlayState.instance.handleSkippedNotes();
+		Conductor.instance.update();
+	}
+	
+	var doneTeleport:Bool = false;
+	override function onUpdate(callback)
+	{
+		super.onUpdate(callback);
+		if(PlayState.instance == null) return;
+		if(PlayState.instance.isGamePaused) return;
+		
+		
+		
+		var repeatFin = PlayState.instance.variables.get("HER_doneRepeat");
+		if(repeatFin == true){
+			if(!doneTeleport){
+				doneTeleport = true;
+				var beatToMS = Conductor.instance.getBeatTimeInMs(repeatEndBeat);
+				setSongTime(beatToMS);
+				SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);	
+			}
+			return;
+		}
+		
+		var inRepeat = PlayState.instance.variables.get("HER_inRepeat");
+		
+		if(Conductor.instance.currentBeatTime < repeatStartBeat || inRepeat == null){ 
+			return;
+		}
+		
+		if(Conductor.instance.currentBeatTime >= repeatTriggerBeat && inRepeat){
+			//PlayState.instance.modDebugNotif("Looped song!", 0xFFFFFF00);
+			
+			var beatToMS = Conductor.instance.getBeatTimeInMs(repeatStartBeat);
+			
+			setSongTime(beatToMS);
+			SongEventRegistry.handleSkippedEvents(PlayState.instance.songEvents, Conductor.instance.songPosition);			
+		}
+	}
+
+	
+
+	override function onNoteIncoming(callback)
+	{
+		super.onNoteIncoming(callback);
+		var note = callback.note;
+		var isPlayer1:Bool = note.weBelongTo == PlayState.instance.playerStrumline;
+		
+		
+		if(isPlayer1){
+		
+			if(note.strumTime >= 141112 && note.strumTime < 150287 && note.noteData.kind == "hurt"){
+				var daNoteMod = ModConstants.createNewMod("speed");
+				daNoteMod.currentValue = 1.5;
+				daNoteMod.baseValue = 1.5;
+				daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+				var daNoteMod2 = ModConstants.createNewMod("circz");
+				daNoteMod2.currentValue = 0.2;
+				daNoteMod2.baseValue = 0.2;
+				daNoteMod2.strumOwner = PlayState.instance.playerStrumline;
+				if(note.noteModData.noteMods != null){
+					note.noteModData.noteMods.push(daNoteMod);
+					note.noteModData.noteMods.push(daNoteMod2);
+					if(note.holdNoteSprite != null){
+						note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+						note.holdNoteSprite.noteModData.noteMods.push(daNoteMod2);
+					}
+				}
+			}
+		
+			if(note.kind == "cinder_smash" || (note.strumTime >= 120850 && note.strumTime < 121160) ){
+				var daNoteMod = ModConstants.createNewMod("wave");
+				daNoteMod.currentValue = 1.8;
+				daNoteMod.baseValue = 1.85;
+				daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+				var daNoteMod2 = ModConstants.createNewMod("speed");
+				daNoteMod2.currentValue = 0.9;
+				daNoteMod2.baseValue = 0.9;
+				daNoteMod2.strumOwner = PlayState.instance.playerStrumline;
+				var daNoteMod3 = ModConstants.createNewMod("circz");
+				daNoteMod3.currentValue = -0.11;
+				daNoteMod3.baseValue = -0.11;
+				daNoteMod3.strumOwner = PlayState.instance.playerStrumline;
+				if(note.noteModData.noteMods != null){
+					note.noteModData.noteMods.push(daNoteMod);
+					note.noteModData.noteMods.push(daNoteMod2);
+					note.noteModData.noteMods.push(daNoteMod3);
+					if(note.holdNoteSprite != null){
+						note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+						note.holdNoteSprite.noteModData.noteMods.push(daNoteMod2);
+						note.holdNoteSprite.noteModData.noteMods.push(daNoteMod3);
+					}
+				}
+			}
+		}
+	}
+	
+}

@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "-[INHUMAN BONUS CONTENT]-",
+  "capsule": {
+    "name": "Inhuman"
+  },
+  "visible": false,
+  "titleAsset": "storymenu/titles/inhuman",
+  "props": [  ],
+  "background": "#767676",
+  "songs": ["interlope", "operator"]
+}

@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "-[YOUR WORST NIGHTMARE]-",
+  "capsule": {
+    "name": "Inhuman"
+  },
+  "visible": false,
+  "titleAsset": "storymenu/titles/inhuman",
+  "props": [  ],
+  "background": "#FF0000",
+  "songs": ["HER"]
+}

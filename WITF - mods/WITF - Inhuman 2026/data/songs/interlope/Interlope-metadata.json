@@ -1,0 +1,48 @@
+{
+  "version": "2.2.4",
+  "songName": "Interlope",
+  "artist": "Hazard24",
+  "charter": "Hazard24",
+  "offsets": {},
+  "playData": {
+    "difficulties": [
+      "hard"
+    ],
+    "characters": {
+      "player": "inhuman/ashley",
+      "girlfriend": "",
+      "opponent": "inhuman/amelia-interlope",
+      "opponentVocals": [
+        "opponent"
+      ],
+      "playerVocals": [
+        "ashley"
+      ]
+    },
+    "stage": "emptyStage",
+    "noteStyle": "inhuman",
+    "ratings": {
+      "easy": 9,
+      "normal": 9,
+      "hard": 9
+    },
+    "album": "Inhuman",
+    "stickerPack": "inhuman",
+    "previewStart": 0.192799029838597,
+    "previewEnd": 0.297502564429807
+  },
+  "generatedBy": "V Stuff",
+  "timeChanges": [
+    {
+      "t": 0,
+      "b": 0,
+      "bpm": 154,
+      "bt": [
+        4,
+        4,
+        4,
+        4
+      ]
+    }
+  ]
+}

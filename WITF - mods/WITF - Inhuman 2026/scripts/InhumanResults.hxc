@@ -1,0 +1,904 @@
+package inhuman.modules.play;
+
+import flixel.addons.display.FlxBackdrop;
+import flixel.addons.transition.FlxTransitionableState;
+import funkin.ui.transition.LoadingState;
+import funkin.modding.base.ScriptedMusicBeatSubState;
+import flixel.FlxCamera;
+import funkin.util.TouchUtil;
+import funkin.audio.FunkinSound;
+import funkin.Paths;
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import funkin.Assets;
+import openfl.filters.ShaderFilter;
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.play.ResultState;
+import funkin.ui.debug.results.ResultsDebugSubState;
+import funkin.ui.mainmenu.MainMenuState;
+import funkin.ui.transition.stickers.StickerSubState;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import funkin.play.scoring.Scoring;
+import funkin.ui.freeplay.FreeplayState;
+import flixel.text.FlxText;
+import flixel.text.FlxTextBorderStyle;
+import flixel.text.FlxTextAlign;
+import flixel.math.FlxMath;
+import funkin.util.FlxTweenUtil;
+import flixel.util.FlxSpriteUtil;
+import flixel.util.FlxColor;
+import openfl.geom.Rectangle;
+import flixel.math.FlxPoint;
+
+
+class InhumanResultsState extends ScriptedMusicBeatSubState {
+	var ogResultsSubState:ResultState = null;
+	var healthSamples:Array<Float> = [];
+	var healthSamplesTime:Array<Float> = [];
+	var hitTimesTime:Array<Float> = [];
+	var hitTimesDiff:Array<Float> = [];
+	var hitTimesJudge:Array<String> = [];
+	var wentBackwards:Bool = false;
+	public function new(_ogResultsSubState:ResultState, _hitTimesTime:Array<Float>, _hitTimesDiff:Array<Float>, _hitTimesJudge:Array<String>, _healthSamples:Array<Float>,_healthSamplesTime:Array<Float>,_wentBackwards:Bool) {
+		super();
+		this.ogResultsSubState = _ogResultsSubState;
+		this.healthSamples = _healthSamples;
+		this.healthSamplesTime = _healthSamplesTime;
+		this.hitTimesTime = _hitTimesTime;
+		this.hitTimesDiff = _hitTimesDiff;
+		this.hitTimesJudge = _hitTimesJudge;
+		this.wentBackwards = _wentBackwards;
+	}
+
+	var menuControllable:Bool = false;
+
+
+	var blackFade:FunkinSprite;
+	var blackFade_Tween:FlxTween;
+
+	var bg:FunkinSprite;
+	var rankBack:FunkinSprite;
+	var rank:FunkinSprite;
+	var star1:FunkinSprite;
+	var star2:FunkinSprite;
+	var deathMarker:FunkinSprite;
+
+	var graphBG:FunkinSprite;
+	var graph_health:FunkinSprite;
+	var graph_performance:FunkinSprite;
+	var graphTXT_performance:FlxText;
+	var graphTXT_health:FlxText;
+	var graphTXT_performance_earlyTxt:FlxText;
+	var graphTXT_performance_lateTxt:FlxText;
+	var inaccurateDataWarningTxt:FlxText;
+
+	var shader:FlxRuntimeShader;
+	var shaderFilter:ShaderFilter;
+	var shaderTime:Float = 0.0;
+	var doShader:Bool = true;
+
+	public override function create():Void {
+		super.create();
+
+		//bgCamera = FlxG.camera = new FlxCamera(0, 0, FlxG.width, FlxG.height, 0);
+		bgCamera = new FlxCamera(0, 0, FlxG.width, FlxG.height, 0);
+		bgCamera.bgColor = 0xFF000000;
+		FlxG.cameras.add(bgCamera);
+
+
+		var clearPercentFloat = ogResultsSubState.params.scoreData.tallies.totalNotes == 0 ? 0.0 : Scoring.tallyCompletion(ogResultsSubState.params.scoreData.tallies) * 100;
+		clearPercentFloat = FlxMath.roundDecimal(clearPercentFloat, 2);
+
+
+		bg = FunkinSprite.create(0, 0, 'inhuman/results/mainBaseResults');
+		bg.setGraphicSize(FlxG.width, FlxG.height);
+        bg.screenCenter();
+
+
+
+        rankBack = FunkinSprite.create(0, 0, 'inhuman/results/rank_backdrop');
+		rankBack.setGraphicSize(Std.int(rankBack.width * 1.1));
+		rankBack.updateHitbox();
+		rankBack.screenCenter();
+		rankBack.x += FlxG.width / 4;
+		rankBack.y -= 60;
+		rankBack.angularVelocity = 11;
+
+		// Full combo if your maxCombo is equal or greater then the totalNotes in the chart.
+		var isFC:Bool = ogResultsSubState.params.scoreData.tallies.maxCombo >= ogResultsSubState.params.scoreData.tallies.totalNotes; 
+		var inhumanRank:String = "f";
+		if(clearPercentFloat >= 95)
+			inhumanRank = "s";
+		else if(clearPercentFloat >= 90)
+			inhumanRank = "a";
+		else if(clearPercentFloat >= 80)
+			inhumanRank = "b";
+		else if(clearPercentFloat >= 70)
+			inhumanRank = "c";
+		else if(clearPercentFloat >= 60)
+			inhumanRank = "d";
+
+
+		ranking = FunkinSprite.create(0, 0, 'inhuman/results/rank_'+inhumanRank.toUpperCase());
+		ranking.setGraphicSize(Std.int(ranking.width * 0.85));
+		ranking.updateHitbox();
+		ranking.x = rankBack.x + (rankBack.width/2) - (ranking.width/2);
+		ranking.y = rankBack.y + (rankBack.height/2) - (ranking.height/2);
+
+
+		var leftSideBox:FunkinSprite = new FunkinSprite(50,40).makeGraphic(Std.int((FlxG.width/2))-50, FlxG.height-80, 0xFF000000);
+		leftSideBox.alpha=0.5;
+
+
+
+		graphBG = new FunkinSprite(FlxG.width/2 + 25,FlxG.height - 200).makeGraphic((Std.int(FlxG.width/2))-50, 175, 0xFF000000);
+		graphBG.scrollFactor.set();
+		graphBG.alpha=0.5;
+
+		initGraphs(32);
+
+
+		var graphBG_line:FunkinSprite = new FunkinSprite(graphBG.x,graphBG.y+31).makeGraphic(Std.int(graphBG.width), 2, 0xFFFFFFFF);
+		graphBG_line.scrollFactor.set();
+		graphBG_line.alpha=0.75;
+
+		graphTXT_performance = new FlxText(0, 0, 0, "Timings", 16);
+		graphTXT_performance.scrollFactor.set();
+		graphTXT_performance.setFormat(Paths.font("PIXEAB__.TTF"), 16, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		graphTXT_performance.updateHitbox();
+
+		graphTXT_health = new FlxText(0, 0, 0, "Health", 16);
+		graphTXT_health.scrollFactor.set();
+		graphTXT_health.setFormat(Paths.font("PIXEAB__.TTF"), 16, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		graphTXT_health.updateHitbox();
+
+		graphTXT_performance.setPosition(graphBG.x, graphBG.y);
+		graphTXT_health.setPosition(graphBG.x + graphBG.width - graphTXT_health.width, graphBG.y);
+
+		//graphCreation();
+
+
+		var starPath:String = "inhuman/stars/star";
+
+		if (isFC){
+			if (clearPercentFloat>=100 && ogResultsSubState.params.scoreData.tallies.sick >= ogResultsSubState.params.scoreData.tallies.totalNotes ){
+				starPath = "inhuman/stars/star-perfect";
+			}else{
+				starPath = "inhuman/stars/star-fc";
+			}	
+		}
+		if(PlayState.instance.isPracticeMode){
+			starPath = "inhuman/stars/clear";
+		}
+
+
+		star1 = FunkinSprite.create(0, 0, starPath);
+		star1.updateHitbox();
+		star2 = FunkinSprite.create(0, 0, starPath);
+		star2.updateHitbox();
+		star1.setPosition(rankBack.x - 25, rankBack.y - 13);
+		star2.setPosition(rankBack.x + rankBack.width - 65, rankBack.y + rankBack.height - 67);
+		star1.angularVelocity = 8;
+		star2.angularVelocity = 7;
+
+
+
+		var songTitleTXT:FlxText = new FlxText(0, 40, FlxG.width/2, "? ? ?", 35);
+		if(PlayState.instance!=null && PlayState.instance.currentChart!=null){
+			songTitleTXT.text = PlayState.instance.currentChart.songName;
+		}
+		songTitleTXT.setFormat(Paths.font("PIXEAB__.TTF"), 35, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		songTitleTXT.updateHitbox();
+		songTitleTXT.setPosition(FlxG.width/4 + FlxG.width/4, 40);
+
+
+		var songSpeedTXT:FlxText = new FlxText(0, 40, FlxG.width/2, "", 16);
+		var playbackRate:Float = PlayState.instance.playbackRate;
+		var playbackRateModule = ModuleHandler.getModule("PlaybackRateHandler");
+		if (playbackRateModule!=null){
+			playbackRate = playbackRateModule.scriptGet("playbackRate");
+		}
+		if(playbackRate!=1){
+			songSpeedTXT.text = playbackRate + "x Speed";
+		}
+		//if(ClientPrefs.getGameplaySetting('songspeedchaos', false)){
+		//	songSpeedTXT.text += " (with Rate Chaos)";
+		//}
+		songSpeedTXT.scrollFactor.set();
+		songSpeedTXT.setFormat(Paths.font("PIXEAB__.TTF"), 16, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		songSpeedTXT.updateHitbox();
+		songSpeedTXT.setPosition(FlxG.width/4 + FlxG.width/4, 40);
+		songSpeedTXT.y += songTitleTXT.height - 5;
+		
+
+
+		//Score
+		var scoreTXT_title:FlxText = new FlxText(0, 0, 0, "Score", 16);
+		scoreTXT_title.setFormat(Paths.font("PIXEAB__.TTF"), 16, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		scoreTXT_title.updateHitbox();
+		scoreTXT_title.setPosition(leftSideBox.x + (leftSideBox.width/2) - (scoreTXT_title.width/2), 40);
+
+		var scoreTXT:FlxText = new FlxText(0,0, 0, "", 36);
+		scoreTXT.text = Std.string(ogResultsSubState.params.scoreData.score);
+		scoreTXT.setFormat(Paths.font("PIXEAB__.TTF"), 36, 0xFFFFFFFF, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		scoreTXT.updateHitbox();
+		scoreTXT.setPosition(leftSideBox.x + (leftSideBox.width/2) - (scoreTXT.width/2), scoreTXT_title.y + 36);
+
+
+		//Combo
+		var combo_titleTXT:FlxText = new FlxText(0, 0, 0, "Best Combo", 30);
+		combo_titleTXT.setFormat(Paths.font("PIXEAB__.TTF"), 30, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		combo_titleTXT.updateHitbox();
+		combo_titleTXT.setPosition(leftSideBox.x + (leftSideBox.width/4) - (combo_titleTXT.width/2), 150);
+
+		var comboTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		comboTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		comboTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.maxCombo);
+		comboTXT.updateHitbox();
+		comboTXT.x = leftSideBox.x + (leftSideBox.width/4) - (comboTXT.width/2);
+		comboTXT.y = combo_titleTXT.y + 65;
+
+		//Accuracy
+		var accuracy_titleTXT:FlxText = new FlxText(0, 0, 0, "Accuracy", 30);
+		accuracy_titleTXT.setFormat(Paths.font("PIXEAB__.TTF"), 30, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		accuracy_titleTXT.updateHitbox();
+		accuracy_titleTXT.setPosition(leftSideBox.x + (leftSideBox.width/4) - (accuracy_titleTXT.width/2), 150);
+		accuracy_titleTXT.x += leftSideBox.width/2;
+
+		
+		var accuracyTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		accuracyTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		accuracyTXT.text = Std.string(clearPercentFloat);
+		accuracyTXT.text += "%";
+		accuracyTXT.updateHitbox();
+		accuracyTXT.x = leftSideBox.x + (leftSideBox.width/4) - (accuracyTXT.width/2);
+		accuracyTXT.y = accuracy_titleTXT.y + 65;
+		accuracyTXT.x += leftSideBox.width/2;
+
+
+		inaccurateDataWarningTxt = new FlxText(0,0, leftSideBox.width/2, "Inaccurate data detected", 24);
+		inaccurateDataWarningTxt.setFormat(Paths.font("PIXEAB__.TTF"), 24, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFF0000);
+		inaccurateDataWarningTxt.updateHitbox();
+		inaccurateDataWarningTxt.x = graphBG.x + (graphBG.width/2) - (inaccurateDataWarningTxt.width/2);
+		inaccurateDataWarningTxt.y = graphBG.y + (graphBG.height/2) - (inaccurateDataWarningTxt.height/2);
+		inaccurateDataWarningTxt.y += 18;
+		inaccurateDataWarningTxt.visible = wentBackwards;
+		inaccurateDataWarningTxt.alpha=0.375;
+
+
+
+
+		var perfectsSprite:FlxSprite;
+		var goodsSprite:FlxSprite;
+		var badsSprite:FlxSprite;
+		var shitsSprite:FlxSprite;
+
+		// Todo -> Maybe make it take the noteStyleID and reconstruct the ratings from the noteStyle.
+
+		var ratingsTexture:String = "inhuman/results/ratings_inhuman";
+		perfectsSprite = new FunkinSprite(leftSideBox.x + (leftSideBox.width/4), 275);
+		perfectsSprite.frames = Paths.getSparrowAtlas(ratingsTexture);
+		perfectsSprite.animation.addByPrefix('sick', 'sick', 0, false);	
+		perfectsSprite.animation.play("sick");
+		perfectsSprite.setGraphicSize(Std.int(perfectsSprite.width * 0.8));
+		perfectsSprite.updateHitbox();
+		perfectsSprite.x -= (perfectsSprite.width/2);
+
+		goodsSprite = new FunkinSprite(leftSideBox.x + (leftSideBox.width/4), 275);
+		goodsSprite.frames = Paths.getSparrowAtlas(ratingsTexture);
+		goodsSprite.animation.addByPrefix('good', 'good', 0, false);	
+		goodsSprite.animation.play("good");
+		goodsSprite.setGraphicSize(Std.int(goodsSprite.width * 0.7));
+		goodsSprite.updateHitbox();
+		goodsSprite.x -= (goodsSprite.width/2);
+		goodsSprite.x += leftSideBox.width/2;
+
+		badsSprite = new FunkinSprite(leftSideBox.x + (leftSideBox.width/4), 400);
+		badsSprite.frames = Paths.getSparrowAtlas(ratingsTexture);
+		badsSprite.animation.addByPrefix('bad', 'bad', 0, false);	
+		badsSprite.animation.play("bad");
+		badsSprite.setGraphicSize(Std.int(badsSprite.width * 0.58));
+		badsSprite.updateHitbox();
+		badsSprite.x -= (badsSprite.width/2);
+
+		shitsSprite = new FunkinSprite(leftSideBox.x + (leftSideBox.width/4), 400);
+		shitsSprite.frames = Paths.getSparrowAtlas(ratingsTexture);
+		shitsSprite.animation.addByPrefix('shit', 'shit', 0, false);	
+		shitsSprite.animation.play("shit");
+		shitsSprite.setGraphicSize(Std.int(shitsSprite.width * 0.6));
+		shitsSprite.updateHitbox();
+		shitsSprite.x -= (shitsSprite.width/2);
+		shitsSprite.x += leftSideBox.width/2;
+
+
+
+
+		var perfectsTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		perfectsTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("sick"));
+		perfectsTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.sick);
+		perfectsTXT.updateHitbox();
+		perfectsTXT.x = leftSideBox.x + (leftSideBox.width/4) - (perfectsTXT.width/2);
+		perfectsTXT.y = perfectsSprite.y + 75;
+		
+
+		var goodsTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		goodsTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("good"));
+		goodsTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.good);
+		goodsTXT.updateHitbox();
+		goodsTXT.x = leftSideBox.x + (leftSideBox.width/4) - (goodsTXT.width/2);
+		goodsTXT.y = goodsSprite.y + 75;
+		goodsTXT.x += leftSideBox.width/2;
+
+
+		var badsTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		badsTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("bad"));
+		badsTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.bad);
+		badsTXT.updateHitbox();
+		badsTXT.x = leftSideBox.x + (leftSideBox.width/4) - (badsTXT.width/2);
+		badsTXT.y = badsSprite.y + 75;
+		
+
+		var shitsTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		shitsTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("shit"));
+		shitsTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.shit);
+		shitsTXT.updateHitbox();
+		shitsTXT.x = leftSideBox.x + (leftSideBox.width/4) - (shitsTXT.width/2);
+		shitsTXT.y = badsSprite.y + 75;
+		shitsTXT.x += leftSideBox.width/2;
+
+
+
+		var miss_titleTXT:FlxText = new FlxText(0, 0, 0, "Misses", 30);
+		miss_titleTXT.setFormat(Paths.font("PIXEAB__.TTF"), 30, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("miss"));
+		miss_titleTXT.updateHitbox();
+		miss_titleTXT.setPosition(leftSideBox.x + (leftSideBox.width/2) - (miss_titleTXT.width/2), 525);
+		miss_titleTXT.y += 15;
+
+		var missTXT:FlxText = new FlxText(0,0, leftSideBox.width/2, "", 28);
+		missTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, getJudgeCol("miss"));
+		missTXT.text = Std.string(ogResultsSubState.params.scoreData.tallies.missed);
+		missTXT.updateHitbox();
+		missTXT.x = leftSideBox.x + (leftSideBox.width/2) - (missTXT.width/2);
+		missTXT.y = miss_titleTXT.y + 50;
+
+
+
+
+
+		//CHEATER
+		//var vibeCheck:String = PlayState.checkIfNotLegit();
+		var cheaterTXT:FlxText = new FlxText(0, 0, 0, "", 28);
+		if(PlayState.instance.isBotPlayMode){
+			cheaterTXT.text = "BOTPLAY";
+			star1.visible = false;
+			star2.visible = false;
+		}else if(PlayState.instance.isPracticeMode){
+			cheaterTXT.text = "PRACTICE MODE";
+		}
+		//else if(PlayState.checkpointsUsed > 0){
+		//	cheaterTXT.text = "CHECKPOINTS USED";
+		//}else if(PlayState.instance.noFail_hasDied){
+		//	cheaterTXT.text = "DIED WITH NO FAIL";
+		//}else if(vibeCheck != "Ranked"){
+		//	cheaterTXT.text = vibeCheck.toUpperCase();
+		//}
+		cheaterTXT.scrollFactor.set();
+		cheaterTXT.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFFFF0000, FlxTextAlign.LEFT, FlxTextBorderStyle.OUTLINE, 0xFF000000);
+		cheaterTXT.updateHitbox();
+		cheaterTXT.setPosition(graphBG.x, graphBG.y - cheaterTXT.height);
+
+		var fullComboTxt:FlxText = new FlxText(0,0, leftSideBox.width/2, "Full Combo", 28);
+		fullComboTxt.visible = false;
+		if(isFC){ 
+			fullComboTxt.scrollFactor.set();
+			fullComboTxt.setFormat(Paths.font("PIXEAB__.TTF"), 28, 0xFF000000, FlxTextAlign.RIGHT, FlxTextBorderStyle.OUTLINE, 0xFF00FFFF);
+			fullComboTxt.updateHitbox();
+			fullComboTxt.x = graphBG.x + graphBG.width - fullComboTxt.width;
+			fullComboTxt.y = graphBG.y - fullComboTxt.height;
+			fullComboTxt.visible = true;
+		}
+
+
+
+
+
+
+        blackFade = new FunkinSprite(-FlxG.width, -FlxG.height).makeSolidColor(FlxG.width*3, FlxG.height*3, 0xFF000000);
+		blackFade.zIndex = 999999;
+		blackFade.scrollFactor.set();
+		blackFade.alpha=1;
+
+
+
+        var screenStuff = [bg, 
+        graphBG, inaccurateDataWarningTxt, graphTXT_performance_lateTxt, graphTXT_performance_earlyTxt, graph_performance, graph_health,deathMarker, graphBG_line, graphTXT_performance, graphTXT_health,
+        leftSideBox,scoreTXT,scoreTXT_title, combo_titleTXT, comboTXT, accuracy_titleTXT, accuracyTXT,
+        shitsSprite, badsSprite, goodsSprite, perfectsSprite, miss_titleTXT,
+        shitsTXT, badsTXT, goodsTXT, perfectsTXT, missTXT,
+        star1, star2, rankBack, ranking, songSpeedTXT,songTitleTXT, 
+        fullComboTxt, cheaterTXT, 
+        blackFade];
+
+
+
+        for (i in screenStuff){
+            add(i);
+            i.camera = bgCamera;
+        }
+
+        if(shader==null && doShader){
+			//shader = new VCRDistortionEffect(0.123,true,true,false,false);
+			shader = new FlxRuntimeShader(Assets.getText(Paths.frag("inhuman/vcr")), null);
+			shader.setFloat("iTime",0.0);
+			shader.setFloat("glitchModifier",0.02);
+			shader.setBool("distortionOn",true);
+			shader.setBool("perspectiveOn",true);
+			shader.setBool("vignetteMoving",false);
+			shader.setBool("forceAlpha",true);
+			shader.setBool("vignetteOn",true);
+
+			shaderFilter = new ShaderFilter(shader);
+
+			addShaderToCamera(bgCamera, shaderFilter);
+		}
+
+		showingHealthGraph = true;
+		swapGraph(true);
+
+        
+
+        if (blackFade_Tween!=null){
+			blackFade_Tween.cancel();
+			blackFade_Tween=null;
+		}
+    	blackFade_Tween = FlxTween.tween(blackFade, {alpha: 0}, 0.4, { onComplete: _ -> {
+            
+        }});
+
+        menuControllable = true;
+	}
+
+	override function update(elapsed:Float):Void {
+		super.update(elapsed);
+
+		if(shader != null){
+			shaderTime += elapsed;
+			shader.setFloat("iTime", shaderTime);	
+		}
+
+		// Stupid dumb way to get the default results state to stfu
+		if (FlxG.sound.music != null)
+	    {
+	      FlxG.sound.music.fadeTween?.cancel();
+	      FlxG.sound.music.stop();
+	      FlxG.sound.music.kill();
+	      FlxG.sound.music = null;
+	    }
+	    if (ogResultsSubState != null){
+	    	if (ogResultsSubState.resultsMusic != null){ 
+	    		ogResultsSubState.resultsMusic.fadeTween?.cancel();
+	      		ogResultsSubState.resultsMusic.stop();
+      			ogResultsSubState.resultsMusic.kill();
+      			ogResultsSubState.resultsMusic = null;
+	    	}
+
+	    	if (ogResultsSubState.introMusicAudio != null){
+		    	ogResultsSubState.introMusicAudio.fadeTween?.cancel();
+	      		ogResultsSubState.introMusicAudio.stop();
+      			ogResultsSubState.introMusicAudio.kill();
+      			ogResultsSubState.introMusicAudio = null;
+		    }
+	    }
+
+		if (!menuControllable) return;
+
+
+		if (controls.UI_LEFT_P || controls.UI_RIGHT_P) swapGraph();
+
+		if (FlxG.onMobile ? TouchUtil.justPressed : controls.ACCEPT_P) closeResults();
+	}
+
+	function getJudgeCol(judge:String):FlxColor {
+		return switch (judge){
+			  case "perfect":
+		        0xFF008000;
+			  case "killer":
+		        0xFF008000;
+		      case "sick":
+		        0xFF008000;
+		      case "good":
+		        0xFFFFFF00;
+		      case "bad":
+		        0xFFFF0000;
+		      case "shit":
+		        0xFFFF0044;
+		      case "miss":
+		        0xFF800080;
+		      default:
+		        0xFFFFFFFF;
+		    }
+	}
+
+	function judgeLineYpercentage(judge:String):Float{
+		var threshold:FLoat = switch (judge){
+			  case "perfect":
+		        0.0;
+			  case "killer":
+		        Scoring.PBOT1_KILLER_THRESHOLD;
+		      case "sick":
+		        Scoring.PBOT1_SICK_THRESHOLD;
+		      case "good":
+		        Scoring.PBOT1_GOOD_THRESHOLD;
+		      case "bad":
+		        Scoring.PBOT1_BAD_THRESHOLD;
+		      case "shit":
+		        Scoring.PBOT1_SHIT_THRESHOLD;
+		      case "miss":
+		        Scoring.PBOT1_SICK_THRESHOLD;
+		      default:
+		        0.0;
+		    }
+
+		var p:Float = FlxMath.remapToRange(threshold, 0, Constants.HIT_WINDOW_MS, 0.5, 1.0);
+		return p;
+	}
+	function judgeLineFill(judge:String):Void{
+		var col:FlxColor = getJudgeCol(judge);
+		col = (col & 0x00FFFFFF) | (24 << 24);
+		var judgeLineY:Float = judgeLineYpercentage(judge);
+		
+		var endY:Float = graph_performance.height * judgeLineY;
+		var startY:Float = graph_performance.height * (1.0-judgeLineY);
+		var height:Float = endY - startY;
+		graph_performance.pixels.fillRect(new Rectangle(0, startY, graph_performance.width, height), 0);
+		FlxSpriteUtil.drawRect(graph_performance, 0, startY, graph_performance.width, height, col);
+	}
+
+	function initGraphs(topPadding:Int = 0):Void {
+		graph_performance = new FunkinSprite(graphBG.x,graphBG.y+topPadding).makeGraphic(graphBG.width, graphBG.height-topPadding, 0, true);
+		graph_performance.scrollFactor.set();
+
+		graphTXT_performance_earlyTxt = new FlxText(0, 0, 0, "EARLY", 10);
+		graphTXT_performance_earlyTxt.scrollFactor.set();
+		graphTXT_performance_earlyTxt.setFormat(Paths.font("PIXEAB__.TTF"), 10, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		graphTXT_performance_earlyTxt.x = graph_performance.x + graph_performance.width*0.5;
+		graphTXT_performance_earlyTxt.x -= graphTXT_performance_earlyTxt.width*0.5;
+		graphTXT_performance_earlyTxt.y = graph_performance.y + graph_performance.height*0.1;
+		graphTXT_performance_earlyTxt.y -= graphTXT_performance_earlyTxt.height*0.5;
+
+		graphTXT_performance_lateTxt = new FlxText(0, 0, 0, "LATE", 10);
+		graphTXT_performance_lateTxt.scrollFactor.set();
+		graphTXT_performance_lateTxt.setFormat(Paths.font("PIXEAB__.TTF"), 10, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+		graphTXT_performance_lateTxt.x = graph_performance.x + graph_performance.width*0.5;
+		graphTXT_performance_lateTxt.x -= graphTXT_performance_lateTxt.width*0.5;
+		graphTXT_performance_lateTxt.y = graph_performance.y + graph_performance.height*0.9;
+		graphTXT_performance_lateTxt.y -= graphTXT_performance_earlyTxt.height*0.5;
+
+		graphTXT_performance_earlyTxt.alpha=0.6;
+		graphTXT_performance_lateTxt.alpha=0.6;
+		
+		var doLines:Bool = false;
+		if (doLines){
+			var judgeLineY:Float = judgeLineYpercentage("sick");
+			FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * judgeLineY, graph_performance.width, graph_performance.height * judgeLineY, {
+	            thickness: 1,
+	            color: getJudgeCol("sick")
+	        });
+	        FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * (1.0-judgeLineY), graph_performance.width, graph_performance.height * (1.0-judgeLineY), {
+	            thickness: 1,
+	            color: getJudgeCol("sick")
+	        });
+
+			judgeLineY = judgeLineYpercentage("good");
+			FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * judgeLineY, graph_performance.width, graph_performance.height * judgeLineY, {
+	            thickness: 1,
+	            color: getJudgeCol("good")
+	        });
+	        FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * (1.0-judgeLineY), graph_performance.width, graph_performance.height * (1.0-judgeLineY), {
+	            thickness: 1,
+	            color: getJudgeCol("good")
+	        });
+
+			judgeLineY = judgeLineYpercentage("bad");
+			FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * judgeLineY, graph_performance.width, graph_performance.height * judgeLineY, {
+	            thickness: 1,
+	            color: getJudgeCol("bad")
+	        });
+	        FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * (1.0-judgeLineY), graph_performance.width, graph_performance.height * (1.0-judgeLineY), {
+	            thickness: 1,
+	            color: getJudgeCol("bad")
+	        });
+
+			judgeLineY = judgeLineYpercentage("shit");
+			FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * judgeLineY, graph_performance.width, graph_performance.height * judgeLineY, {
+	            thickness: 1,
+	            color: getJudgeCol("shit")
+	        });
+	        FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height * (1.0-judgeLineY), graph_performance.width, graph_performance.height * (1.0-judgeLineY), {
+	            thickness: 1,
+	            color: getJudgeCol("shit")
+	        });
+	    }else{
+	    	judgeLineFill("miss");
+	    	judgeLineFill("shit");
+	    	judgeLineFill("bad");
+	    	judgeLineFill("good");
+	    	judgeLineFill("sick");
+	    }
+	    FlxSpriteUtil.drawLine(graph_performance, 0, graph_performance.height*0.5, graph_performance.width, graph_performance.height*0.5, {
+            thickness: 1,
+            color: getJudgeCol("perfect")
+        });
+
+
+
+
+
+		//Load the song we are gonna play instead
+		var instId:String = PlayState.instance.currentInstrumental;
+		var suffix:String = (instId != '') ? '-$instId' : '';
+		var songInst = FunkinSound.load(Paths.inst(PlayState.instance.currentChart.song.id, suffix), 0, false, false, true, false, null, null, true);
+		
+		var songLength:Float = songInst.length;	
+
+		trace('song length - ' + songLength);
+
+		trace('How many hits: ' + hitTimesTime.length);
+		for (i in 0...hitTimesTime.length)
+		{
+			trace('Hit ' + i + ": ");
+
+			var time:Float = hitTimesTime[i];
+			var dif:Float = hitTimesDiff[i];
+			var judge = hitTimesJudge[i];
+
+			trace('time ' + time);
+			trace('dif ' + dif);
+			trace('judge ' + judge + "\n");
+
+			//var percentage:Float = hitTimesTimeNormalised[i];
+			var percentage:Float = time / songLength;
+
+			var difP:Float = dif / Constants.HIT_WINDOW_MS;
+			difP *= 0.5;
+			difP += 0.5;
+
+			
+			var innerCol = 0xFFFFFFFF;
+			var outlineCol = getJudgeCol(judge);
+
+			var xPos:Float = graph_performance.width*percentage;
+			var yPos:Float = graph_performance.height*difP;
+			FlxSpriteUtil.drawCircle(graph_performance, xPos, yPos, 2, innerCol, {
+	            thickness: 2,
+	            color: outlineCol
+	        });
+		}
+		
+		var doneDeathMarker:Bool = false;
+		deathMarker = FunkinSprite.create(0, 0, "inhuman/results/deathMarker");
+		deathMarker.updateHitbox();
+		deathMarker.alpha = 0;
+		deathMarker.x = FlxG.width * 4;
+		deathMarker.y = graphBG.y + graphBG.height - deathMarker.height;
+
+		graph_health = new FunkinSprite(graphBG.x,graphBG.y+topPadding).makeGraphic(graphBG.width, graphBG.height-topPadding, 0, true);
+		graph_health.scrollFactor.set();
+
+
+		trace('How many health samples: ' + healthSamples.length);
+		var oldX:Float = 0;
+		var oldY:Float = 0;
+		var verts:Array<FlxPoint> = [];
+		for (i in 0...healthSamples.length)
+		{
+			trace('Sample ' + i + ": ");
+
+			var time:Float = healthSamplesTime[i];
+			var health:Float = healthSamples[i];
+
+			trace('health ' + health);
+			trace('time ' + time);
+
+			var percentage:Float = time / songLength;
+			var xPos:Float = graph_health.width*percentage;
+
+			if (health <= 0.0 && !doneDeathMarker){
+				doneDeathMarker = true;
+				deathMarker.alpha = 1;
+				deathMarker.x = graph_health.x + xPos - (deathMarker.width/2);
+			}
+
+
+			var healthPercentage:Float = health / Constants.HEALTH_MAX;
+			healthPercentage = 1 - healthPercentage; // Reverse it!
+			var yPos:Float = graph_health.height*healthPercentage;
+
+			//FlxSpriteUtil.drawCircle(graph_health, xPos, yPos, 2, 0xFFFFFFFF);
+
+
+			if (i == healthSamples.length-1){
+				trace('THE END');
+				FlxSpriteUtil.drawLine(graph_health, xPos, yPos, graph_health.width, yPos, {
+		            thickness: 2,
+		            color: 0xFFFFFFFF
+		        });
+			}
+			if (i > 0){
+				FlxSpriteUtil.drawLine(graph_health, oldX, oldY, xPos, yPos, {
+		            thickness: 2,
+		            color: 0xFFFFFFFF
+		        });
+			}
+
+			oldX = xPos;
+			oldY = yPos;
+
+			verts.push(new FlxPoint(xPos, yPos));
+
+		}
+		verts.push(new FlxPoint(graph_health.width, graph_health.height));
+		verts.push(new FlxPoint(0, graph_health.height));
+
+		FlxSpriteUtil.drawPolygon(graph_health, verts, 0x6400FF00);
+
+	}
+
+
+	var showingHealthGraph:Bool = false;
+	function swapGraph(silent:Bool = false):Void {
+		if(!silent) FunkinSound.playOnce(Paths.sound('inhuman/ui/scrollMenuTAB', "shared"), 0.75);	
+		showingHealthGraph = !showingHealthGraph;
+
+		if(showingHealthGraph){
+			graphTXT_performance.setFormat(Paths.font("PIXEAB__.TTF"), 14, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+			graphTXT_health.setFormat(Paths.font("PIXEAB__.TTF"), 18, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFF0000);
+			//healthBars.forEach(function(bar:FlxBar){bar.visible = true;});
+			//graphSprite.visible = false;
+		}else{
+			graphTXT_performance.setFormat(Paths.font("PIXEAB__.TTF"), 18, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFF0000);
+			graphTXT_health.setFormat(Paths.font("PIXEAB__.TTF"), 14, 0xFF000000, FlxTextAlign.CENTER, FlxTextBorderStyle.OUTLINE, 0xFFFFFFFF);
+			//healthBars.forEach(function(bar:FlxBar){bar.visible = false;});
+			//graphSprite.visible = true;
+		}
+
+		graph_health.visible = showingHealthGraph;
+		deathMarker.visible = showingHealthGraph;
+		graph_performance.visible = !showingHealthGraph;
+		graphTXT_performance_earlyTxt.visible = !showingHealthGraph;
+		graphTXT_performance_lateTxt.visible = !showingHealthGraph;
+
+		graphTXT_performance.setPosition(graphBG.x, graphBG.y);
+		graphTXT_health.setPosition(graphBG.x + graphBG.width - graphTXT_health.width, graphBG.y);
+	}
+
+	function closeResults():Void {
+		FunkinSound.playOnce(Paths.sound('inhuman/ui/results_leave', "shared"), 0.85);	
+		menuControllable = false;
+
+		
+
+		if (blackFade_Tween!=null){
+			blackFade_Tween.cancel();
+			blackFade_Tween=null;
+		}
+		blackFade_Tween = FlxTween.tween(blackFade, {alpha: 1}, 0.4, { onComplete: _ -> {
+
+
+			//Basically a copy of the og resultsState stuff
+
+			if (Std.isOfType(ogResultsSubState._parentState, ResultsDebugSubState)) {
+			//if (ogResultsSubState._parentState is ResultsDebugSubState){
+				this.close();
+				ogResultsSubState.close();
+			}
+
+			var targetState:FlxState = new MainMenuState();
+			var targetStateFactory:Null<Void->StickerSubState> = null;
+			var shouldTween = false;
+      		var shouldUseSubstate = false;
+
+			if (ogResultsSubState.params.storyMode)
+			{
+
+			}
+			else
+			{
+				var wasBotplay:Bool = false;
+				var wasPractice:Bool = false;
+				if (ogResultsSubState.params!= null && ogResultsSubState.params.isPracticeMode!= null){
+					wasPractice = ogResultsSubState.params.isPracticeMode;
+				}
+				if (ogResultsSubState.params!= null && ogResultsSubState.params.isBotPlayMode!= null){
+					wasBotplay = ogResultsSubState.params.isBotPlayMode;
+				}
+				var isScoreValid = !(wasPractice) && !(wasBotplay);
+        		var isPersonalBest = ogResultsSubState.rank > Scoring.calculateRank(ogResultsSubState.params?.prevScoreData);
+    			if ((isScoreValid && isPersonalBest) || ogResultsSubState.params.forceRankSlam){
+			          shouldTween = true;
+			          if (ogResultsSubState.isChartingMode)
+			          {
+			            PlayState.instance?.close();
+			            FlxTimer.globalManager.clear();
+			            FlxTween.globalManager.clear();
+			            if (ogResultsSubState.introMusicAudio != null) ogResultsSubState.introMusicAudio.stop();
+			            if (ogResultsSubState.resultsMusic != null) ogResultsSubState.resultsMusic.stop();
+			            this.close();
+			            ogResultsSubState.close();
+			            return;
+			          }
+			          var charID:String = "bf";
+			          if (ogResultsSubState.playerCharacterId!=null){
+			          	charID = ogResultsSubState.playerCharacterId;
+			          }
+			          targetState = FreeplayState.build({
+			            {
+			              character: charID,
+			              fromResults: {
+			                oldRank: Scoring.calculateRank(ogResultsSubState.params?.prevScoreData),
+			                newRank: ogResultsSubState.rank,
+			                songId: ogResultsSubState.params.songId,
+			                difficultyId: ogResultsSubState.params.difficultyId,
+			                playRankAnim: true
+			              }
+			            }
+			          });
+    			}else{
+    				if (ogResultsSubState.isChartingMode)
+			          {
+			            PlayState.instance?.close();
+			            FlxTimer.globalManager.clear();
+			            FlxTween.globalManager.clear();
+			            if (ogResultsSubState.introMusicAudio != null) ogResultsSubState.introMusicAudio.stop();
+			            if (ogResultsSubState.resultsMusic != null) ogResultsSubState.resultsMusic.stop();
+			            this.close();
+			            ogResultsSubState.close();
+			            return;
+			          }
+			          shouldTween = false;
+          			  shouldUseSubstate = true;
+          			  targetStateFactory = () -> new StickerSubState({
+			            targetState: (sticker) -> FreeplayState.build(null, sticker),
+			            stickerPack: "inhuman"
+			          });
+    			}
+
+    			ogResultsSubState.transitionToState(targetState, targetStateFactory, shouldTween, shouldUseSubstate);
+
+
+			}
+        }});
+	}
+
+
+
+	function addShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+			else{ 
+				if(!daCamera.filters.contains(daShaderFilter))
+					daCamera.filters.push(daShaderFilter);
+			}
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	function removeShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters != null)
+				daCamera.filters.remove(daShaderFilter);
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+
+}

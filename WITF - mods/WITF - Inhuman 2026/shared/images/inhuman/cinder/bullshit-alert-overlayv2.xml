@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="bullshit-alert-overlayv2.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="alert-down.png" x="0" y="0" width="2440" height="1400"/>
+	<SubTexture name="alert-empty" x="0" y="1401" width="2440" height="1400"/>
+	<SubTexture name="alert-normal.png" x="0" y="2802" width="2440" height="1400"/>
+	<SubTexture name="alert-up.png" x="0" y="4203" width="2440" height="1400"/>
+	<SubTexture name="alert-warn" x="0" y="5604" width="2440" height="1400"/>
+</TextureAtlas>

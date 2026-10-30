@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="cinderTaunt_v2.png">
+	<!-- Created with Adobe Animate version 19.2.0.405 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="cinderTAUNT0000" x="0" y="1208" width="1045" height="601" frameX="0" frameY="-1" frameWidth="1045" frameHeight="607"/>
+	<SubTexture name="cinderTAUNT0001" x="0" y="0" width="1045" height="602" frameX="0" frameY="-3" frameWidth="1045" frameHeight="607"/>
+	<SubTexture name="cinderTAUNT0002" x="0" y="604" width="1045" height="602" frameX="0" frameY="0" frameWidth="1045" frameHeight="607"/>
+	<SubTexture name="cinderTAUNT0003" x="0" y="604" width="1045" height="602" frameX="0" frameY="-5" frameWidth="1045" frameHeight="607"/>
+</TextureAtlas>

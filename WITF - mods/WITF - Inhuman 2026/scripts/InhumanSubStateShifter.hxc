@@ -1,0 +1,191 @@
+package inhuman.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.ResultState;
+import funkin.play.GameOverSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.graphics.FunkinSprite;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import flixel.math.FlxMath;
+
+
+
+// This module is responsible for tracking WHEN notes get hit in the song for the hitgraph.
+// It also then opens the inhumanResultState when the regular ResultsState gets opened. Ideally I would just replace the resultsState but I'm lazy lmfao
+class InhumanResultsModule extends Module {
+
+	var validSongs:Array<String> = 
+	[
+	"vs hazard (real)!!!", "vs_hazard_real", // For testing
+	"emergency-reset", "emergency reset", // It's Inhuman enough to count
+	"operator", "her", "her - 2026", "interlope"
+	];
+
+	var isWITF:Bool = false;
+	public function new() {
+		super("InhumanPlaySubStateShifter", 1, {
+          state: PlayState
+        });
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+
+	public var healthSamples:Array<Float> = [];
+	public var hitTimesTime:Array<Float> = [];
+	public var healthSamplesTime:Array<Float> = [];
+	public var hitTimesDiff:Array<Float> = [];
+	public var hitTimesJudge:Array<String> = [];
+	public var tracking:Bool = false;
+
+	function resetSamples():Void{
+		hitTimesTime=[];
+		healthSamplesTime=[];
+		hitTimesDiff=[];
+		hitTimesJudge=[];
+		healthSamples=[];
+		previousHealthSampleTime = -10;
+		wentBackwards=false;
+		tracking = songDoesInhumanResults();
+	}
+	public override function onSongStart(event:ScriptEvent):Void
+	{
+		super.onSongStart(event);
+	}
+	public override function onGameOver(event:ScriptEvent):Void
+	{
+		super.onGameOver(event);
+		resetSamples();
+	}
+	public override function onSongRetry(event:ScriptEvent):Void
+	{
+		super.onSongRetry(event);
+		resetSamples();
+	}
+	override function onSongLoaded(e):Void
+	{
+		super.onSongLoaded(e);
+		resetSamples();
+	}
+
+	var previousHealthSampleTime:Float = -10;
+	var wentBackwards:Bool = false;
+	override function onStepHit(e):Void
+	{
+		super.onStepHit(e);
+		if(!tracking || PlayState.instance == null){return;}
+		if (PlayState.instance.isGameOverState){return;}
+		if(Conductor.instance.songPosition < -15){return;}
+		//if(e.step == previousHealthSampleTime){return;}
+		if(e.step <= previousHealthSampleTime){
+			wentBackwards = true; 
+			//trace("BACKWARDSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS"); 
+			return;
+		}
+		if(e.step % 2 == 1){return;}
+		var inRepeat = PlayState.instance.variables.get("HER_inRepeat");
+		if(inRepeat){return;}
+		var curHealth:Float = FlxMath.bound(PlayState.instance.health, Constants.HEALTH_MIN, Constants.HEALTH_MAX);
+		healthSamplesTime.push(Conductor.instance.songPosition);
+		healthSamples.push(curHealth);
+		//trace("Recorded '" + curHealth+"' health at " + Conductor.instance.songPosition);
+		previousHealthSampleTime=e.step;
+	}
+
+
+
+	override function onNoteHit(event) {	
+		super.onNoteHit(event);	
+		if(!tracking || PlayState.instance == null){ 	//To stop any potential errors
+			return; 
+		}
+		if(event.note.noteData.getStrumlineIndex() == 0){
+			if(isWITF){
+				if(event.note.weBelongTo == PlayState.instance.playerStrumline){
+					hitTimesTime.push(event.note.strumTime);
+					hitTimesDiff.push(event.hitDiff);
+					hitTimesJudge.push(isHurtNote(event.note.kind) ? "miss" : event.judgement);
+				}
+			}else{
+				hitTimesTime.push(event.note.strumTime);
+				hitTimesDiff.push(event.hitDiff);
+				hitTimesJudge.push(isHurtNote(event.note.kind) ? "miss" : event.judgement);
+			}	
+		}	
+	}
+
+	var hurtNoteIDs:Array<String> = [
+		"hurt", "hellNote", "trickyDeathNote", "hellnotes", "deathnotes"
+	];	
+
+	function isHurtNote(kind:String):Bool{
+		return hurtNoteIDs.contains(kind);
+	}
+
+	override function onNoteMiss(event:NoteScriptEvent) 
+	{
+		super.onNoteMiss(event);
+		if(!tracking || PlayState.instance == null){ 	//To stop any potential errors
+			return; 
+		}
+
+		if(event.note.noteData.getStrumlineIndex() == 0){
+			if(isWITF){
+				if(event.note.weBelongTo == PlayState.instance.playerStrumline){
+					hitTimesTime.push(event.note.strumTime);
+					hitTimesDiff.push(Math.abs(event.note.strumTime - Conductor.instance.songPosition));
+					hitTimesJudge.push("miss");
+				}
+			}else{
+				hitTimesTime.push(event.note.strumTime);
+				hitTimesDiff.push(Math.abs(event.note.strumTime - Conductor.instance.songPosition));
+				hitTimesJudge.push("miss");
+			}	
+		}		
+	}
+
+	var allSongs:Bool = false;
+	function songDoesInhumanResults():Bool{
+		if(allSongs) return true;
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return false;
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		if( !validSongs.contains( songName ) ){
+			return false;		
+		}else{
+			return true;
+		}
+	}
+	
+
+		
+	public function onSubStateOpenEnd(event):Void {
+        super.onSubStateOpenEnd(event);
+        if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		if( !songDoesInhumanResults() ){
+			return;		
+		}	
+
+		if (Std.isOfType(event.targetState, ResultState)) {
+			event.targetState.busy = true;
+
+			var blackCover:FunkinSprite = new FunkinSprite(-FlxG.width, -FlxG.height).makeSolidColor(FlxG.width*3, FlxG.height*3, 0xFF000000);
+			blackCover.zIndex = 999999;
+			blackCover.scrollFactor.set();
+			event.targetState.add(blackCover);
+
+			var resultsState = new InhumanResultsState(event.targetState, hitTimesTime, hitTimesDiff, hitTimesJudge, healthSamples, healthSamplesTime, wentBackwards);
+			event.targetState.openSubState(resultsState);	
+			if (isWITF){ 
+				event.targetState.autoStartRankTallySequence = false;	
+			}	
+			event.targetState.persistentUpdate = false;		
+		}
+	}
+	
+	public function onSubStateCloseBegin(event:StateChangeScriptEvent):Void {	
+        super.onSubStateCloseBegin(event);
+	}
+}

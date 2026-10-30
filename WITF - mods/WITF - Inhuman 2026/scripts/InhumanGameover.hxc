@@ -1,0 +1,282 @@
+package inhuman.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.GameOverSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import funkin.util.TouchUtil;
+import flixel.FlxG;
+import funkin.Conductor;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import funkin.graphics.FunkinSprite;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import funkin.Assets;
+import openfl.filters.ShaderFilter;
+
+class InhumanGameoverModule extends Module {
+
+	var validSongs:Array<String> = 
+	[
+	"emergency-reset", "emergency reset",
+	 "operator", "her", "her - 2026", "interlope"
+	];
+
+	var isWITF:Bool = false;
+	public function new() {
+		super("InhumanGameoverModule", 1, {
+          state: PlayState
+        });
+		shaderTime = 0.0;
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+
+	var inGameOver:Bool = false;
+	var gameOverState:GameOverSubState;
+	var shader:FlxRuntimeShader;
+	var shaderFilter:ShaderFilter;
+	var shaderTime:Float = 0.0;
+	var doShader:Bool = true;
+	override function onUpdate(event:UpdateScriptEvent):Void {
+        super.onUpdate();
+        if (!inGameOver) return;
+        shaderTime += event.elapsed;
+		if(shader != null){
+			shader.setFloat("iTime", shaderTime);	
+		}
+		if(noise != null && noise.visible && noise.alpha > 0){
+			noise.offset.x = FlxG.random.float(-70,70);
+			noise.offset.y = FlxG.random.float(-40,40);
+		}
+
+		if ((FlxG.onMobile ? (TouchUtil.pressAction(hitbox) || FlxG.keys.justPressed.SPACE) : FlxG.keys.justPressed.SPACE) && !dodged) {
+            state.currentStage.getBoyfriend().playAnimation("dodge");
+            dodged = true;
+            if (shouldDodge) {
+	            FunkinSound.playOnce(Paths.sound("tricky/pillar-success"));
+                dodgeSuccess = true;
+            }
+            else {
+	            FunkinSound.playOnce(Paths.sound("ANGRY"), 2);
+                dodgeSuccess = false;
+            }
+        }
+
+	    if ((gameOverState.controls.ACCEPT_P || (FlxG.onMobile && TouchUtil.pressAction() && !TouchUtil.overlaps(gameOverState.backButton) && gameOverState.canInput))
+	      && !hasTriggeredLeave
+	      && !gameOverState.mustNotExit)
+	    {
+	      hasTriggeredLeave = true;
+	      onGameOverRetry();
+	    }
+    }
+    var hasTriggeredLeave:Bool = false;
+	
+	override function onSongLoaded(e):Void
+	{
+		super.onSongLoaded(e);
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		if( !validSongs.contains( songName ) ){
+			return;		
+		}	
+		GameOverSubState.musicSuffix = '-inhuman';
+    	GameOverSubState.blueBallSuffix = '-inhuman';
+	}
+	
+	var initTimer:FlxTimer;
+
+	var kbEyes:FunkinSprite;
+	var kbEyes_Tween:FlxTween;
+	//var kbEyes_Pos:FlxPoint;
+
+	var retryPrompt:FunkinSprite;
+	var connectionLost:FunkinSprite;
+
+	var noise:FunkinSprite;
+	var noise_Tween:FunkinSprite;
+
+	public function onSubStateOpenEnd(event):Void {
+        super.onSubStateOpenEnd(event);
+        if (!(event.targetState is GameOverSubState)) return;
+
+        if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		if( !validSongs.contains( songName ) ){
+			return;		
+		}
+
+		hasTriggeredLeave = false;
+        inGameOver = true;
+        gameOverState = event.targetState;
+
+        //kbEyes = new FunkinSprite(0,0,Paths.image("inhuman/gameover/kb_eyes", "shared"));
+	    //kbEyes.screenCenter();
+	    //kbEyes.setScrollFactor();
+	    //kbEyes.alpha=0;
+
+       	connectionLost = new FunkinSprite(0,0);
+	    connectionLost.frames = Paths.getSparrowAtlas('inhuman/gameover/connection', "shared"); 
+	    connectionLost.animation.addByPrefix('idle', 'gameover-lost-loop', 24, true);  
+	    connectionLost.animation.addByPrefix('retry', 'gameover-lost-retry', 24, true);  
+	    connectionLost.screenCenter();
+	    connectionLost.y -= 86;
+	    connectionLost.scrollFactor.set();
+	    gameOverState.add(connectionLost);
+		connectionLost.animation.play('idle');
+
+       	retryPrompt = new FunkinSprite(0,0);
+	    retryPrompt.frames = Paths.getSparrowAtlas('inhuman/gameover/retry', "shared"); 
+	   	retryPrompt.animation.addByPrefix('empty', "gameover-retry-introEMPTY.png", 24, true);
+        retryPrompt.animation.addByPrefix('start', "gameover-retry-start", 4, false);
+        retryPrompt.animation.addByPrefix('idle', "gameover-retry-loop", 1, true);
+        retryPrompt.setGraphicSize(Std.int(retryPrompt.width * 0.375));
+	    retryPrompt.scrollFactor.set();
+	    gameOverState.add(retryPrompt);
+	    retryPrompt.alpha=0;
+		retryPrompt.screenCenter();
+		retryPrompt.x -= 142;
+		//retryPrompt.y += 195;
+		retryPrompt.y += 120;
+		retryPrompt.animation.play('empty');
+		retryPrompt.animation.onFinish.add((_) ->
+	    {
+	      if (_ == "start")
+	      {
+	        retryPrompt.animation.play('idle');
+	      }
+	    });
+
+
+		noise = new FunkinSprite(0,0,Paths.image("inhuman/gameover/noiseTexture", "shared"));
+	    noise.screenCenter();
+	    noise.scrollFactor.set();
+	    //noise.scale.set(3.5, 3.5);
+	    noise.alpha=1.0;
+	    gameOverState.add(noise);
+	    if(noise_Tween != null){
+	      	noise_Tween.cancel();
+	    }
+	    noise_Tween = FlxTween.tween(noise, {alpha: 0}, 1.25, {ease:FlxEase.quadOut, startDelay: 0.795});
+
+		if(shader==null && doShader){
+			//shader = new VCRDistortionEffect(0.123,true,true,false,false);
+			shader = new FlxRuntimeShader(Assets.getText(Paths.frag("inhuman/vcr")), null);
+			shader.setFloat("iTime",0.0);
+			shader.setFloat("glitchModifier",0.123);
+			shader.setBool("distortionOn",true);
+			shader.setBool("perspectiveOn",true);
+			shader.setBool("vignetteMoving",false);
+			shader.setBool("forceAlpha",false);
+			shader.setBool("vignetteOn",true);
+
+			shaderFilter = new ShaderFilter(shader);
+		}
+
+       	addShaderToCamera(FlxG.camera, shaderFilter);
+
+       	gameOverState.boyfriend.visible = false;
+
+ 		if(initTimer != null){
+	      	initTimer.cancel();
+	    }
+       	initTimer = new FlxTimer().start(0.96, function(tmr:FlxTimer)
+		{
+			//if(easterEgg_Taunt!=null)
+			//	FlxTween.tween(easterEgg_Taunt, {alpha: 0}, 1.4, {ease:FlxEase.quadOut});
+
+			if(kbEyes!=null)
+				kbEyes_Tween = FlxTween.tween(kbEyes, {alpha: 0.475}, 1.5, {ease:FlxEase.linear});
+
+			if(retryPrompt != null){
+				retryPrompt.animation.play('start');
+				retryPrompt.alpha=0.8;
+				//retryPrompt.screenCenter();
+			}
+			trace("hiawdwjaidosehgdnersujhujdrghuorghu9grhrgurghdujujo");
+		});
+
+
+	}
+
+
+	function onGameOverRetry(){
+	    if(connectionLost != null && connectionLost.animation!=null){
+			connectionLost.animation.play('retry');
+		}
+		if(retryPrompt != null){
+			retryPrompt.visible = false;
+		}
+	}
+
+
+	
+	function addShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+			else{ 
+				if(!daCamera.filters.contains(daShaderFilter))
+					daCamera.filters.push(daShaderFilter);
+			}
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	function removeShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters != null)
+				daCamera.filters.remove(daShaderFilter);
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	
+	public function onSubStateCloseBegin(event:StateChangeScriptEvent):Void {	
+		super.onSubStateCloseBegin(event);
+		if (!(event.targetState is GameOverSubState)) return;
+		removeShaderToCamera(FlxG.camera, shaderFilter);
+        if (initTimer != null)
+	    {
+	      initTimer.cancel();
+	      initTimer = null;
+	    }
+        if(noise_Tween != null){
+	      	noise_Tween.cancel();
+      	  	noise_Tween = null;
+	    }
+	    if(noise != null){
+	      	noise.destroy();
+	      	noise = null;
+	    }
+	    if(kbEyes_Tween != null){
+	      	kbEyes_Tween.cancel();
+      	  	kbEyes_Tween = null;
+	    }
+	    if(kbEyes != null){
+	      	kbEyes.destroy();
+	      	kbEyes = null;
+	    }
+	    if(connectionLost != null){
+	      	connectionLost.destroy();
+	      	connectionLost = null;
+	    }
+	    if(retryPrompt != null){
+	      	retryPrompt.destroy();
+	      	retryPrompt = null;
+	    }
+	    
+        shaderFilter = null;
+        shader = null;
+        shaderTime = null;
+        inGameOver = false;
+        gameOverState = null;
+        hasTriggeredLeave = false;
+	}
+}

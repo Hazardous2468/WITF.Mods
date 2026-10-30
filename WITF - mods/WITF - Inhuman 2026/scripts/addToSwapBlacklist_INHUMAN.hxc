@@ -1,0 +1,33 @@
+import funkin.modding.module.Module;
+import flixel.FlxG;
+import funkin.modding.module.ModuleHandler;
+
+// Disables chart shuffles for dad notes (to make modchart not break) plus disables swap chart modifier
+class SwapBlacklistAdder_INHUMAN extends Module
+{	  
+	public function new() {
+        super("SwapBlacklistAdder_INHUMAN");	
+    }
+	
+	function daScriptLogic(){
+		var chartModifiersModule = ModuleHandler.getModule("ChartModifiersModule");
+		if(chartModifiersModule!=null){
+			var blackListArray = chartModifiersModule.scriptGet("swapBlacklist");
+			if(blackListArray.contains("her - 2026")) return;
+			blackListArray.push("her - 2026");
+			blackListArray.push("her");
+			blackListArray.push("interlope");
+			chartModifiersModule.scriptSet("swapBlacklist", blackListArray);
+			
+			var blackListArray = chartModifiersModule.scriptGet("dontShuffleDADNotesList");
+			if(blackListArray.contains("her - 2026")) return;
+			blackListArray.push("her - 2026");
+			blackListArray.push("her");
+			chartModifiersModule.scriptSet("dontShuffleDADNotesList", blackListArray);
+		}
+	}
+	
+	override function onStateChangeEnd(event) {
+		daScriptLogic();
+	}
+}

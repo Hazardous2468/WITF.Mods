@@ -1,0 +1,161 @@
+package inhuman.modules.play;
+
+import funkin.modding.module.Module;
+import funkin.play.PlayState;
+import funkin.play.PauseSubState;
+import funkin.modding.module.ModuleHandler;
+import funkin.util.Constants;
+import flixel.FlxG;
+import funkin.Conductor;
+import funkin.FunkinMemory;
+import funkin.Paths;
+import funkin.audio.FunkinSound;
+import flixel.addons.display.FlxRuntimeShader;
+import openfl.filters.BitmapFilter;
+import funkin.Assets;
+import openfl.filters.ShaderFilter;
+
+class InhumanPauseModule extends Module {
+
+	var validSongs:Array<String> = 
+	[
+	"emergency-reset", "emergency reset", "argos","argo↑↓s", "too-many-trumpets", "too many trumpets",
+	"operator", "her", "her - 2026", "interlope"
+	];
+
+	var isWITF:Bool = false;
+	public function new() {
+		super("InhumanPauseModule", 1, {
+          state: PlayState
+        });
+		shaderTime = 0.0;
+		isWITF = Constants.TITLE.toUpperCase() == "WHAT IN THE FUNKIN'";
+	}
+
+	var inPauseState:Bool = false;
+	var pauseState:PauseSubState=null;
+	var shader:FlxRuntimeShader;
+	var shaderFilter:ShaderFilter;
+	var shaderTime:Float = 0.0;
+	override function onUpdate(event:UpdateScriptEvent):Void {
+        super.onUpdate();
+        if(!inPauseState) return;
+		if(shader != null){
+			shaderTime += event.elapsed;
+			shader.setFloat("uTime", shaderTime);	
+		}
+
+		if(pauseState != null){
+		    if (pauseState.controls.ACCEPT_P && pauseState.currentMenuEntries.length > 0)
+		    {
+		    	var pauseEntry = pauseState.currentMenuEntries[pauseState.currentEntry];
+		    	if(pauseEntry.text.toLowerCase() == "exit" || pauseEntry.text.toLowerCase() == "exit to menu"){
+		    		FunkinSound.playOnce(Paths.sound('inhuman/ui/pause/pauseExit', "shared"), 1);	
+		    	}
+		    	else if(pauseEntry.text.toLowerCase() == "enable practice mode" || pauseEntry.text.toLowerCase() == "practice mode"|| pauseEntry.text.toLowerCase() == "practice"){
+		    		FunkinSound.playOnce(Paths.sound('pauseEnable'), 0.65);	
+		    	}
+		    	//else if(pauseEntry.text.toLowerCase() == "restart" || pauseEntry.text.toLowerCase() == "restart song"|| pauseEntry.text.toLowerCase() == "retry song"|| pauseEntry.text.toLowerCase() == "retry"){
+		    	//	FunkinSound.playOnce(Paths.sound('inhuman/ui/pause/pauseRetry', "shared"), 1);	
+		    	//}
+		    }
+		}
+    }
+	
+	override function onSongLoaded(e):Void
+	{
+		super.onSongLoaded(e);
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		if( !validSongs.contains( songName ) ){
+			return;		
+		}	
+		PauseSubState.musicSuffix = "-Inhuman";
+		FunkinMemory.cacheSound(Paths.sound("inhuman/ui/pause/pause", "shared"));
+		FunkinMemory.cacheSound(Paths.sound("inhuman/ui/pause/pauseExit", "shared"));
+		//FunkinMemory.cacheSound(Paths.sound("inhuman/ui/pause/pauseRetry", "shared"));
+		//FunkinMemory.cacheSound(Paths.sound("inhuman/ui/pause/pauseScroll", "shared"));
+	}
+
+
+	public function onSubStateOpenBegin(event):Void {
+		inPauseState = false;
+		pauseState=null;
+		if(PlayState.instance == null || PlayState.instance.currentChart == null) return;
+		
+		var songName:String = PlayState.instance.currentChart.songName.toLowerCase();
+		//PlayState.instance.modDebugNotif(songName, 0xFFFF00FF);		
+		//first check if the song is valid ?
+		if( !validSongs.contains( songName ) ){
+			return;		
+		}	
+		if (Std.isOfType(event.targetState, PauseSubState)) {
+
+			inPauseState = true;
+			PauseSubState.musicSuffix = "-Inhuman";
+			if(isWITF){
+				PauseSubState.scrollSuffix = "-InhumanPause";
+			}
+			pauseState = event.targetState;
+			FunkinSound.playOnce(Paths.sound('inhuman/ui/pause/pause', "shared"), 1);	
+			
+			//Create shader if it doesn't already exist:
+			if(shader==null){
+				shader = new FlxRuntimeShader(Assets.getText(Paths.frag("inhuman/inhuman_pause_shader")), null);
+				shader.setFloat("uTime",0.0);	
+				shaderFilter = new ShaderFilter(shader);
+			}
+			
+			//add shader
+			addShaderToCamera(PlayState.instance.camGame, shaderFilter);
+			addShaderToCamera(PlayState.instance.camHUD, shaderFilter);
+			if(isWITF){
+				addShaderToCamera(PlayState.instance.camNotes, shaderFilter);
+				addShaderToCamera(PlayState.instance.camAFT, shaderFilter);
+			}
+		}
+        super.onSubStateOpenBegin(event);
+	}
+	
+	function addShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters == null) daCamera.filters = [daShaderFilter];
+			else{ 
+				if(!daCamera.filters.contains(daShaderFilter))
+					daCamera.filters.push(daShaderFilter);
+			}
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	function removeShaderToCamera(daCamera, daShaderFilter){
+		if(daCamera != null && daShaderFilter!=null){
+			if(daCamera.filters != null)
+				daCamera.filters.remove(daShaderFilter);
+		}else{
+			trace("ERROR: Either the camera or shader is null!");
+		}
+	}
+	
+	
+	public function onSubStateCloseBegin(event:StateChangeScriptEvent):Void {
+
+		if(pauseState != null){
+			
+			//FunkinSound.playOnce(Paths.sound('pause'), 0.7).pitch = 0.78;
+			
+			removeShaderToCamera(PlayState.instance.camGame, shaderFilter);
+			removeShaderToCamera(PlayState.instance.camHUD, shaderFilter);
+			if(isWITF){
+				removeShaderToCamera(PlayState.instance.camNotes, shaderFilter);
+				removeShaderToCamera(PlayState.instance.camAFT, shaderFilter);
+			}
+			
+			inPauseState = false;
+			pauseState=null;
+		}
+	
+        super.onSubStateCloseBegin(event);
+	}
+}

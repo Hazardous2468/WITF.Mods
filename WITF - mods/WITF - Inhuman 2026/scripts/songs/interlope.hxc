@@ -1,0 +1,111 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.Paths;
+import funkin.graphics.FunkinSprite;
+import flixel.tweens.FlxTween;
+import flixel.tweens.FlxEase;
+import funkin.play.modchartSystem.ModConstants;
+import funkin.Conductor;
+import funkin.play.modchartSystem.modifiers.Modifier;
+import funkin.data.event.SongEventRegistry;
+import funkin.play.components.HealthIcon;
+import flixel.math.FlxMath;
+import flixel.text.FlxTextBorderStyle;
+import funkin.play.Countdown;
+
+
+class InterlopeSongScript extends Song {	
+	public function new() {
+		super('interlope');
+	}
+
+	function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+		if (PlayState.instance == null) return;
+	}
+
+	function updateIcon(icon:HealthIcon):Void{
+		icon.autoUpdate=false;
+
+		switch (icon.playerId)
+		{
+			case 0: // Boyfriend
+				icon.updateHealthIcon(PlayState.instance.health);
+					icon.x = PlayState.instance.healthBar.x
+					+ (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.value, 0, 2, 100, 0) * 0.01) - HealthIcon.POSITION_OFFSET);
+			case 1: // Dad
+				var doingHealthIconAnim:Bool = false;
+				if (Conductor.instance.currentBeatTime>=510 && Conductor.instance.currentBeatTime<512){
+					doingHealthIconAnim = true;
+				}
+
+				//if (PlayState.instance.variables.exists("doHealthIconAnim")){
+				//	doingHealthIconAnim = PlayState.instance.variables.get("doHealthIconAnim");
+				//}
+
+
+				if (!icon.animation.exists("special")){
+					icon.animation.addByPrefix("special", "special", 24, true);
+				}
+
+				if (doingHealthIconAnim){
+					icon.animation.play("special",false);
+				}
+
+				if (!doingHealthIconAnim){
+					icon.updateHealthIcon(HealthIcon.MAXIMUM_HEALTH - PlayState.instance.health);
+				}
+				icon.x = PlayState.instance.healthBar.x
+					+ (PlayState.instance.healthBar.width * (FlxMath.remapToRange(PlayState.instance.healthBar.value, 0, 2, 100, 0) * 0.01))
+					- (icon.width - HealthIcon.POSITION_OFFSET);
+		}
+
+
+		icon.y = PlayState.instance.healthBar.y - (icon.height / 2); // - (PlayState.instance.healthBar.height / 2)
+	}
+
+	override function onUpdate(event):Void
+	{
+		super.onUpdate(event);
+		if (PlayState.instance == null) return;
+		if (PlayState.instance.isGamePaused) return;
+
+        if(PlayState.instance.iconP1!=null)
+          updateIcon(PlayState.instance.iconP1);
+        if(PlayState.instance.iconP2!=null)
+          updateIcon(PlayState.instance.iconP2);
+
+	}
+
+	override function onCountdownStart(event:CountdownScriptEvent):Void
+  {
+    super.onCountdownStart(event);
+    event.cancel();
+    Countdown.stopCountdown();
+    PlayState.instance.isInCountdown = true;
+    Conductor.instance.update(PlayState.instance.startTimestamp);
+  }
+
+
+
+	override function onNoteIncoming(callback)
+	{
+		super.onNoteIncoming(callback);
+		var note = callback.note;
+		
+		if(((note.strumTime >= 49850 && note.strumTime < 99725) || (note.strumTime >= 174445 && note.strumTime < 224364)) && note.noteData.kind == "hurt"){
+			var daNoteMod = ModConstants.createNewMod("alpha");
+			daNoteMod.currentValue = 4;
+			daNoteMod.baseValue = 4;
+			daNoteMod.strumOwner = PlayState.instance.playerStrumline;
+			if(note.noteModData.noteMods != null){
+				note.noteModData.noteMods.push(daNoteMod);
+				if(note.holdNoteSprite != null){
+					note.holdNoteSprite.noteModData.noteMods.push(daNoteMod);
+				}
+			}
+		}
+	}
+	
+}
