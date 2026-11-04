@@ -1,0 +1,41 @@
+{
+ "version": "2.2.4",
+ "songName": "YARARARA",
+ "artist": "AnythingBecomeMoe",
+ "charter": "Hazard24",
+ "offsets": { },
+ "playData": {
+  "difficulties": [
+   "normal"
+  ],
+  "characters": {
+   "player": "nobody",
+   "girlfriend": "nobody",
+   "opponent": "nobody",
+   "opponentVocals": [
+    "nobody"
+   ],
+   "playerVocals": [
+    "nobody"
+   ]
+  },
+  "stage": "emptyStage",
+  "noteStyle": "groovin",
+  "ratings": {
+   "normal": 7,
+   "hard": 13
+  },
+  "album": "WITF",
+  "previewStart": 0.0109284609045691,
+  "previewEnd": 0.175293297248588
+ },
+ "generatedBy": "What in the Funkin' (v1.1.2) - v0.8.7",
+ "timeChanges": [
+  {
+   "t": 0,
+   "b": 0,
+   "bpm": 125,
+   "bt": [4, 4, 4, 4]
+  }
+ ]
+}

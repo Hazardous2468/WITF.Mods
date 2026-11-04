@@ -22,7 +22,7 @@
 		}
 	],
     "api_version": "0.8.6",
-    "mod_version": "0.1.0",
+    "mod_version": "0.1.2",
     "witf_version": "1.1.1",
 	"dependencies": {
 		"witf-essentials": "*",

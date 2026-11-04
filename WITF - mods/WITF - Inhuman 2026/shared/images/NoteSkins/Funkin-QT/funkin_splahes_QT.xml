@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="funkin_splahes_QT.png">
+	<!-- Created with Adobe Animate version 24.0.3.19 -->
+	<!-- http://www.adobe.com/products/animate.html -->
+	<SubTexture name="note impact 1 down0000" x="1050" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 down0001" x="1312" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 down0002" x="1574" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 down0003" x="2" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 left0000" x="2" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 left0001" x="264" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 left0002" x="526" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 left0003" x="788" y="2" width="260" height="298"/>
+	<SubTexture name="note impact 1 right0000" x="1312" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 right0001" x="1574" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 right0002" x="2" y="602" width="260" height="298"/>
+	<SubTexture name="note impact 1 right0003" x="264" y="602" width="260" height="298"/>
+	<SubTexture name="note impact 1 up0000" x="264" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 up0001" x="526" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 up0002" x="788" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 1 up0003" x="1050" y="302" width="260" height="298"/>
+	<SubTexture name="note impact 2 down0000" x="1630" y="602" width="274" height="267"/>
+	<SubTexture name="note impact 2 down0001" x="526" y="871" width="274" height="267"/>
+	<SubTexture name="note impact 2 down0002" x="802" y="871" width="274" height="267"/>
+	<SubTexture name="note impact 2 down0003" x="1078" y="871" width="274" height="267"/>
+	<SubTexture name="note impact 2 left0000" x="526" y="602" width="274" height="267"/>
+	<SubTexture name="note impact 2 left0001" x="802" y="602" width="274" height="267"/>
+	<SubTexture name="note impact 2 left0002" x="1078" y="602" width="274" height="267"/>
+	<SubTexture name="note impact 2 left0003" x="1354" y="602" width="274" height="267"/>
+	<SubTexture name="note impact 2 right0000" x="554" y="1140" width="274" height="267"/>
+	<SubTexture name="note impact 2 right0001" x="830" y="1140" width="274" height="267"/>
+	<SubTexture name="note impact 2 right0002" x="1106" y="1140" width="274" height="267"/>
+	<SubTexture name="note impact 2 right0003" x="1382" y="1140" width="274" height="267"/>
+	<SubTexture name="note impact 2 up0000" x="1354" y="871" width="274" height="267"/>
+	<SubTexture name="note impact 2 up0001" x="1630" y="871" width="274" height="267"/>
+	<SubTexture name="note impact 2 up0002" x="2" y="902" width="274" height="267"/>
+	<SubTexture name="note impact 2 up0003" x="278" y="1140" width="274" height="267"/>
+</TextureAtlas>

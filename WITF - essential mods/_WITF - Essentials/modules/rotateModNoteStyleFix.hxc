@@ -54,7 +54,7 @@ class RotateModNoteStyleFix extends Module
 				case "pixel":
 					noteOffset = 0;
 					holdOffset = -1;
-				case "funkin" | "funkin-quant" | "funkin-qt-2021" | "funkin-qt-dodge":
+				case "funkin" | "funkin-quant" | "funkin-qt-2021" | "funkin-qt-dodge" | "funkin-qt":
 					noteOffset = -2;
 					holdOffset = 1;
 				case "maniac":

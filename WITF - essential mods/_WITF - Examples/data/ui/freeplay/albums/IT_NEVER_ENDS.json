@@ -4,5 +4,6 @@
   "artists": ["Hazard24"],
   "albumOSTName": "IT NEVER ENDS",
   "albumArtAsset": "freeplay/albumRoll/WITF_NEVERENDS",
-  "albumTitleAsset": "freeplay/albumRoll/WITF-text"
+  "albumTitleAsset": "freeplay/albumRoll/WITF-text",
+  "discordRPCImage": "https://raw.githubusercontent.com/Hazardous2468/WITF.Assets/refs/heads/WITF_Art/discord/album-IT_NEVER_ENDS.png"
 }

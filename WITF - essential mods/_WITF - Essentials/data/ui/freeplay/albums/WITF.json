@@ -4,5 +4,6 @@
   "artists": ["Various artists"],
   "albumOSTName": "WITF EXAMPLE",
   "albumArtAsset": "freeplay/albumRoll/WITF",
-  "albumTitleAsset": "freeplay/albumRoll/WITF-text"
+  "albumTitleAsset": "freeplay/albumRoll/WITF-text",
+  "discordRPCImage": "https://raw.githubusercontent.com/Hazardous2468/WITF.Assets/refs/heads/WITF_Art/discord/album-witf.png"
 }

@@ -1,0 +1,25 @@
+import flixel.FlxG;
+import funkin.play.song.Song;
+import funkin.play.PlayState;
+import funkin.graphics.FunkinCamera;
+
+class YarararaSongScript extends Song {
+
+	//DISABLE GHOST MISSES FOR THIS SONG!
+	override function onNoteGhostMiss(event) {
+		event.cancelEvent();
+	}
+
+	public function new() {
+		super('yararara');
+	}
+
+	override function onCreate(event:ScriptEvent):Void {
+		super.onCreate(event);
+
+		var customCamera:FunkinCamera = new FunkinCamera('player3_camera');
+		customCamera.bgColor = 0;
+		PlayState.instance.variables.set("customCamera", customCamera);
+		FlxG.cameras.add(customCamera, false);
+	}
+}

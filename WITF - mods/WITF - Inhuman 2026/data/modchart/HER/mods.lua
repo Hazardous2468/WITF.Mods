@@ -11,7 +11,7 @@ function setUp()
 	createNewPlayer(true)
 	
 	--QT playfield
-	createNewPlayer(true, "funkin")
+	createNewPlayer(true, "funkin-qt")
 end
 
 local third = 1/3

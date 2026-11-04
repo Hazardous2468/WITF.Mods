@@ -67,7 +67,7 @@
 		}
 	],
     "api_version": "0.8.6",
-    "mod_version": "3.1.1",
+    "mod_version": "3.1.2",
     "witf_version": "1.1.1",
 	"dependencies": {
 		"witf-essentials": "*"

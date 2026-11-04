@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "YARARARA",
+  "capsule": {
+    "name": "WITF"
+  },
+  "visible": false,
+  "titleAsset": "storymenu/titles/yararara",
+  "props": [  ],
+  "background": "#FF3A9D",
+  "songs": ["yararara"]
+}

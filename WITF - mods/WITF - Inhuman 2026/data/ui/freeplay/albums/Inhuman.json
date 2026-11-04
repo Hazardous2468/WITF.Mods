@@ -4,5 +4,6 @@
   "artists": ["Hazard24"],
   "albumOSTName": "INHUMAN OST",
   "albumArtAsset": "freeplay/albumRoll/Inhuman",
-  "albumTitleAsset": "freeplay/albumRoll/Inhuman-text"
+  "albumTitleAsset": "freeplay/albumRoll/Inhuman-text",
+  "discordRPCImage": "https://raw.githubusercontent.com/Hazardous2468/WITF.Assets/refs/heads/WITF_Art/discord/album-inhuman.png"
 }
