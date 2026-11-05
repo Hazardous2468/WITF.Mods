@@ -4,5 +4,6 @@
   "artists": ["Hazard24"],
   "albumOSTName": "KB 2026",
   "albumArtAsset": "freeplay/albumRoll/kb_2026_album",
-  "albumTitleAsset": "freeplay/albumRoll/kb_2026-text"
+  "albumTitleAsset": "freeplay/albumRoll/kb_2026-text",
+  "discordRPCImage": "https://raw.githubusercontent.com/Hazardous2468/WITF.Assets/refs/heads/WITF_Art/discord/album-kb_2026.jpg"
 }

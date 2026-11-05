@@ -4,5 +4,6 @@
   "artists": ["Hazard24"],
   "albumOSTName": "QT OST",
   "albumArtAsset": "freeplay/albumRoll/qt_classic_album",
-  "albumTitleAsset": "freeplay/albumRoll/qt_ost_generic-text"
+  "albumTitleAsset": "freeplay/albumRoll/qt_ost_generic-text",
+  "discordRPCImage": "https://raw.githubusercontent.com/Hazardous2468/WITF.Assets/refs/heads/WITF_Art/discord/album-qt.jpg"
 }

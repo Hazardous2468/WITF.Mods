@@ -1,3 +1,6 @@
+function onCreate()
+	allowMobileUI(true)
+end
 function setUp()
 end
 
