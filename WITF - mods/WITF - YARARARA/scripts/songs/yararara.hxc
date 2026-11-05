@@ -16,10 +16,5 @@ class YarararaSongScript extends Song {
 
 	override function onCreate(event:ScriptEvent):Void {
 		super.onCreate(event);
-
-		var customCamera:FunkinCamera = new FunkinCamera('player3_camera');
-		customCamera.bgColor = 0;
-		PlayState.instance.variables.set("customCamera", customCamera);
-		FlxG.cameras.add(customCamera, false);
 	}
 }

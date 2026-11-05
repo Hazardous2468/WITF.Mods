@@ -1,3 +1,19 @@
+function setUp()
+	addHaxeLibrary("FunkinCamera", "funkin.graphics")
+	runHaxeCode(
+	[[
+
+		var customCamera:FunkinCamera = new FunkinCamera('player3_camera');
+		customCamera.bgColor = 0;
+		PlayState.instance.variables.set("customCamera", customCamera);
+		FlxG.cameras.add(customCamera, false);
+
+		print("Created custom camera!");
+	]])
+end
+
+
+
 function modsTimeline()	
 	addHaxeLibrary("HazardAFT", "funkin.play.modchartSystem")
 	addHaxeLibrary("ZSpriteProjected", "funkin.graphics")
@@ -12,6 +28,15 @@ function modsTimeline()
 			customCamera.x = FlxG.width * 4;
 		}else{
 			print("Custom camera undefined?");
+
+
+			customCamera = new FunkinCamera('player3_camera');
+			customCamera.bgColor = 0;
+			PlayState.instance.variables.set("customCamera", customCamera);
+			FlxG.cameras.add(customCamera, false);
+			customCamera.x = FlxG.width * 4;
+			print("Created custom camera!");
+
 		}
 
 
